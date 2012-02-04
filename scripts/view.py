@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim:sts=4:sw=4
 from __future__ import division
 import re,sys,os,traceback
 from collections import defaultdict
@@ -170,83 +171,83 @@ def process_potentially_multifile(filename):
   return tuples
 
 if __name__=='__main__':
-  import string
-  from optparse import OptionParser
-  p = OptionParser(usage="""
-  %prog filename.anno  [or multiple files]
-  Visualizes a GFL annotations file via GraphViz (as an image file).
-  Also can handle a file with multiple annotations in it (outputs HTML)""")
-  p.add_option('-w', dest="show_words", action='store_true', help="show words in graph")
-  p.add_option('-n', dest="supress_open", action='store_true', help="force to not open image when done")
-  p.add_option('-v', dest="verbose", action='store_true', help="verbose mode")
-  p.add_option('-m', dest="open_html", action='store_true', help="force to open html, not png, version")
-  opts,args = p.parse_args()
-  show_words = opts.show_words
-  batch_mode = len(args) > 1
-  do_open = not batch_mode and not opts.supress_open
-  VERBOSE = opts.verbose
-  multi_mode = None
-  multi_annos = None
+    import string
+    from optparse import OptionParser
+    p = OptionParser(usage="""
+    %prog filename.anno  [or multiple files]
+    Visualizes a GFL annotations file via GraphViz (as an image file).
+    Also can handle a file with multiple annotations in it (outputs HTML)""")
+    p.add_option('-w', dest="show_words", action='store_true', help="show words in graph")
+    p.add_option('-n', dest="supress_open", action='store_true', help="force to not open image when done")
+    p.add_option('-v', dest="verbose", action='store_true', help="verbose mode")
+    p.add_option('-m', dest="open_html", action='store_true', help="force to open html, not png, version")
+    opts,args = p.parse_args()
+    show_words = opts.show_words
+    batch_mode = len(args) > 1
+    do_open = not batch_mode and not opts.supress_open
+    VERBOSE = opts.verbose
+    multi_mode = None
+    multi_annos = None
 
-  if not args:
-    print "(use -h for help)"
-    args = ['/dev/stdin']
+    if not args:
+        print "(use -h for help)"
+        args = ['/dev/stdin']
 
-  for filename in args:
-    print "FILE",filename
-    if filename=='/dev/stdin':
-      bigbase = 'tmp'
-    else:
-      bigbase = re.sub(r'\.(txt|anno)$','', filename)
-
-    tokens_codes_texts = process_potentially_multifile(filename)
-
-    if len(tokens_codes_texts)==1:
-      tokens,code,anno_text = tokens_codes_texts[0]
-      try:
-        parse = gfl_parser.parse(tokens, code)
-      except Exception:
-        if not batch_mode: raise
-        traceback.print_exc()
-        continue
-      base = bigbase
-      process_one_parse(parse, base)
-      htmlfile = make_html(base, anno_text, base+'.png')
-      if do_open:
-        if opts.open_html:
-          desktop_open(htmlfile)
+    for filename in args:
+        print "FILE",filename
+        if filename=='/dev/stdin':
+            bigbase = 'tmp'
         else:
-          desktop_open("{base}.png".format(**locals()))
-      sys.exit()
+            bigbase = re.sub(r'\.(txt|anno)$','', filename)
 
-    parses = []
-    for tokens,code,text in tokens_codes_texts:
-      if not code or not tokens:
-        parses.append(None)
-      else:
-        try:
-          p = gfl_parser.parse(tokens, code)
-          parses.append(p)
-        except Exception:
-          print code
-          parses.append(None)
-          if not batch_mode: raise
-          traceback.print_exc()
-          continue
-    os.system("rm -f {bigbase}.*.png".format(**locals()))
+        tokens_codes_texts = process_potentially_multifile(filename)
 
-    htmlfile = bigbase + '.html'
-    out = open(htmlfile, 'w')
-    print_header(out)
-    x = []
-    for i,parse in enumerate(parses):
-      anno_text = tokens_codes_texts[i][2]
-      base = "%s.%d" % (bigbase,i)
-      print "\t",base
-      if parse is not None:
-        process_one_parse(parse, base)
-      print_html(out, anno_text, base + '.png' if parse is not None else None)
-    out.close()
-    if do_open:
-      desktop_open(htmlfile)
+        if len(tokens_codes_texts)==1:
+            tokens,code,anno_text = tokens_codes_texts[0]
+            try:
+                parse = gfl_parser.parse(tokens, code, check_semantics=True)
+            except Exception:
+                if not batch_mode: raise
+                traceback.print_exc()
+                continue
+            base = bigbase
+            process_one_parse(parse, base)
+            htmlfile = make_html(base, anno_text, base+'.png')
+            if do_open:
+                if opts.open_html:
+                    desktop_open(htmlfile)
+                else:
+                    desktop_open("{base}.png".format(**locals()))
+            continue  ## to next file
+
+        parses = []
+        for tokens,code,text in tokens_codes_texts:
+            if not code or not tokens:
+                parses.append(None)
+            else:
+                try:
+                    p = gfl_parser.parse(tokens, code, check_semantics=True)
+                    parses.append(p)
+                except Exception:
+                    print code
+                    parses.append(None)
+                    if not batch_mode: raise
+                    traceback.print_exc()
+                    continue
+        os.system("rm -f {bigbase}.*.png".format(**locals()))
+
+        htmlfile = bigbase + '.html'
+        out = open(htmlfile, 'w')
+        print_header(out)
+        x = []
+        for i,parse in enumerate(parses):
+            anno_text = tokens_codes_texts[i][2]
+            base = "%s.%d" % (bigbase,i)
+            print "\t",base
+            if parse is not None:
+                process_one_parse(parse, base)
+            print_html(out, anno_text, base + '.png' if parse is not None else None)
+        out.close()
+        if do_open:
+            desktop_open(htmlfile)
 
