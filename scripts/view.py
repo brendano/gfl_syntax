@@ -4,7 +4,7 @@ import re,sys,os,traceback
 from collections import defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../parser'))
-import psf_parser
+import gfl_parser
 
 def parse_parts(tweet_text):
   s = tweet_text
@@ -200,7 +200,7 @@ if __name__=='__main__':
 
     if multi_mode=='SINGLE':
       try:
-        parses_annos = [(psf_parser.parse(tokens, code), multi_annos[0])]
+        parses_annos = [(gfl_parser.parse(tokens, code), multi_annos[0])]
       except Exception:
         if not batch_mode: raise
         traceback.print_exc()
@@ -218,7 +218,7 @@ if __name__=='__main__':
           parses_annos.append((None,anno))
           continue
         try:
-          p = psf_parser.parse(x['TEXT'].split(), x['ANNO'])
+          p = gfl_parser.parse(x['TEXT'].split(), x['ANNO'])
           parses_annos.append((p, anno))
         except Exception:
           print x['ANNO']

@@ -3,7 +3,7 @@ Parse the high-level annotation format.
 ("psfParser.py" is the ANTLR parser.)
 
 Run tests with:
-  py.test -v psf_parser.py
+  py.test -v gfl_parser.py
 
 Remember: CHILD points to HEAD
 HEAD < CHILD
@@ -129,15 +129,17 @@ class Parse:
       del self.node2words[n]
 
     
-  def to_json(self):
+  def to_json(self, numberize=False):
+    assert self.is_finalized
+    assert not numberize, "numberization not implemented yet"
     d = {}
     d['node2words'] = {k:list(v) for k,v in self.node2words.items()}
     d['extra_node2words'] = {k:list(v) for k,v in self.extra_node2words.items()}
     d['node_edges'] = list(sorted(self.node_edges))
-    #d['nodeword_edges'] = 
-    #d['tokens'] = self.tokens
-    #d['node2id'] = self.node2id
-    #d['word2id'] = self.word2id
+    d['tokens'] = self.tokens
+    d['nodes'] = list(sorted(self.nodes))
+    #d['node2id'] = dict(self.node2id)
+    #d['word2id'] = dict(self.word2id)
 
     return d
 
