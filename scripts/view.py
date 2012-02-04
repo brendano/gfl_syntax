@@ -97,11 +97,11 @@ def psf2dot(parse):
 
 def print_html(out, anno_text, png):
 
-  png = os.path.basename(png)
+  img = '' if not png else "<img src={}>".format(os.path.basename(png))
   print>>out, """
   <hr>
   <pre>{anno_text}</pre>
-  <p><img src={png}>
+  <p><img src={img}>
   """.format(**locals())
   #print>>out, """
   #<table><tr><td style="padding-right:20px; vertical-align:top">
@@ -166,6 +166,7 @@ if __name__=='__main__':
   p.add_option('-w', dest="show_words", action='store_true', help="show words in graph")
   p.add_option('-n', dest="supress_open", action='store_true', help="force to not open image when done")
   p.add_option('-v', dest="verbose", action='store_true', help="verbose mode")
+  p.add_option('-m', dest="open_html", action='store_true', help="force to open html, not png, version")
   opts,args = p.parse_args()
   show_words = opts.show_words
   batch_mode = len(args) > 1
@@ -213,9 +214,12 @@ if __name__=='__main__':
         continue
       base = bigbase
       process_one_parse(parses_annos[0][0], base)
-      make_html(base, anno_text, base+'.png')
+      htmlfile = make_html(base, anno_text, base+'.png')
       if do_open:
-        desktop_open("{base}.png".format(**locals()))
+        if opts.open_html:
+          desktop_open(htmlfile)
+        else:
+          desktop_open("{base}.png".format(**locals()))
     else:
       parses_annos = []
       for anno in multi_annos:

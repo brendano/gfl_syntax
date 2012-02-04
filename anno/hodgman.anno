@@ -1,0 +1,22 @@
+% TEXT
+Anti-child labor Governor
+William G. Jelks
+was a-1 particularly nimble sculptor ,
+while George Wallace ,
+for reasons unknown ,
+gave himself a-2 third eye
+in-1 the middle of his-1 forehead
+during his-2 last term in-2 office .
+
+% ANNO
+
+([Anti-child labor] > Governor) > [William G. Jelks] > was < sculptor
+{a-1 (particularly > nimble)} > sculptor
+while
+[George Wallace] > gave < {himself ({a-2 third} > eye)}
+eye < in-1 < (the > middle < of < (his-1 > forehead))
+gave < during < term
+his-2 > (last > term) < in-2 < office
+
+% NOTES
+J. Hodgman, "The Areas of My Expertise"
