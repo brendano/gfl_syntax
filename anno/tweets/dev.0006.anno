@@ -1,0 +1,18 @@
+---
+% ID 28860933400
+% POS TEXT
+New/A Question/N :/, How/R CAN/V you/O mend/V a/D broken/A heart/N ?/, Really/R ?/, Please/! ?:/, http://bit.ly/9RgG9L/U
+% TEXT
+
+New Question : How CAN you mend a broken heart ? Really ? Please ?: http://bit.ly/9RgG9L
+
+% ANNO
+
+New > Question
+ :
+CAN < mend < (a > [broken heart])
+you > CAN
+mend < How
+Really 
+Please 
+http://bit.ly/9RgG9L

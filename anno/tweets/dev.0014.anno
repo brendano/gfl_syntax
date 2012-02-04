@@ -1,0 +1,15 @@
+---
+% ID 28937641136
+% POS TEXT
+So/R who's/L going/V to/P the/D Ethernet/^ Expo/^ next/A week/N in/P NYC/^ ?/,
+% TEXT
+
+So who's going to the Ethernet Expo next week in NYC ?
+
+% ANNO
+
+So 
+who's > going < to < (the > [Ethernet Expo])
+[Ethernet Expo] < [next week]
+[Ethernet Expo] < in < NYC
+?

@@ -1,0 +1,20 @@
+---
+% ID 28905558199
+% POS TEXT
+Senate/^ #ArtsGrades/# are/V in/P !/, See/V who/O passed/V and/& who/O made/V the/D Dirty/^ Dozen/^ ./, #arts/# http://t.co/BAh2iUL/U via/P @ArtsActionFund/@
+% TEXT
+
+Senate #ArtsGrades are in ! See who^1 passed and who^2 made the Dirty Dozen . #arts http://t.co/BAh2iUL via @ArtsActionFund
+
+% ANNO
+
+[Senate #ArtsGrades] > [are in]
+!
+See < $x
+$x :: {who^1 who^2} :: and
+who^1 > passed 
+who^2 > made < (the > [Dirty Dozen])
+. 
+#arts
+http://t.co/BAh2iUL 
+via < @ArtsActionFund

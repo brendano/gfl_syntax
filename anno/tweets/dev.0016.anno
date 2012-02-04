@@ -1,0 +1,16 @@
+---
+% ID 28909872295
+% POS TEXT
+@gcouros/@ I/O see/V that/P ,/, regretfully/R I/O was/V tied/V up/T ,/, Physed/N at/P Forest/~ Green/~ -/, have/V a/D good/A one/N
+% TEXT
+
+@gcouros I~1 see that , regretfully I~2 was tied up , Physed at Forest Green - have a good one
+
+% ANNO
+
+@gcouros 
+I~1 > see < that
+regretfully > was
+I~2 > was < [tied up]
+Physed < at < [Forest Green]
+have < [a good one]

@@ -1,0 +1,23 @@
+---
+% ID 28862939809
+% POS TEXT
+Confirmed/V no/D phone/N ,/, now/R I/O have/V to/P go/V to/P school/N tomorrow/N so/P I/O don't/V get/V to/P see/V @taybby21/@ till/P like/R the/D weekend/N or/& something/N ./, //E :/E Mom's/L yelling/V ./,
+% TEXT
+
+Confirmed no phone , 
+now I~1 have to~1 go to~2 school tomorrow 
+so I~2 don't get to~3 see @taybby21 
+till like the weekend or something . 
+/ : 
+Mom's yelling .
+
+% ANNO
+
+Confirmed < (no > phone)
+{now I~1} > [have to~1] < (go < to~2 < school) < tomorrow
+so 
+I~2 > don't < [get to~3] < (see < @taybby21) < till < (the > weekend)
+like
+or 
+something
+Mom's > yelling 

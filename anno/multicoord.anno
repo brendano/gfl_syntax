@@ -1,0 +1,5 @@
+% TEXT
+Bob ,~1 Fred ,~2 and I
+
+% ANNO
+$x :: {Bob Fred I} :: { ,~1 ,~2 and }

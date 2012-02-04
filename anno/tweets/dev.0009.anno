@@ -1,0 +1,28 @@
+---
+% ID 28868301143
+% POS TEXT
+@carolyncallahan/@ I/O knew/V about/P it/O last/A night/N ,/, but/& didn't/V bother/V calling/V Shawn/~ because/P I'd/L just/R be/V working/V on/P it/O this/D morning/N w//P same/A info/N ./,
+% TEXT
+
+@carolyncallahan I knew about it~1 last night , 
+but didn't bother calling Shawn 
+because I'd just be working on it~2 this morning w/ same info .
+
+% ANNO
+
+// BTO: really unsure about bother/calling
+
+@carolyncallahan 
+I > (knew < about < it~1) < [last night]
+knew < [last night]
+,
+$x :: {knew didn't} :: but
+didn't < bother < calling < Shawn
+bother < because 
+because < [working on]
+I'd > [working on] < it~2
+just > [working on]
+// I'd just be working on it~2 
+[working on] < [this morning]
+[working on] < w/ < (same > info)
+.

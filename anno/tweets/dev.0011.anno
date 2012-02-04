@@ -1,0 +1,20 @@
+---
+% ID 28913125797
+% POS TEXT
+RT/~ @guarnaschelli/@ :/~ I/O want/V to/P sit/V at/P a/D counter/N in/P a/D diner/N and/& watch/V the/D news/N and/& tune/V out/T over/P some/D fresh/A pancakes/N ,/, bananas/N with/P rum/N ,/, cri/G .../~
+% TEXT
+
+RT @guarnaschelli : I want to sit at a~1 counter in a~2 diner and~1 watch the news and~2 tune out over some fresh pancakes ,~1 bananas with rum ,~2 cri ...
+
+% ANNO
+
+RT @guarnaschelli : 
+I > ([want to] < $x)
+sit < at < (a~1 > counter) < in < (a~2 > diner)
+watch < (the > news)
+[tune out] < over < $food
+$x :: {sit watch [tune out]} :: {and~1 and~2}
+
+$food :: {pancakes bananas cri } :: { ,~1 ,~2 }
+{some fresh} > pancakes
+bananas < with < rum

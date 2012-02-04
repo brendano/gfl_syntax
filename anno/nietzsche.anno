@@ -1,0 +1,8 @@
+% TEXT
+I~1 mistrust all systematizers and I~2 avoid them . The will to a~1 system is a~2 lack of integrity .
+% ANNO
+I~1 > mistrust < (all > systematizers)
+I~2 > avoid < them
+$x :: {mistrust avoid} :: and
+The > will < to < (a~1 > system)
+will > is < (a~2 > lack) < of < integrity

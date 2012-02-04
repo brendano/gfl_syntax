@@ -1,0 +1,15 @@
+---
+% ID 28884432470
+% POS TEXT
+RT/~ @Gromit01/@ :/~ Get/V into/P an/D argument/N with/P your/D tattooist/N ?/, What/O could/V possibly/R go/V wrong/A ?/, http://tinyurl.com/2e2z82n/U wow/!
+% TEXT
+
+RT @Gromit01 : Get into an argument with your tattooist ? What could possibly go wrong ? http://tinyurl.com/2e2z82n wow
+
+% ANNO
+
+RT @Gromit01 :
+[Get into] < (an > argument) < with < (your > tattooist)
+What > could < { possibly [go wrong] }
+http://tinyurl.com/2e2z82n
+wow

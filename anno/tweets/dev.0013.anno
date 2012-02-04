@@ -1,0 +1,22 @@
+---
+% ID 28920784485
+% POS TEXT
+@comicsguy024/@ I/O don't/V use/V Chrome/~ due/P to/P the/D lack/N of/P a/D good/A Twitter/~ extension/N -LRB-/, and/& extension/N behavior/N in/P general-RRB-/N ./, Also/R ,/, it/O looks/V weird/A
+% TEXT
+
+@comicsguy024 I don't use Chrome 
+due to the lack of a good Twitter extension~1 
+-LRB- and extension~2 behavior in general-RRB- . 
+Also , it looks weird
+
+% ANNO
+
+@comicsguy024 
+I > don't < use < Chrome
+use < [due to] < $reason
+$reason :: {lack behavior} :: { ( and ) }
+the > lack < of < extension~1
+{a good Twitter} > extension~1
+extension~2 > behavior
+extension~2 < [in general-RRB-]
+it > looks < weird

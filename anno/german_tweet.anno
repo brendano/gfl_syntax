@@ -1,0 +1,12 @@
+% TEXT
+Ich sollte öfters meinen Koffer packen und in Omas Ferienhaus ziehen . Alleine sein ist schon dufte !
+
+% ANNO
+
+Ich > sollte < $x
+$x :: {ziehen packen} :: und
+meinen > Koffer > packen < öfters
+ziehen < in < Ferienhaus < Omas
+Alleine > sein
+sein > ist < {schon dufte}
+

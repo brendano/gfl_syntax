@@ -1,0 +1,17 @@
+---
+% ID 28922942651
+% POS TEXT
+@justinbieber/@ can/V u/O follow/V me/O please/R ???/, it/O will/V mean/V the/D world/N to/P me/O !!/, :)/E ♥♥♥/E
+% TEXT
+
+@justinbieber can u follow me~1 please ??? it will mean the world to me~2 !! :) ♥♥♥
+
+% ANNO
+
+u > can < follow < me~1 
+please 
+??? 
+it > will < [mean the world] < to < me~2
+!!
+:)
+ ♥♥♥

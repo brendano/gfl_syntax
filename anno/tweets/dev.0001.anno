@@ -1,0 +1,14 @@
+---
+% ID 28861691989
+% POS TEXT
+RT/~ @TheRealQuailman/@ :/~ Currently/R laughing/V at/P Laker/^ haters/N ./,
+% TEXT
+
+RT @TheRealQuailman : Currently laughing at Laker haters .
+
+% ANNO
+
+RT @TheRealQuailman : 
+Currently > laughing < at < (Laker > haters)
+.
+

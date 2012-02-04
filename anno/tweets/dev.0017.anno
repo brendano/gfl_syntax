@@ -1,0 +1,17 @@
+---
+% ID 28903896070
+% POS TEXT
+Costume/N ready/A !/, Where/R to/P go/V for/P Halloween/^ on/P fri/^ and/& sat/^ .../, Thinking/V pyramid/^ on/P sat/^ .../,
+% TEXT
+
+Costume ready ! Where to go for Halloween on^1 fri and sat^1 ... Thinking pyramid on^2 sat^2 ...
+
+% ANNO
+
+Costume < ready
+ ! 
+Where > (to > go)
+go < for < Halloween
+go < on^1 < $x
+$x :: {fri sat^1} :: and
+Thinking < pyramid < on^2 < sat^2

@@ -1,0 +1,97 @@
+% NOTES
+This is TREEBANK_3/DYSFL/MGD/SWBD/2/SW2006.MGD
+it says:
+FILENAME:       2006_1061_1035
+
+---
+% ORIGINAL
+SpeakerA1/SYM ./.
+All/UH righty/UH ./. E_S
+{F Uh/UH ,/, } I/PRP guess/VBP our/PRP$ topic/NN today/RB is/VBZ air/NN pollution/NN ./. E_S
+{C And/CC } we/PRP are/VBP to/TO just/RB discuss/VB what/WP substances/NNS do/VBP you/PRP think/VB that/WDT contribute/VBP most/RBS to/IN air/NN pollution/NN ,/, as/RB well/RB as/IN what/WP society/NN can/MD do/VB to/TO improve/VB the/DT air/NN quality/NN of/IN the/DT atmosphere/NN around/IN us/PRP ./. E_S
+
+% TEXT
+
+All righty .
+Uh , I guess our topic today is air~1 pollution~1 .
+we are to~1 just discuss 
+what~1 substances do~1 you think 
+that contribute most to~2 air~2 pollution~2 , 
+as~1 well as~2 
+what~2 society can do~2 to~3 improve the~1 air~3 quality of the~2 atmosphere around us .
+
+
+% ANNO
+[All righty]
+I > guess < is
+(our > topic < today) > is < (air~1 > pollution~1)
+
+we > are < [to~1 discuss]
+[to~1 discuss] < just
+[to~1 discuss] < (what~1 > substances)
+substances = that
+
+you > [do~1 think]
+that > contribute < (to~2 < (air~2 > pollution~2))
+contribute < most
+that = substances
+
+[as~1 well as~2] < what~2
+society > can < do~2
+do~2 < to~3 < improve < (the~1 > [air~3 quality])
+[air~3 quality] < of < (the~2 > atmosphere) < around < us
+
+---
+% ORIGINAL
+@ SpeakerB2/SYM ./.
+Right/UH ./. E_S
+
+---
+% ORIGINAL
+SpeakerA3/SYM ./.
+{F Um/UH ,/, } does/VBZ your/PRP$ work/NN entitle/VB ,/, {F uh/UH ,/, } anything/NN of/IN environmental/JJ along/IN these/DT lines/NNS ?/. E_S
+
+% TEXT
+Um/UH ,/,
+does your work entitle , uh ,
+anything of environmental along these lines ?
+
+% ANNO
+(your > work) > does < entitle
+anything < of < environmental 
+anything < along < (these > lines)
+
+---
+% ORIGINAL
+SpeakerB4/SYM ./.
+Me/PRP ,/, I/PRP 'm/VBP in/IN the/DT legal/JJ department/NN E_S
+{C and/CC ,/, } {F um/UH ,/, } we/PRP do/VBP have/VB ,/, {F uh/UH ,/, } a/DT group/NN of/IN attorneys/NNS who/WP handle/VBP our/PRP$ environmental/JJ issues/NNS ./. E_S
+
+% TEXT
+Me , I 'm in the legal department E_S
+{C and , } {F um , } we do have , {F uh , } a group of attorneys who handle our environmental issues . E_S
+
+% ANNO
+I > 'm < in < (the > (legal >department))
+we > do < have
+(a > group) < of < attorneys 
+group = who
+who > handle < (our > (environmental > issues))
+
+
+---
+% ORIGINAL
+SpeakerA5/SYM ./.
+Uh-huh/UH ./. E_S
+
+---
+% ORIGINAL
+SpeakerB6/SYM ./.
+{C And/CC } I/PRP do/VBP n't/RB know/VB too/RB much/JJ about/IN the/DT air/NN pollution/NN thing/NN ./. E_S
+I/PRP do/VBP know/VB for/IN other/JJ types/NNS of/IN pollution/NN like/IN the/DT toxic/JJ waste/NN and/CC such/JJ that/IN T/NNP I/NNP has/VBZ to/TO dispose/VB of/IN that/DT we/PRP normally/RB put/VBP in/IN the/DT ground/NN ,/, {D you/PRP know/VBP ,/, } we/PRP 're/VBP coming/VBG up/RP with/IN [ a/DT ,/, + {F uh/UH ,/, } a/DT ] new/JJ solution/NN ./. E_S
+We/PRP have/VBP been/VBN finding/VBG a/DT lot/NN of/IN toxic/JJ places/NNS to/TO dump/VB E_S
+{C and/CC } we/PRP just/RB transport/VBP to/IN these/DT places/NNS ./. E_S
+{C But/CC } after/IN awhile/RB it/PRP always/RB seems/VBZ that/IN [ the/DT ,/, + {F um/UH ,/, } {F oh/UH ,/, } the/DT ] site/NN starts/VBZ to/TO leak/VB E_S
+{C and/CC then/RB } you/PRP have/VBP to/TO clean/VB it/PRP up/RP and/CC such/JJ ./. E_S
+{C But/CC } the/DT new/JJ idea/NN is/VBZ to/TO take/VB everything/NN up/IN to/IN Sherman/NNP ,/, E_S
+{C and/CC } we/PRP 're/VBP going/VBG have/VB that/DT ,/, {D you/PRP know/VBP ,/, } incineration/NN place/NN up/IN there/RB and/CC ,/, 

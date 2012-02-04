@@ -1,0 +1,17 @@
+---
+% ID 28883465935
+% POS TEXT
+Wind/N 2.0/$ mph/N SE/N ./, Barometer/N 29.676/$ in/P ,/, Rising/V ./, Temperature/N 56.3/$ °F/~ ./, Rain/N today/N 0.00/$ in/P ./, Humidity/N 45%/$
+% TEXT
+
+Wind 2.0 mph SE . Barometer 29.676 in~1 , Rising . Temperature 56.3 °F . Rain today 0.00 in~2 . Humidity 45%
+
+% ANNO
+
+Wind < { (2.0 > mph) SE }
+Barometer < (29.676 > in~1)
+Rising > Barometer
+Temperature < (56.3 > °F)
+Rain < today 
+Rain < (0.00 > in~2)
+Humidity < 45%

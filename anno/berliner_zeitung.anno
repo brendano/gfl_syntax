@@ -1,0 +1,12 @@
+// http://www.berliner-zeitung.de/berlin/plattenbau-bezirke-keine-schmuddelkinder-mehr,10809148,11562058.html
+
+% TEXT
+Die BVG-Vorstandsvorsitzende Sigrid Nikutta ist die~1 wohl prominenteste Zuzüglerin der letzten anderthalb Jahre : Im Herbst 2010 siedelte die~2 Chefin des größten kommunalen Verkehrsunternehmens Deutschlands mit Familie von Wiesbaden nach Biesdorf um .
+
+% ANNO
+$x :: {(die~1 > BVG-Vorstandsvorsitzende) [Sigrid Nikutta]}
+$x > ist < (wohl > prominenteste > Zuzüglerin) < der < ({letzten anderthalb} > Jahre)
+(Im > (Herbst < 2010)) > [siedelte um] < (die~2 > Chefin < des < ({größten kommunalen} > Verkehrsunternehmens < Deutschlands))
+[siedelte um] < mit < Familie
+[siedelte um] < von < Wiesbaden
+[siedelte um] < nach < Biesdorf

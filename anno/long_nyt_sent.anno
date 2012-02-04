@@ -1,0 +1,19 @@
+// http://www.nytimes.com/2012/02/03/us/komen-foundation-urged-to-restore-planned-parenthood-funds.html
+
+% TEXT
+
+The nation 's leading breast cancer advocacy organization 
+confronted the~1 growing furor Thursday over its~1 decision 
+to~1 largely end its~2 decades-long partnership with~1 Planned Parenthood , 
+with~2 rising dissension in its~3 own ranks 
+and a roiling anger on the~2 Internet 
+showing the~3 power of social media to~2 harness protest .
+
+% ANNO
+The > nation > 's > leading > ([breast cancer] > advocacy > organization) > confronted < ({the~1 growing}> furor)
+confronted < Thursday
+furor < over < (its~1 > decision) < to~1 < (largely > end) < ({its~2 decades-long} > partnership) < with~1 < [Planned Parenthood]
+with~2 < (rising > dissension) < in < ([its~3 own] > ranks)
+and
+({a roiling}> anger) < on < (the~2 > Internet)
+anger > showing < (the~3 > power < of < [social media]) < to~2 < harness < protest

@@ -1,0 +1,78 @@
+% NOTES
+
+from:
+http://psu-us.academia.edu/MikePutnam/Papers/899666/Catenae_-_Introducing_a_Novel_Unit_of_Syntactic_Analysis
+http://brenocon.com/Putnam2011_Catenae_Syntax.pdf
+
+They are (using [] for their italics, not GFL right here):
+(1) She [has lost] her keys.
+(2) Fred [took] us [on].
+(3) We [wiped the floor with] them.
+(4) [What is] that fly [doing] in my soup?
+(5) Larry will [persuade] you [to stay] sooner than Susan will me.
+(6) She has [more old pictures] of you than he has of me
+
+---
+% TEXT
+She has lost her keys .
+% ANNO
+She > [has lost] < (her > keys)
+% NOTES
+They argue "has lost" should be one unit.
+I think with the right conventions we can deal with a verb chain.  Either
+  (1)   She > (has > lost) < (her > keys)
+  (2)   She > (has < lost) < (her > keys)
+In second version, need verb-chaining rules to extract subj/obj pair.  This can
+be done as parser features and/or for downstream analysis.
+
+---
+% TEXT
+Fred took us on .
+% ANNO
+Fred > [took on] < us
+
+---
+% TEXT
+We wiped the floor with them .
+% NOTES
+idiom reading -- keep semantic unit together
+% ANNO
+We > [wiped the floor with] < them 
+
+---
+% TEXT
+What is that fly doing in my soup ?
+% NOTES
+"What is doing" means "why"
+% ANNO
+(that > fly) > [What is doing] < in < (my > soup)
+
+---
+% TEXT
+Larry will-1 persuade you to stay sooner than Susan will-2 me .
+% NOTES
+this is "pseudogapped"
+also, using modal-first verb convention here
+% ANNO
+Larry > will-1 > [persuade to stay]
+[persuade to stay] < you
+[persuade to stay] < [sooner than] < Susan < will-2 < $x < me
+$x = [persuade to stay]
+
+---
+% TEXT
+She has.1 more old pictures of.1 you than he has.2 of.2 me .
+% ANNO
+She > has.1 < (old > pictures) < of.1 < you
+more > pictures
+than < has.2
+he > has.2 < $x < of.2 < me
+$x = pictures
+
+% NOTES
+we don't support coref to phrases, instead choose the head.
+if we analyzed (old > pictures) as [old pictures]
+then we'd align more closely with their analysis
+Also... shouldn't "more than" be combined??
+and what about:   than > $x   ??
+

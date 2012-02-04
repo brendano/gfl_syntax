@@ -1,0 +1,14 @@
+---
+% ID 28928939032
+% POS TEXT
+I/O wonder/V if/P you/O realize/V we/O were/V talking/V about/P YOU/O ./,
+% TEXT
+
+I wonder if you realize we were talking about YOU .
+
+% ANNO
+
+I > wonder < if < realize 
+you > realize < were
+we > were < talking < about < YOU 
+.

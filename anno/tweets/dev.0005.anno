@@ -1,0 +1,14 @@
+---
+% ID 28937617852
+% POS TEXT
+@ShiversTheNinja/@ forgive/V me/O for/P blowing/V up/T your/D youtube/^ comment/N section/N ./,
+% TEXT
+
+@ShiversTheNinja forgive me for blowing up your youtube comment section .
+
+% ANNO
+
+@ShiversTheNinja 
+forgive < me 
+forgive < for < [blowing up] < [comment section] < {your youtube}
+

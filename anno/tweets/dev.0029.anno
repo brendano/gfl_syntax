@@ -1,0 +1,23 @@
+---
+% ID 28841482210
+% POS TEXT
+Ignite/V to/P Write/V :/, This/D Photo/N Needs/V a/D Title/N !:/, This/D photograph/N certainly/R needs/V a/D title/N !/, Can/V you/O give/V it/O one/$ ?/, It/O se/G .../~ http://bit.ly/bz8n9w/U
+% TEXT
+
+Ignite to Write : This~1 Photo Needs a~1 Title !: This~2 photograph certainly needs a~2 title ! Can you give it one ? It se ... http://bit.ly/bz8n9w
+
+% ANNO
+
+Ignite < to < Write
+ : 
+This~1 > Photo > Needs < (a~1 > Title)
+ !: 
+This~2 > photograph < needs
+certainly > needs < (a~2 > title)
+ ! 
+Can > give < {it one}
+you > Can
+ ? 
+It > se 
+... 
+http://bit.ly/bz8n9w

@@ -1,0 +1,14 @@
+% TEXT
+Crabby ass witch babies need~1 to grow the f up~1 ... seriously we dont need~2 ur drama and if u cant work in a grown up~2 place then go away !
+
+% ANNO
+(Crabby < ass) > (witch > babies) > need~1 < to < [grow up~1] < [the f]
+  we > dont < need~2 < (ur > drama)
+  u > cant < work < in < ({a [grown up~2]} > place)
+  [go away]
+if < cant
+then < [go away]
+then = if  // ? misuse of coref/anaphor label??
+
+// $x :: {cant [go away]} :: {if then}
+

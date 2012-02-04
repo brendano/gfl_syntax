@@ -1,0 +1,17 @@
+---
+% ID 28909399135
+% POS TEXT
+"/, Because/P if/P seeing/V is/V believing/V ,/, then/R believe/V that/P we/O have/V lost/V our/D eyes/N ..."/, #fb/#
+% TEXT
+
+" Because if seeing is believing , then believe that we have lost our eyes ..." #fb
+
+% ANNO
+
+
+Because
+$x :: {is believe} :: {if then}
+seeing > is < believing
+then
+believe < that < have
+we > have < lost < (our> eyes)

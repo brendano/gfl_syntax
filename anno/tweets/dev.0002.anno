@@ -1,0 +1,15 @@
+---
+% ID 28913450823
+% POS TEXT
+RT/~ @HollywoodOompa/@ :/~ Sat/^ November/^ 6/$ ill/L be/V at/P Nashville/^ center/N stage/N for/P the/D ice/N kream/N party/N for/P
+% TEXT
+
+RT @HollywoodOompa : Sat November 6 ill be at Nashville center stage for^1 the ice kream party for^2
+
+% ANNO
+
+RT @HollywoodOompa : 
+[Sat November 6] > be
+ill > be < at < [Nashville center stage]
+be < for^1 < (the > [ice kream party])
+for^2

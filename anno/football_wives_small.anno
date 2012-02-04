@@ -1,0 +1,7 @@
+% TEXT
+He and his wife own smash burger
+
+% ANNO
+$x :: {He wife} :: and
+wife < his
+$x > own < [smash burger]

@@ -1,0 +1,15 @@
+---
+% ID 28920840060
+% POS TEXT
+Jay-Z/^ Responds/V To/P Beyonce/^ Pregnancy/N Rumors/N |/G The/D Urban/^ Daily/^ http://bit.ly/aMjMsZ/U
+% TEXT
+
+Jay-Z Responds To Beyonce Pregnancy Rumors | The Urban Daily http://bit.ly/aMjMsZ
+
+% ANNO
+
+Jay-Z > [Responds To] < Rumors
+Beyonce > Pregnancy > Rumors
+ | 
+[The Urban Daily]
+http://bit.ly/aMjMsZ

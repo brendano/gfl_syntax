@@ -1,0 +1,14 @@
+% NOTES
+use http://search.twitter.com for zillions of examples
+
+
+---
+% TEXT
+#LiesBrokePeopleTell " My card declined because 
+my Bank tryna protect me from fraud "
+
+% ANNO
+
+(My > card) > declined < because
+because < tryna
+(my > Bank) > tryna < protect < {me (from < fraud)}

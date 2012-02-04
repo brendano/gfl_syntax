@@ -1,0 +1,44 @@
+---
+% ID 28849570224
+% POS TEXT
+@ciaranyree/@ it/O was/V on/P football/N wives/N ,/, one/$ of/P the/D players/N and/& his/D wife/N own/V smash/^ burger/^
+% TEXT
+
+@ciaranyree it was on football wives , one of the players and his wife own smash burger
+
+% ANNO
+
+@ciaranyree
+it > was < on < [football wives] 
+, 
+one < of < (the > players)
+and
+his > wife 
+$x :: {one wife} :: and
+$x > own < [smash burger]
+
+% NOTES
+
+playing around with notation....
+
+it >sb> was < on [football wives]
+$x >sb> own <ob< [smash burger]
+$x -sb> own <ob- [smash burger]
+$x -SB-> own <-OB- [smash burger]
+$x -sb-> own <-ob- [smash burger]
+$x -s-> own <-o- [smash burger]
+$x -s> own <o- [smash burger]
+$x >s> own <o< [smash burger]
+
+$x :CC: and :CC: {one wife}
+$x %CC% and %CC% {one wife}
+$x && and && {one wife}
+$x :&&: and :&&: {one wife}
+$x :&: and :&: {one wife}
+
+$x = CC {one wife} {and}
+$x = and :CC: {one wife}
+$x = {one wife} :CC: and
+$x = {and , ( ) } :CC: {one wife}
+$x = {one wife} :CC: {and , ( ) }
+
