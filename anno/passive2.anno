@@ -1,0 +1,10 @@
+% TEXT
+Four iCreate robots -- Roomba vacuum cleaner-type machines -- were put through the paces of Samuel Beckett 's play " Quad . "
+% ANNO
+
+{Four iCreate} > robots
+$x :: {robots machines}
+{Roomba [vacuum cleaner-type]} > machines
+$x > were < put < through < (the > paces) < of < $y
+$y :: {(([Samuel Beckett] > 's) > play) Quad}
+
