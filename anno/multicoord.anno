@@ -1,5 +1,5 @@
 % TEXT
-Bob ,~1 Fred ,~2 and I
+ice cream and~1 cake and~2 asparagus
 
 % ANNO
-$x :: {Bob Fred I} :: { ,~1 ,~2 and }
+$x :: {[ice cream] cake asparagus} :: { and~1 and~2 }

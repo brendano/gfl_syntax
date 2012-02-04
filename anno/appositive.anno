@@ -1,0 +1,7 @@
+% TEXT
+Your friend Brainerd is in trouble .
+
+% ANNO
+$x > is < [in trouble]
+$x :: {(Your > friend) Brainerd}
+
