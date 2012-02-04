@@ -1,9 +1,10 @@
 % TEXT
 Yo reader , the~1 Graph Fragment Language ( GFL ) facilitates the~2 creation of dependency trees and~1 graphs with a simple and~2 intuitive annotation language .
 
+// Yo\INT
+// reader\VOC
+
 % ANNO
-Yo\INT
-reader\VOC
 ,
 $z :: { (the~1 > [Graph Fragment Language]) GFL }
 $z > facilitates < (the~2 > creation) < of < $y
