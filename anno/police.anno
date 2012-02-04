@@ -1,0 +1,7 @@
+% TEXT
+The police arrested the man who robbed our bank .
+
+% ANNO
+The > police > arrested < (the > man)
+who > robbed < (our > bank)
+who = man           // indicates coreferentiality

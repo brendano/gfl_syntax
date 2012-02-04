@@ -15,6 +15,6 @@ watch < (the > news)
 [tune out] < over < $food
 $x :: {sit watch [tune out]} :: {and~1 and~2}
 
-$food :: {pancakes bananas cri } :: { ,~1 ,~2 }
+$food :: {pancakes bananas cri }
 {some fresh} > pancakes
 bananas < with < rum
