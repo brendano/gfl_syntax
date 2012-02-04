@@ -54,7 +54,7 @@ def psf2dot(parse):
         child=dot_clean(child)
         col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple'}.get(label, 'blue')
         dir = {'Anaph':'none'}.get(label, 'back')
-        weight = {'Anaph':0.2}.get(label, 2)
+        weight = {'Anaph':0.01}.get(label, 5)
         lab = '' if not label else label
         e = '{head} -> {child} [color={col} fontsize={fontsize} fontcolor={col} dir={dir} weight={weight} label="{lab}"]'.format(**locals())
         G.append(e)

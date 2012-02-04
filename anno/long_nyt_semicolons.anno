@@ -1,7 +1,7 @@
 % NOTES
 http://www.nytimes.com/2012/02/03/us/politics/romney-immigration-position-at-odds-with-mormon-church.html?pagewanted=2&src=recg
 
-Was done quickly, not checked very thoroughly
+Was done quickly, not checked very thoroughly (BTO)
 
 
 % TEXT
@@ -25,8 +25,15 @@ in-4 this life and-4 the-3 next .
 
 
 % ANNO
-(The > [Mormon Church]) > has < (a-1 > variety) < of < motives
-variety < for < ({its immigration} > stand)
+
+// Originally I did:
+//   (The > [Mormon Church]) > has < (a-1 > variety) < of < motives
+//   variety < for < ({its immigration} > stand)
+// But I think "a variety of" is the noncompositional unit.
+// "motives" makes more sense, semantically, as the object.
+
+(The > [Mormon Church]) > has < ([a-1 variety of] > motives)
+motives < for < ({its immigration} > stand)
 
 it-1 > is-1 < eager < to < be < perceived < positively
 perceived < by < Hispanics < $in_prep_cc
@@ -51,3 +58,12 @@ it-4 > places < ({a-2 strong} > premium) < on < keeping < families < intact
 // ...??.. or ... keeping < {families intact}
 intact < in-4 < $life
 $life :: {(this > life) (the-3 > next)} :: {and-4}
+
+
+// Giant coreference chain!!
+// We require the GFL to specify antecedents.  I'm not sure what's correct here, so let's just say a flat structure.
+
+[Mormon Church] = it-1
+[Mormon Church] = it-2
+[Mormon Church] = it-3
+[Mormon Church] = it-4
