@@ -1,0 +1,53 @@
+% NOTES
+http://www.nytimes.com/2012/02/03/us/politics/romney-immigration-position-at-odds-with-mormon-church.html?pagewanted=2&src=recg
+
+Was done quickly, not checked very thoroughly
+
+
+% TEXT
+The Mormon Church 
+has a-1 variety of motives 
+for its immigration stand :
+
+it-1 is-1 eager to be perceived positively 
+by Hispanics 
+in-1 the-1 United States , 
+and-1
+in-2 Mexico and-2 Latin America , 
+where it-2 is-2 making new converts ; 
+
+it-3 identifies with the-2 immigrant experience , 
+having fled persecution before settling in-3 Utah ;
+
+and-3 
+it-4 places a-2 strong premium on keeping families intact ,
+in-4 this life and-4 the-3 next .
+
+
+% ANNO
+(The > [Mormon Church]) > has < (a-1 > variety) < of < motives
+variety < for < ({its immigration} > stand)
+
+it-1 > is-1 < eager < to < be < perceived < positively
+perceived < by < Hispanics < $in_prep_cc
+$in_prep_cc :: {in-1 in-2} :: {and-1}
+in-1 < (the-1 > [United States])
+in-2 < $mexlat
+$mexlat :: {Mexico [Latin America]} :: {and-2}
+where = $mexlat         // Genuinely ambiguous. Converting Hispanics in US too?
+
+// Hidden in ... really, it's a LOCATION semantic role.  Should we encode a hidden node for "in" or something like that?  Or is it just the marker heading the relative clause?
+where > is-2
+it-2 > is-2 < making < (new > converts)
+
+it-3 > identifies < with < ({the-2 immigrant} > experience)
+identifies < having < fled 		// ??
+fled < persecution
+fled < before < settling < in-3 < Utah
+
+// and-3 ???????  it's more of a discoruse marker, if anything it links with the other semicols.  maybe it's a coordination-like chain of discourse markers.  we probably should NOT do these.
+
+it-4 > places < ({a-2 strong} > premium) < on < keeping < families < intact
+// ...??.. or ... keeping < {families intact}
+intact < in-4 < $life
+$life :: {(this > life) (the-3 > next)} :: {and-4}
