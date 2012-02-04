@@ -66,8 +66,10 @@ def psf2dot(parse):
     G.append('{name} [color={bg} style=filled fillcolor={bg} height=0.4 fontcolor=black label={label} fontsize={fontsize}]'.format(
       name=dot_clean(node), label=dot_clean(label, node_label=True), fontsize=fontsize, bg=bg))
 
+  seen_words = set()
+
+  # standard node-word edges only when "show_words" flag is on
   if show_words:
-    seen_words = set()
     for node,words in parse.node2words.items():
       node = dot_clean(node)
       # emit edges in surface order ... graphviz seems to respect this a little bit.
@@ -77,22 +79,22 @@ def psf2dot(parse):
         seen_words.add(w)
         e = '%s -> %s [color=gray weight=1 dir=none]' % (node, w)
         G.append(e)
-    for node,wordlabels in parse.extra_node2words.items():
-      node = dot_clean(node)
-      for w,label in wordlabels:
-        w = dot_clean(w)
-        seen_words.add(w)
-        lab = '' if not label else dot_clean(label)
-        e = '{node} -> {w} [color={conjcol} fontcolor={conjcol} fontsize={fontsize} weight=2 dir=none label={lab}]'.format(**locals())
-        G.append(e)
-    for word in seen_words:
-      col = '"#e0e0e0"'
-      G.append("{word} [shape=box fillcolor={col} style=filled color={col} height=0.1 width=0.1 fontsize={wfontsize}]".format(**locals()))
 
-  #for word,ind in parse.word2id.items():
-  #  if word not in seen_words: continue
-  #  G.append('''%s [pos="%s,0!"]''' % (dot_clean(word),(1.1 * ind)))
-  #G.append('splines=true')
+  # all the funky node-word edges (e.g. coordinators) are always shown
+  for node,wordlabels in parse.extra_node2words.items():
+    node = dot_clean(node)
+    for w,label in wordlabels:
+      w = dot_clean(w)
+      seen_words.add(w)
+      lab = '' if not label else dot_clean(label)
+      e = '{node} -> {w} [color={conjcol} fontcolor={conjcol} fontsize={fontsize} weight=2 dir=none label={lab}]'.format(**locals())
+      G.append(e)
+
+  # styling for word boxes
+  for word in seen_words:
+    col = '"#e0e0e0"'
+    G.append("{word} [shape=box fillcolor={col} style=filled color={col} height=0.1 width=0.1 fontsize={wfontsize}]".format(**locals()))
+
   s = '\n'.join(L+';' for L in G)
   return 'digraph {\n %s \n}' % s
 
