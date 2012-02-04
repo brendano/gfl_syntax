@@ -254,7 +254,7 @@ def process_chain(p, antlr_node):
     # sorting is better for string comparability, but order-preserving is nicer for interpretation
     #mw_node = 'MW(' + ','.join(sorted(words)) + ')'
     n = p.multiword_canonical_node(words)
-    mw_node = n if n else 'MW(' + ','.join(words) + ')'
+    mw_node = n if n else 'MW(' + '_'.join(words) + ')'
     for w in words:
       p.add_nodeword_edge(mw_node, w)
     #for n in wordnodes:
@@ -377,8 +377,8 @@ def test_multiwords():
 
   p = go("z > [a b]")
   assert len(p.nodes)==2
-  assert set(p.node2words['MW(a,b)']) == set(['a','b'])
-  assert set([('MW(a,b)','W(z)',None)]) == set(p.node_edges)
+  assert set(p.node2words['MW(a_b)']) == set(['a','b'])
+  assert set([('MW(a_b)','W(z)',None)]) == set(p.node_edges)
   p = go("[a b] > {c d}")
   assert_same(go("[a b] > {c d}"), go("[a b] > c \n [a b] > d"))
 

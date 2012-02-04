@@ -6,6 +6,8 @@ from collections import defaultdict
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../parser'))
 import gfl_parser
 
+show_words = False
+
 def parse_parts(tweet_text):
   s = tweet_text
   s = re.sub('^--- *', '', s)
@@ -30,12 +32,15 @@ def parse_parts(tweet_text):
 
 def clean_name_for_dot(s):
   # s = s.replace('$','N_').replace('^','_')
+  if not show_words:
+    s = re.sub(r'^(MW|W)\((.*?)\)$', r'\2', s)
   s = s.encode('utf8')
   s = s.replace('"', "''")
   s = '"{}"'.format(s)
   return s
 
-def psf2dot(parse, show_words=True):
+def psf2dot(parse):
+  global show_words
   G = []
   fontsize = 12
   wfontsize = 11
@@ -136,9 +141,9 @@ def make_multi_html(bigbase, base_and_texts):
       print_html(out, anno_text, base + '.png')
   return html_filename
 
-def process_one_parse(p, base, show_words):
+def process_one_parse(p, base):
   # base is for OUTPUT
-  dot = psf2dot(p, show_words=show_words)
+  dot = psf2dot(p)
   with open("{base}.dot".format(**locals()),'w') as f: print>>f, dot
   cmd = "dot -Tpng < {base}.dot > {base}.png".format(**locals())
   print cmd
@@ -162,6 +167,7 @@ if __name__=='__main__':
   p.add_option('-n', dest="supress_open", action='store_true', help="force to not open image when done")
   p.add_option('-v', dest="verbose", action='store_true', help="verbose mode")
   opts,args = p.parse_args()
+  show_words = opts.show_words
   batch_mode = len(args) > 1
   do_open = not batch_mode and not opts.supress_open
   VERBOSE = opts.verbose
@@ -206,7 +212,7 @@ if __name__=='__main__':
         traceback.print_exc()
         continue
       base = bigbase
-      process_one_parse(parses_annos[0][0], base, opts.show_words)
+      process_one_parse(parses_annos[0][0], base)
       make_html(base, anno_text, base+'.png')
       if do_open:
         desktop_open("{base}.png".format(**locals()))
@@ -231,7 +237,7 @@ if __name__=='__main__':
         base = "%s.%d" % (bigbase,i)
         print "\t",base
         if parse is not None:
-          process_one_parse(parse, base, opts.show_words)
+          process_one_parse(parse, base)
         x.append((base,anno))
       htmlfile = make_multi_html(bigbase, x)
       if do_open:
