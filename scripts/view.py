@@ -96,12 +96,11 @@ def psf2dot(parse):
   return 'digraph {\n %s \n}' % s
 
 def print_html(out, anno_text, png):
-
   img = '' if not png else "<img src={}>".format(os.path.basename(png))
   print>>out, """
   <hr>
   <pre>{anno_text}</pre>
-  <p><img src={img}>
+  <p>{img}
   """.format(**locals())
   #print>>out, """
   #<table><tr><td style="padding-right:20px; vertical-align:top">
@@ -113,7 +112,6 @@ def print_html(out, anno_text, png):
 def print_header(out):
   print>>out, """
   <style>
-
   pre {
     font-family: times, serif;
     white-space: pre-wrap;       /* css-3 */
@@ -133,14 +131,6 @@ def make_html(basename, anno_text, png):
     print_html(out, anno_text, png)
   return html_filename
 
-def make_multi_html(bigbase, base_and_texts):
-  html_filename = bigbase + '.html'
-  with open(html_filename, 'w') as out:
-    print_header(out)
-    for base,anno_text in base_and_texts:
-      print_html(out, anno_text, base + '.png')
-  return html_filename
-
 def process_one_parse(p, base):
   # base is for OUTPUT
   dot = psf2dot(p)
@@ -156,6 +146,26 @@ def desktop_open(filename):
   else:
     print "File is ready to open:  " + filename
     
+def process_potentially_multifile(filename):
+  # parse container format and return GFL code .. do NOT parse it yet
+  anno_text = open(filename).read().strip()
+  if '%' not in anno_text:
+    tokens = string.letters
+    code = anno_text
+    return [(tokens, code, anno_text)]
+  multi_annos = re.split(r'(\n|^)--- *(\n|$)', anno_text)
+  multi_annos = ['---\n' + x.strip() for x in multi_annos if x.strip()]
+  if len(multi_annos) == 0:
+    print "empty annotations"
+    return None
+  tuples = []
+  for anno_text in multi_annos:
+    container = parse_parts(anno_text)
+    tokens = container.get('TEXT','').split()
+    code = container.get('ANNO','').strip()
+    tuples.append((tokens, code, anno_text))
+  return tuples
+
 if __name__=='__main__':
   import string
   from optparse import OptionParser
@@ -176,7 +186,7 @@ if __name__=='__main__':
   multi_annos = None
 
   if not args:
-    print "(use -h for options help)"
+    print "(use -h for help)"
     args = ['/dev/stdin']
 
   for filename in args:
@@ -185,65 +195,55 @@ if __name__=='__main__':
       bigbase = 'tmp'
     else:
       bigbase = re.sub(r'\.(txt|anno)$','', filename)
-    anno_text = open(filename).read()
-    multi_annos,tokens,code = None,None,None
-    if '%' not in anno_text:
-      tokens = string.letters
-      code = anno_text
-      multi_mode = 'SINGLE'
-    else:
-      multi_annos = re.split(r'(\n|^)--- *(\n|$)', anno_text)
-      multi_annos = ['---\n' + x.strip() for x in multi_annos if x.strip()]
-      if len(multi_annos) == 0:
-        print "empty annotations"
-        continue
-      elif len(multi_annos) == 1:
-        container = parse_parts(anno_text)
-        tokens = container['TEXT'].split()
-        code = container['ANNO']
-        multi_mode = 'SINGLE'
-      else:
-        multi_mode = 'MULTI'
 
-    if multi_mode=='SINGLE':
+    tokens_codes_texts = process_potentially_multifile(filename)
+
+    if len(tokens_codes_texts)==1:
+      tokens,code,anno_text = tokens_codes_texts[0]
       try:
-        parses_annos = [(gfl_parser.parse(tokens, code), multi_annos[0])]
+        parse = gfl_parser.parse(tokens, code)
       except Exception:
         if not batch_mode: raise
         traceback.print_exc()
         continue
       base = bigbase
-      process_one_parse(parses_annos[0][0], base)
+      process_one_parse(parse, base)
       htmlfile = make_html(base, anno_text, base+'.png')
       if do_open:
         if opts.open_html:
           desktop_open(htmlfile)
         else:
           desktop_open("{base}.png".format(**locals()))
-    else:
-      parses_annos = []
-      for anno in multi_annos:
-        x = parse_parts(anno)
-        if not (x.get('TEXT','').strip() or x.get('ANNO','').strip()):
-          parses_annos.append((None,anno))
-          continue
+      sys.exit()
+
+    parses = []
+    for tokens,code,text in tokens_codes_texts:
+      if not code or not tokens:
+        parses.append(None)
+      else:
         try:
-          p = gfl_parser.parse(x['TEXT'].split(), x['ANNO'])
-          parses_annos.append((p, anno))
+          p = gfl_parser.parse(tokens, code)
+          parses.append(p)
         except Exception:
-          print x['ANNO']
+          print code
+          parses.append(None)
           if not batch_mode: raise
           traceback.print_exc()
           continue
-      os.system("rm -f {bigbase}.*.png".format(**locals()))
-      x = []
-      for i,(parse,anno) in enumerate(parses_annos):
-        base = "%s.%d" % (bigbase,i)
-        print "\t",base
-        if parse is not None:
-          process_one_parse(parse, base)
-        x.append((base,anno))
-      htmlfile = make_multi_html(bigbase, x)
-      if do_open:
-        desktop_open(htmlfile)
+    os.system("rm -f {bigbase}.*.png".format(**locals()))
+
+    htmlfile = bigbase + '.html'
+    out = open(htmlfile, 'w')
+    print_header(out)
+    x = []
+    for i,parse in enumerate(parses):
+      anno_text = tokens_codes_texts[i][2]
+      base = "%s.%d" % (bigbase,i)
+      print "\t",base
+      if parse is not None:
+        process_one_parse(parse, base)
+      print_html(out, anno_text, base + '.png' if parse is not None else None)
+    out.close()
+    if do_open:
+      desktop_open(htmlfile)
 

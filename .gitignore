@@ -2,3 +2,5 @@
 *.dot
 *.html
 *.pyc
+.DS_Store
+tags
