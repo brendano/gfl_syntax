@@ -1,0 +1,26 @@
+Graph Fragment Language for Easy Syntactic Annotation
+=====================================================
+
+Lightweight dependency-style annotations, featuring multiwords and latent nodes.
+by Chris Dyer, Brendan O'Connor, David Bamman; Carnegie Mellon University.
+
+This is pre-alpha and not ready for anything real!
+And we aren't done with the document that actually describes all this.
+But the directories are:
+
+parser/ -- a parser for the GFL annotations format.
+scripts/ -- a tool for checking and visualizing them, in GraphViz.
+anno/   -- some annotated sentences.
+
+
+Getting started
+===============
+
+The viewer needs Python 2.7 and GraphViz ("dot" command) to be installed.  Run:
+
+  scripts/view.py anno/tweets/dev.0000.anno
+  scripts/view.py -w anno/tweets/dev.0000.anno
+  scripts/view.py anno/nietzsche.anno
+
+etc.
+
