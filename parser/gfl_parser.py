@@ -20,6 +20,9 @@ except ImportError:
 
 VERBOSE = False
 
+class ParseError(Exception): pass
+class InvalidGraph(ParseError): pass
+
 import antlr3
 from psfLexer import psfLexer
 from psfParser import psfParser
@@ -62,6 +65,7 @@ class Parse:
         self.word2nodes[w].add(n)
     self.node2words = dict(self.node2words)
     self.extra_node2words = dict(self.extra_node2words)
+
     self.is_finalized = True
 
   ## Accessors
@@ -158,7 +162,7 @@ def unicodify(s, encoding='utf8', *args):
   if isinstance(s,str): return s.decode(encoding, *args)
   return unicode(s)
 
-def parse(text_tokens, psf_code):
+def parse(text_tokens, psf_code, check_semantics=False):
   """ text_tokens is a list of strings, psf_code is a string """
   text_tokens = [unicodify(x) for x in text_tokens]
   parsetree = antlr_parse(psf_code)
@@ -216,6 +220,8 @@ def parse(text_tokens, psf_code):
     else:
       assert False, "bad type %s %s" % (typ, TypeNames[typ])
   p.finalize()
+  if check_semantics:
+    graph_semantics_check(p)
   return p
 
 def show(antlr_node):
@@ -293,6 +299,7 @@ def leaves(antlr_node):
       yield x
 
 def consistency_check(text_tokens, tree):
+  """ Do checks on the tokens and AST """
   # References check
   alltoks = set(text_tokens)
   for leaf in leaves(tree):
@@ -311,7 +318,15 @@ def consistency_check(text_tokens, tree):
   
   # TODO special multiword check
 
-class ParseError(Exception): pass
+def graph_semantics_check(parse):
+  """Do checks on the final parse graph -- these are linguistic-level checks,
+  not graph definition checks."""
+  # Check tree constraint
+  for n in parse.nodes:
+    outbounds = [(h,c,l) for h,c,l in parse.node_edges if c==n and l is None]
+    if len(outbounds) > 1:
+      raise InvalidGraph("Violates tree constraint: node {} has {} outbound edges: {}".format(
+        repr(n), len(outbounds), repr(outbounds)))
 
 def antlr_parse(code):
   if isinstance(code,str): code = code.decode('utf8')
@@ -467,6 +482,14 @@ def test_duplication_checking():
     goparse(tokens, "A > B")
   # This is OK
   goparse(tokens, "B > C")
+
+def test_tree_constraint():
+  import pytest
+  with pytest.raises(InvalidGraph):
+    p = goparse(string.letters, "z > a \n z > b")
+    graph_semantics_check(p)
+  p = goparse(string.letters, "a > z \n b > z")
+  graph_semantics_check(p)
 
 
 def assert_same(p1, p2):

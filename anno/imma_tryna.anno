@@ -1,6 +1,6 @@
 % NOTES
-use http://search.twitter.com for zillions of examples
-
+These were found by querying "tryna", "imma", "didna"
+on http://search.twitter.com , from which infinitely many more examples can be retrieved
 
 ---
 % TEXT
@@ -12,3 +12,31 @@ my Bank tryna protect me from fraud "
 (My > card) > declined < because
 because < tryna
 (my > Bank) > tryna < protect < {me (from < fraud)}
+
+
+---
+% TEXT
+dang had to throw away a whole loaf of bread cause 
+i didna eat fast enough
+
+% ANNO
+had < to < [throw away] < ({a whole} > loaf < of < bread)
+[throw away] < cause < didna
+i > didna < eat < fast < enough
+
+% NOTES
+not sure if "cause" should be annotated in the tree; Chris prefers to treat it as a discourse-y thing and leave it out
+
+---
+% TEXT
+cop'n beats for this mixtape . imma be writing all night
+
+% ANNO
+(cop'n < beats) < for < (this > mixtape)
+imma < be < writing < [all night]
+
+% NOTES
+PP attachment ambiguity; alternative is:
+  cop'n < beats < for
+
+Our analysis: "for this mixtape" is a more of a discourse-level thing, it answers why the speaker is doing what they're doing.  Therefore, attach to the verb.
