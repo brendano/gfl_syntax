@@ -30,9 +30,10 @@ def parse_parts(tweet_text):
     pairs.append((key,value))
   return dict(pairs)
 
-def clean_name_for_dot(s):
+def dot_clean(s, node_label=False):
   # s = s.replace('$','N_').replace('^','_')
-  if not show_words:
+  if node_label:
+    #not show_words:
     s = re.sub(r'^(MW|W)\((.*?)\)$', r'\2', s)
   s = s.encode('utf8')
   s = s.replace('"', "''")
@@ -48,8 +49,8 @@ def psf2dot(parse):
   conjbg  = '"#90c090"'
   darkblue = '"#202090"'
   for head,child,label in parse.node_edges:
-    head=clean_name_for_dot(head)
-    child=clean_name_for_dot(child)
+    head=dot_clean(head)
+    child=dot_clean(child)
     col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple'}.get(label, 'blue')
     dir = {'Anaph':'none'}.get(label, 'back')
     weight = {'Anaph':0.2}.get(label, 2)
@@ -63,25 +64,25 @@ def psf2dot(parse):
     label = node
     bg = conjbg if node.startswith('$') else '"#d0d0f0"'
     G.append('{name} [color={bg} style=filled fillcolor={bg} height=0.4 fontcolor=black label={label} fontsize={fontsize}]'.format(
-      name=clean_name_for_dot(node), label=clean_name_for_dot(label), fontsize=fontsize, bg=bg))
+      name=dot_clean(node), label=dot_clean(label, node_label=True), fontsize=fontsize, bg=bg))
 
   if show_words:
     seen_words = set()
     for node,words in parse.node2words.items():
-      node = clean_name_for_dot(node)
+      node = dot_clean(node)
       # emit edges in surface order ... graphviz seems to respect this a little bit.
       words = sorted(words, key=lambda w: parse.word2id[w])
       for w in words:
-        w = clean_name_for_dot(w)
+        w = dot_clean(w)
         seen_words.add(w)
         e = '%s -> %s [color=gray weight=1 dir=none]' % (node, w)
         G.append(e)
     for node,wordlabels in parse.extra_node2words.items():
-      node = clean_name_for_dot(node)
+      node = dot_clean(node)
       for w,label in wordlabels:
-        w = clean_name_for_dot(w)
+        w = dot_clean(w)
         seen_words.add(w)
-        lab = '' if not label else clean_name_for_dot(label)
+        lab = '' if not label else dot_clean(label)
         e = '{node} -> {w} [color={conjcol} fontcolor={conjcol} fontsize={fontsize} weight=2 dir=none label={lab}]'.format(**locals())
         G.append(e)
     for word in seen_words:
@@ -90,7 +91,7 @@ def psf2dot(parse):
 
   #for word,ind in parse.word2id.items():
   #  if word not in seen_words: continue
-  #  G.append('''%s [pos="%s,0!"]''' % (clean_name_for_dot(word),(1.1 * ind)))
+  #  G.append('''%s [pos="%s,0!"]''' % (dot_clean(word),(1.1 * ind)))
   #G.append('splines=true')
   s = '\n'.join(L+';' for L in G)
   return 'digraph {\n %s \n}' % s
