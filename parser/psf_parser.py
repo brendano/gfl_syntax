@@ -18,7 +18,7 @@ try:
 except ImportError:
   import json
 
-VERBOSE = any(s.startswith('-v') for s in sys.argv)
+VERBOSE = False
 
 import antlr3
 from psfLexer import psfLexer
@@ -76,6 +76,15 @@ class Parse:
     if len(ns)==0: return None
     if len(ns)==1: return list(ns)[0]
     assert len(ns) <= 1, "more than one node for a word... shouldnt this be impossible?"
+
+  def multiword_canonical_node(self, words):
+    swords = set(words)
+    for n,nodewords in self.node2words.items():
+      if swords == nodewords:
+        return n
+    return None
+
+
 
   ## State manipulation
 
@@ -242,8 +251,8 @@ def process_chain(p, antlr_node):
     words = flatten(word_lists)
     # sorting is better for string comparability, but order-preserving is nicer for interpretation
     #mw_node = 'MW(' + ','.join(sorted(words)) + ')'
-    mw_node = 'MW(' + ','.join(words) + ')'
-
+    n = p.multiword_canonical_node(words)
+    mw_node = n if n else 'MW(' + ','.join(words) + ')'
     for w in words:
       p.add_nodeword_edge(mw_node, w)
     #for n in wordnodes:
@@ -370,6 +379,11 @@ def test_multiwords():
   assert set([('MW(a,b)','W(z)',None)]) == set(p.node_edges)
   p = go("[a b] > {c d}")
   assert_same(go("[a b] > {c d}"), go("[a b] > c \n [a b] > d"))
+
+def test_multiwords_consistency():
+  go = lambda c: goparse(string.letters, c)
+  p = go("[a b] \n [b a]")
+  assert len(p.nodes) == 1
 
 def test_empty_nodes():
   go = lambda c: goparse(string.letters, c)
