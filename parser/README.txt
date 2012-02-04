@@ -1,13 +1,11 @@
-To compile the grammar, you will need ANTLR v3 (http://www.antlr.org/).
-
 To compile the grammar:
   ./build.sh
 
 To run it:
   python python-driver.py
 
-For development, I've been using ANTLRWorks which is also available
-from the ANTLR website.
+For development, I've been using ANTLRWorks which is available from the ANTLR
+website (http://www.antlr.org/).
 
 DOT visualization of parse tree
 -------------------------------
@@ -18,7 +16,7 @@ DOT visualization of parse tree
   javac -cp jars/antlr-3.4-complete.jar AnnotationTreeToDOT.java psfParser.java psfLexer.java
 
   # run 
-  ../anno_code/strip_preamble.pl ../anno/dev.0000.anno | java -cp jars/antlr-3.4-complete.jar:. AnnotationTreeToDOT > dev0000.dot
+  ../scripts/strip_preamble.pl ../anno/tweets/dev.0000.anno | java -cp jars/antlr-3.4-complete.jar:. AnnotationTreeToDOT > dev0000.dot
 
   # display, e.g.:
   dotty dev0000.dot
