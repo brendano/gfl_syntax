@@ -10,3 +10,14 @@ I~2 > avoid < them
 $x :: {mistrust avoid} :: and
 The > will < to < (a~1 > system)
 will > is < (a~2 > lack) < of < integrity
+
+---
+% TEXT
+Ich misstraue allen Systematikern und gehe ihnen aus dem Weg .~1 Der Wille zum System ist ein Mangel an Rechtschaffenheit .~2
+
+% ANNO
+Ich > misstraue < (allen > Systematikern) und 
+ihnen > [gehe aus dem Weg]
+$x :: {misstraue [gehe aus dem Weg]} :: und
+Der > Wille < zum < System 
+Wille > ist < (ein > Mangel) < an < Rechtschaffenheit .~2
