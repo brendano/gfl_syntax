@@ -1,0 +1,17 @@
+% NOTES
+andre's example
+
+% TEXT
+I had lunch with Ingrid ,
+Brendan's friend ,
+and Humphrey ,
+my cousin .
+
+% ANNO
+
+$i :: {Ingrid friend}
+$h :: {Humphrey cousin}
+$obj :: {$i $h} :: and
+I > had < lunch < with < $obj
+Brendan's > friend
+my > cousin

@@ -31,6 +31,7 @@ in-4 this life and-4 the-3 next .
 //   variety < for < ({its immigration} > stand)
 // But I think "a variety of" is the noncompositional unit.
 // "motives" makes more sense, semantically, as the object.
+// and "a variety of" could be replaced by "various", "many", etc.
 
 (The > [Mormon Church]) > has < ([a-1 variety of] > motives)
 motives < for < ({its immigration} > stand)
@@ -41,7 +42,7 @@ $in_prep_cc :: {in-1 in-2} :: {and-1}
 in-1 < (the-1 > [United States])
 in-2 < $mexlat
 $mexlat :: {Mexico [Latin America]} :: {and-2}
-where = $mexlat         // Genuinely ambiguous. Converting Hispanics in US too?
+where = $mexlat         // Ambiguous to me. Converting Hispanics in US too?
 
 // Hidden in ... really, it's a LOCATION semantic role.  Should we encode a hidden node for "in" or something like that?  Or is it just the marker heading the relative clause?
 where > is-2
