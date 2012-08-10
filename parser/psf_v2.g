@@ -38,7 +38,7 @@ conjexpr:	DOLLARTOKEN DCOLON^ atom (DCOLON! atom)?
 // however, it makes the precedence weird
 atom	:	narrow
 	|	curlyset
-	|	LRB! expr+ (HEAD expr*)? RRB!
+	|	LRB^ expr+ (HEAD expr*)? RRB!
 	;
 
 narrow	:	TOKEN
