@@ -1,0 +1,12 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Currently , 6 of them are running properly . ||| Currently , 6 of them are running properly .
+
+% TEXT
+Currently , 6 of them are running properly .
+
+% ANNO
+Currently > are
+(6* of them) > are < running < properly

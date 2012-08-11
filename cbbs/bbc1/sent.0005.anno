@@ -1,0 +1,15 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The coach Alex Ferguson announced that he can not play in the Saturday game while he is still suffering from head injury . ||| The coach Alex Ferguson announced that he can not play in the Saturday game while he is still suffering from head injury .
+
+% TEXT
+The coach Alex Ferguson announced that he can not play in the Saturday game while he_1 is still suffering from head injury .
+
+% ANNO
+(The coach [Alex Ferguson]) > announced
+that
+he > (can < not) < play < (in* the Saturday game)
+while
+he_1 > (is < still) < suffering < (from* head injury)

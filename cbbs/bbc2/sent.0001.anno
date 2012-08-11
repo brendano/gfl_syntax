@@ -1,0 +1,12 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+After beating Cameroon with a score of 5 to 1 , the Nigerian women soccer team qualified for the final game of the Africa Women Soccer Cup . ||| After beating Cameroon with a score of 5 to 1 , the Nigerian women soccer team qualified for the final game of the Africa Women Soccer Cup .
+
+% TEXT
+After beating Cameroon with a score of 5 to 1 , the Nigerian women soccer team qualified for the_1 final game of_1 the_2 Africa Women Soccer Cup .
+
+% ANNO
+(After beating Cameroon (with* a score of 5 to 1))
+(the Nigerian women soccer team*) > qualified < for ({the_1 final} > game < (of_1 < the_2 < [Africa Women Soccer Cup]))

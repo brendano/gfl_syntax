@@ -1,0 +1,12 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The public also has to be informed about the new legal decrees on land ownership . ||| The public also has to be informed about the new legal decrees on land ownership .
+
+% TEXT
+The public also has to be informed about the new legal decrees on land ownership .
+
+% ANNO
+The > public > has < to < be < informed < about < ((the new legal decrees*) < on < (land > ownership))
+also > has

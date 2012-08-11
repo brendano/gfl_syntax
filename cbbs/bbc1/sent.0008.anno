@@ -1,0 +1,18 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Manchester United is the highest ranking team in the Premier League with 51 points , followed by Arsenal with 46 points , Manchester in third place with 45 , and Chelsea is fourth with 41 points . ||| Manchester United is the highest ranking team in the Premier League with 51 points , followed by Arsenal with 46 points , Manchester in third place with 45 , and Chelsea is fourth with 41 points .
+
+% TEXT
+Manchester United is the highest ranking team in the_1 Premier League with 51 points , followed by Arsenal with_1 46 points_1 ,_1 Manchester_1 in_1 third place with_2 45 ,_2 and Chelsea is_1 fourth with_3 41 points_2 .
+
+% ANNO
+[Manchester United] > is
+(the highest ranking team*) < in < the_1 < [Premier League]
+(with* 51 points)
+followed < by < Arsenal
+(with_1* 46 points_1)
+Manchester_1 < (in_1* third place)
+(with_2* 45) and
+(Chelsea > is_1 < fourth with_3 41 points_2)

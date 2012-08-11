@@ -1,0 +1,13 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Law on land ownership @: The Ministry strives to inform the public on the subject . ||| Law on land ownership @: The Ministry strives to inform the public on the subject .
+
+% TEXT
+Law on land ownership @: The Ministry strives to inform the public on_1 the_1 subject .
+
+% ANNO
+Law < on < (land ownership*)
+(The Ministry*) > strives < to < inform < (the > public)
+inform < (on_1* (the_1 >subject))

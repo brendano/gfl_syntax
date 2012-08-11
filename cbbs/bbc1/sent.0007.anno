@@ -1,0 +1,14 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+United scored three total including two from Dimitar Bertatov and one scored by Javier Hernandez . ||| United scored three total including two from Dimitar Bertatov and one scored by Javier Hernandez .
+
+% TEXT
+United scored three total including two from Dimitar Bertatov and one scored_1 by Javier Hernandez .
+
+% ANNO
+United > scored < ((three* total)* including < $x)
+(two < from < [Dimitar Bertatov])
+(one < scored_1 < by < [Javier Hernandez])
+$x :: {one two} :: and

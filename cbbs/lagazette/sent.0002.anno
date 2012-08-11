@@ -1,0 +1,17 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Information on land ownership and comparison of the approaches to land management between different state agencies and the city agency in charge of the land ownership or the Bureau of Land Ownership ( BIF ) . ||| Information on land ownership and comparison of the approaches to land management between different state agencies and the city agency in charge of the land ownership or the Bureau of Land Ownership ( BIF ) .
+
+% TEXT
+Information on land ownership and comparison of the approaches to land_1 management between different state agencies and_1 the_1 city agency in charge of_1 the_2 land_2 ownership_1 or the_3 Bureau of_2 Land Ownership ( BIF ) .
+
+% ANNO
+Information < on < (land ownership*) and
+comparison < (of* the > approaches < to (land_1 management*))
+$x :: {Information comparison} :: and
+$y :: {agencies agency} :: and_1
+(between < $x)
+(different state agencies*)
+(the_1 (city > agency)* [in charge of_1] < (the_2 land_2 ownership_1*) or (the_3 [Bureau of_2 Land Ownership]* BIF))

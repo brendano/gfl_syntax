@@ -1,0 +1,13 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Nigeria will meet with the winning team of the half final game between South Africa and Equatorial Guinea , the current holder of the title ( Cup ) . ||| Nigeria will meet with the winning team of the half final game between South Africa and Equatorial Guinea , the current holder of the title ( Cup ) .
+
+% TEXT
+Nigeria will meet with the winning team of the_1 half final game between South Africa and Equatorial Guinea , the_2 current holder of_1 the_3 title ( Cup ) .
+
+% ANNO
+Nigeria > will < meet < (with* {the winning} > team < (of* the_1 [half final] > game < between < $x))
+$x :: {[South Africa] [Equatorial Guinea]} :: and
+[Equatorial Guinea] < (the_2 current holder* (of_1* (the_3 title Cup)) )

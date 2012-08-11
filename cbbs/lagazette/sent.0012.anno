@@ -1,0 +1,12 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The seminar is supposed to fix the issues encountered by all the different agencies involved in land ownership . ||| The seminar is supposed to fix the issues encountered by all the different agencies involved in land ownership .
+
+% TEXT
+The seminar is supposed to fix the issues encountered by all the_1 different agencies involved in land ownership .
+
+% ANNO
+(The seminar*) > is < [supposed to] < fix < issues
+the > issues < encountered < by < (all the_1 different agencies*) involved < in < (land ownership*)

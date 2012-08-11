@@ -1,0 +1,13 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Helen Ukaonu and Ugochi Oparanozie marked the two additional goals in the game that opposed them to Cameroon . ||| Helen Ukaonu and Ugochi Oparanozie marked the two additional goals in the game that opposed them to Cameroon .
+
+% TEXT
+Helen Ukaonu and Ugochi Oparanozie marked the two additional goals in the_1 game that opposed them to Cameroon .
+
+% ANNO
+$x :: {[Helen Ukaonu] [Ugochi Oparanozie]} :: and
+$x > marked < ((the two additional goals*) (in* the_1 game) that opposed < them (to* Cameroon))
+

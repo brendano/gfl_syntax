@@ -1,0 +1,13 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+For a second time , Nigerian forward Perpetua Nkwocha scored 3 goals during the ongoing soccer championship in South Africa . ||| For a second time , Nigerian forward Perpetua Nkwocha scored 3 goals during the ongoing soccer championship in South Africa .
+
+% TEXT
+For a second time , Nigerian forward Perpetua Nkwocha scored 3 goals during the ongoing soccer championship in South Africa .
+
+% ANNO
+(For* a second time) > scored
+(Nigerian forward* [Perpetua Nkwocha]) > scored < (3 > goals)
+scored < during < (the ongoing soccer championship*) < in < [South Africa]

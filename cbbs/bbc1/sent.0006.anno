@@ -1,0 +1,11 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Rafael 's injury caused a ten @-@ minute overtime in the Blackpool game , after United made a tie of two goals . ||| Rafael 's injury caused a ten @-@ minute overtime in the Blackpool game , after United made a tie of two goals .
+
+% TEXT
+Rafael 's injury caused a ten @-@ minute overtime in the Blackpool game , after United made a_1 tie of two goals .
+
+% ANNO
+(Rafael 's injury*) > caused < (a ten @-@ minute overtime* (in* the Blackpool game) (after* (United > made < (a_1 tie* (of two goals*)))))

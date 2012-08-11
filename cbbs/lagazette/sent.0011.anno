@@ -1,0 +1,11 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+This happens in 13 cities . ||| This happens in 13 cities .
+
+% TEXT
+This happens in 13 cities .
+
+% ANNO
+This > happens < (in < (13 > cities))

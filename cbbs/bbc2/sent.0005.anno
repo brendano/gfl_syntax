@@ -1,0 +1,11 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The only goal scored by Cameroon was authored by Jeannette Ngock . ||| The only goal scored by Cameroon was authored by Jeannette Ngock .
+
+% TEXT
+The only goal scored by Cameroon was authored by_1 Jeannette Ngock .
+
+% ANNO
+(The only goal* (scored* by Cameroon)) > was < authored < by_1 < [Jeannette Ngock]

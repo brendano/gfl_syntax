@@ -1,0 +1,15 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+As far as we know , ignorance of the land ownership law and the ensuing responsibilities are obstacles to running the BIF smoothly . ||| As far as we know , ignorance of the land ownership law and the ensuing responsibilities are obstacles to running the BIF smoothly .
+
+% TEXT
+As far as we know , ignorance of the land ownership law and the_1 ensuing responsibilities are obstacles to running the_2 BIF smoothly .
+
+% ANNO
+(As far as we > know)
+(ignorance* of the land ownership law)
+(the_1 ensuing responsibilities*)
+$x :: {ignorance responsibilities} :: and
+$x > are < (obstacles* (to < running < (the_2 BIF*) smoothly))

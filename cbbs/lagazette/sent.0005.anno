@@ -1,0 +1,14 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Within the Analamanga region , Ankazobe district and part of Anbohidratrimo district have already completed the seminar . ||| Within the Analamanga region , Ankazobe district and part of Anbohidratrimo district have already completed the seminar .
+
+% TEXT
+Within the Analamanga region , Ankazobe district and part of Anbohidratrimo district_1 have already completed the_1 seminar .
+
+% ANNO
+(Ankazobe district*)
+(part* of Anbohidratrimo district_1)
+$x :: {district part} :: and
+(Within* (the Analamanga region*)) $x > have < ( already > completed) < (the_1 >seminar)

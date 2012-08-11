@@ -1,0 +1,13 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Thus , the Nigerian team qualified for the final championship games for the Women World Cup to be held in Germany next year . ||| Thus , the Nigerian team qualified for the final championship games for the Women World Cup to be held in Germany next year .
+
+% TEXT
+Thus , the Nigerian team qualified for the_1 final championship games for_1 the_2 Women World Cup to be held in Germany next year .
+
+% ANNO
+Thus
+(the Nigerian team*) > qualified < for < (the_1 > (final championship games*) < for_1 <(the_2 > [Women World Cup]) to < be < held < (in < Germany))
+held < (next > year)

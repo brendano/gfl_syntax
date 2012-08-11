@@ -1,0 +1,15 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Twenty @-@ year @-@ old Rafael was released from hospital and went back to Manchester with his teammates . ||| Twenty @-@ year @-@ old Rafael was released from hospital and went back to Manchester with his teammates .
+
+% TEXT
+Twenty @-@ year @-@_1 old Rafael was released from hospital and went back to Manchester with his teammates .
+
+% ANNO
+[Twenty @-@ year @-@_1 old] > Rafael > $x
+was < released < (from hospital)
+$x :: {was went} :: and
+went < (back to* Manchester)
+went < (with* his teammates)

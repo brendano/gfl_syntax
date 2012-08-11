@@ -1,0 +1,11 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Manchester 's stopper , Rafael , will n't play the FA game in England between Manchester and Southampton due to his head injury . ||| Manchester 's stopper , Rafael , will n't play the FA game in England between Manchester and Southampton due to his head injury .
+
+% TEXT
+Manchester 's stopper , Rafael ,_1 will n't play the FA game in England between Manchester_1 and Southampton due to his head injury .
+
+% ANNO
+(Manchester 's stopper* Rafael) > (will < n't) < play (the FA game (in* England) (between* Manchester_1 and Southampton)) ([due to]* his > (head > injury))

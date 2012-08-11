@@ -1,0 +1,14 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The "@ National Land Program @" ( PNF ) and the Department of Development from the Ministry of Territorial Planning and Decentralization are organizing this seminar that started yesterday , Tuesday , July 5 , and that will end today . ||| The "@ National Land Program @" ( PNF ) and the Department of Development from the Ministry of Territorial Planning and Decentralization are organizing this seminar that started yesterday , Tuesday , July 5 , and that will end today .
+
+% TEXT
+The "@ National Land Program @" ( PNF ) and the Department of Development from the_1 Ministry of_1 Territorial Planning and_1 Decentralization are organizing this seminar that started yesterday , Tuesday ,_1 July 5 ,_2 and_2 that_1 will end today .
+
+% ANNO
+The > [National Land Program]
+the > [Department of Development] < from < (the_1 > [Ministry of_1 Territorial Planning and_1 Decentralization])
+$x :: {[Department of Development] [National Land Program]} :: and
+$x > are < organizing < (this seminar* that started < (yesterday* Tuesday July 5) and_2 that_1 will < end < today)

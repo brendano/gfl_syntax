@@ -1,0 +1,11 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The public information about the PNF 's role in the land ownership law and the harmonization of all agencies ' approaches to land management are ongoing . ||| The public information about the PNF 's role in the land ownership law and the harmonization of all agencies ' approaches to land management are ongoing .
+
+% TEXT
+The public information about the PNF 's role in the_1 land ownership law and the_2 harmonization of all agencies ' approaches to land_1 management are ongoing .
+
+% ANNO
+[The public information about the PNF 's role in the_1 land ownership law and the_2 harmonization of all agencies ' approaches to land_1 management are ongoing]

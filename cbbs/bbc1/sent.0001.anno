@@ -1,0 +1,11 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+Rafael will n't play in the Manchester versus Southampton game . ||| Rafael will n't play in the Manchester versus Southampton game .
+
+% TEXT
+Rafael will n't play in the Manchester versus Southampton game .
+
+% ANNO
+Rafael > (will < n't) < play < (in* the (Manchester versus Southampton) > game)

@@ -1,0 +1,17 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The Brazilian Rafael collided head @-@ on with Marlon Harewood of Blackpool in the Tuesday game after scoring 3 @-@ 2 , and was immediately taken to the hospital for evaluation . ||| The Brazilian Rafael collided head @-@ on with Marlon Harewood of Blackpool in the Tuesday game after scoring 3 @-@ 2 , and was immediately taken to the hospital for evaluation .
+
+% TEXT
+The Brazilian Rafael collided head @-@ on with Marlon Harewood of Blackpool in the Tuesday game after scoring 3 @-@_1 2 , and was immediately taken to the_1 hospital for evaluation .
+
+% ANNO
+(The Brazilian Rafael*) > collided < [head @-@ on]
+collided < (with* [Marlon Harewood] of Blackpool)
+collided < (in* the Tuesday game)
+collided < (after* scoring < [3 @-@_1 2])
+$x :: {collided was} :: and
+{was immediately} > taken < (to* the_1 hospital)
+taken < (for < evaluation)

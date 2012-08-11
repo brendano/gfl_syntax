@@ -1,0 +1,14 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+That was the main topic of the seminar organized in Anjozorobe district and gathering any department involved in land ownership @: the justice , the Bianco , the police , all the mayors and city councils in the district , the state agencies , and the Bureau of Land Ownership ( BIF ) . ||| That was the main topic of the seminar organized in Anjozorobe district and gathering any department involved in land ownership @: the justice , the Bianco , the police , all the mayors and city councils in the district , the state agencies , and the Bureau of Land Ownership ( BIF ) .
+
+% TEXT
+That was the main topic of the_1 seminar organized in Anjozorobe district and gathering any department involved in_1 land ownership @: the_2 justice , the_3 Bianco ,_1 the_4 police ,_2 all the_5 mayors and_1 city councils in_2 the_6 district_1 ,_3 the_7 state agencies ,_4 and_2 the_8 Bureau of_1 Land Ownership ( BIF ) .
+
+% ANNO
+That > was < (the main > topic < of < (the_1 seminar*) organized < in < [Anjozorobe district]) and gathering < (any department involved in_1 < (land ownership*))
+(the_2 justice*) (the_3 Bianco*) (the_4 police*) (all the_5 mayors*) and_1 (city councils*)
+(in_2* the_6 district_1 (the_7 state agencies*) and_2 the_8 > [Bureau of_1 Land Ownership])
+

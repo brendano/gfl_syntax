@@ -1,0 +1,12 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+In Anjozorobe district , 11 out of the 18 cities currently have a Bureau of Land Ownership . ||| In Anjozorobe district , 11 out of the 18 cities currently have a Bureau of Land Ownership .
+
+% TEXT
+In Anjozorobe district , 11 out of the 18 cities currently have a Bureau of_1 Land Ownership .
+
+% ANNO
+(In Anjozorobe district*) (11* out of the 18 cities) currently > have < (a > [Bureau of_1 Land Ownership])
+11 > have

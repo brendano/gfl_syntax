@@ -1,0 +1,12 @@
+% SOURCE
+file=sample.tok
+
+% ORIG
+The issue in the Anjozorobe district is incomplete cadastral surveys , which prevent the BIF from issuing some of the real estate registers . ||| The issue in the Anjozorobe district is incomplete cadastral surveys , which prevent the BIF from issuing some of the real estate registers .
+
+% TEXT
+The issue in the Anjozorobe district is incomplete cadastral surveys , which prevent the_1 BIF from issuing some of the_2 real estate registers .
+
+% ANNO
+(The issue* in < the < (Anjozorobe district*)) > is < (incomplete cadastral surveys* (which prevent < (the_1 BIF*)))
+prevent < (from < issuing < (some* of ({the_2 [real estate]} > registers)))
