@@ -1,4 +1,4 @@
-# $ANTLR 3.0.1 psf.g 2012-02-03 23:04:11
+# $ANTLR 3.0.1 psf.g 2012-08-13 16:03:20
 
 from antlr3 import *
 from antlr3.compat import set, frozenset
@@ -8,30 +8,31 @@ from antlr3.compat import set, frozenset
 HIDDEN = BaseRecognizer.HIDDEN
 
 # token types
-SLARROW=19
-RRB=11
+SLARROW=20
+RRB=12
 RARROW=7
+HEAD=11
 LARROW=6
 LRB=10
-RCB=14
-Tokens=26
+RCB=15
+Tokens=27
 EOF=-1
-EATWS=24
-SRARROW=20
-TOKEN=12
-USP=25
+EATWS=25
+SRARROW=21
+TOKEN=13
+USP=26
 DCOLON=9
-WS=23
+WS=24
 NEWLINE=4
-LCB=13
+LCB=14
 DOLLARTOKEN=8
-RSB=16
-NL=21
-VOCTAG=17
+RSB=17
+NL=22
+VOCTAG=18
 EQ=5
-COMMENT=22
-INTTAG=18
-LSB=15
+COMMENT=23
+INTTAG=19
+LSB=16
 
 class psfLexer(Lexer):
 
@@ -55,14 +56,36 @@ class psfLexer(Lexer):
 
 
 
+    # $ANTLR start HEAD
+    def mHEAD(self, ):
+
+        try:
+            self.type = HEAD
+
+            # psf.g:57:6: ( '*' )
+            # psf.g:57:8: '*'
+            self.match(u'*')
+
+
+
+
+
+        finally:
+
+            pass
+
+    # $ANTLR end HEAD
+
+
+
     # $ANTLR start LSB
     def mLSB(self, ):
 
         try:
             self.type = LSB
 
-            # psf.g:57:6: ( '[' )
-            # psf.g:57:9: '['
+            # psf.g:59:6: ( '[' )
+            # psf.g:59:9: '['
             self.match(u'[')
 
 
@@ -83,8 +106,8 @@ class psfLexer(Lexer):
         try:
             self.type = RSB
 
-            # psf.g:58:6: ( ']' )
-            # psf.g:58:9: ']'
+            # psf.g:60:6: ( ']' )
+            # psf.g:60:9: ']'
             self.match(u']')
 
 
@@ -105,8 +128,8 @@ class psfLexer(Lexer):
         try:
             self.type = LCB
 
-            # psf.g:60:6: ( '{' )
-            # psf.g:60:9: '{'
+            # psf.g:62:6: ( '{' )
+            # psf.g:62:9: '{'
             self.match(u'{')
 
 
@@ -127,8 +150,8 @@ class psfLexer(Lexer):
         try:
             self.type = RCB
 
-            # psf.g:61:6: ( '}' )
-            # psf.g:61:9: '}'
+            # psf.g:63:6: ( '}' )
+            # psf.g:63:9: '}'
             self.match(u'}')
 
 
@@ -149,8 +172,8 @@ class psfLexer(Lexer):
         try:
             self.type = LRB
 
-            # psf.g:63:6: ( '(' )
-            # psf.g:63:9: '('
+            # psf.g:65:6: ( '(' )
+            # psf.g:65:9: '('
             self.match(u'(')
 
 
@@ -171,8 +194,8 @@ class psfLexer(Lexer):
         try:
             self.type = RRB
 
-            # psf.g:64:6: ( ')' )
-            # psf.g:64:9: ')'
+            # psf.g:66:6: ( ')' )
+            # psf.g:66:9: ')'
             self.match(u')')
 
 
@@ -193,8 +216,8 @@ class psfLexer(Lexer):
         try:
             self.type = DCOLON
 
-            # psf.g:66:8: ( '::' )
-            # psf.g:66:10: '::'
+            # psf.g:68:8: ( '::' )
+            # psf.g:68:10: '::'
             self.match("::")
 
 
@@ -214,8 +237,8 @@ class psfLexer(Lexer):
     def mSLARROW(self, ):
 
         try:
-            # psf.g:68:17: ( ( '<' ) )
-            # psf.g:68:19: ( '<' )
+            # psf.g:70:17: ( ( '<' ) )
+            # psf.g:70:19: ( '<' )
             if self.input.LA(1) == u'<':
                 self.input.consume();
 
@@ -241,8 +264,8 @@ class psfLexer(Lexer):
     def mSRARROW(self, ):
 
         try:
-            # psf.g:69:17: ( ( '>' ) )
-            # psf.g:69:19: ( '>' )
+            # psf.g:71:17: ( ( '>' ) )
+            # psf.g:71:19: ( '>' )
             if self.input.LA(1) == u'>':
                 self.input.consume();
 
@@ -270,9 +293,9 @@ class psfLexer(Lexer):
         try:
             self.type = RARROW
 
-            # psf.g:71:8: ( ( SRARROW | ( '-' )+ '>' ) )
-            # psf.g:71:10: ( SRARROW | ( '-' )+ '>' )
-            # psf.g:71:10: ( SRARROW | ( '-' )+ '>' )
+            # psf.g:73:8: ( ( SRARROW | ( '-' )+ '>' ) )
+            # psf.g:73:10: ( SRARROW | ( '-' )+ '>' )
+            # psf.g:73:10: ( SRARROW | ( '-' )+ '>' )
             alt2 = 2
             LA2_0 = self.input.LA(1)
 
@@ -281,19 +304,19 @@ class psfLexer(Lexer):
             elif (LA2_0 == u'-') :
                 alt2 = 2
             else:
-                nvae = NoViableAltException("71:10: ( SRARROW | ( '-' )+ '>' )", 2, 0, self.input)
+                nvae = NoViableAltException("73:10: ( SRARROW | ( '-' )+ '>' )", 2, 0, self.input)
 
                 raise nvae
 
             if alt2 == 1:
-                # psf.g:71:11: SRARROW
+                # psf.g:73:11: SRARROW
                 self.mSRARROW()
 
 
 
             elif alt2 == 2:
-                # psf.g:71:19: ( '-' )+ '>'
-                # psf.g:71:19: ( '-' )+
+                # psf.g:73:19: ( '-' )+ '>'
+                # psf.g:73:19: ( '-' )+
                 cnt1 = 0
                 while True: #loop1
                     alt1 = 2
@@ -304,7 +327,7 @@ class psfLexer(Lexer):
 
 
                     if alt1 == 1:
-                        # psf.g:71:19: '-'
+                        # psf.g:73:19: '-'
                         self.match(u'-')
 
 
@@ -342,9 +365,9 @@ class psfLexer(Lexer):
         try:
             self.type = LARROW
 
-            # psf.g:72:8: ( ( SLARROW | '<' ( '-' )+ ) )
-            # psf.g:72:10: ( SLARROW | '<' ( '-' )+ )
-            # psf.g:72:10: ( SLARROW | '<' ( '-' )+ )
+            # psf.g:74:8: ( ( SLARROW | '<' ( '-' )+ ) )
+            # psf.g:74:10: ( SLARROW | '<' ( '-' )+ )
+            # psf.g:74:10: ( SLARROW | '<' ( '-' )+ )
             alt4 = 2
             LA4_0 = self.input.LA(1)
 
@@ -356,21 +379,21 @@ class psfLexer(Lexer):
                 else:
                     alt4 = 1
             else:
-                nvae = NoViableAltException("72:10: ( SLARROW | '<' ( '-' )+ )", 4, 0, self.input)
+                nvae = NoViableAltException("74:10: ( SLARROW | '<' ( '-' )+ )", 4, 0, self.input)
 
                 raise nvae
 
             if alt4 == 1:
-                # psf.g:72:11: SLARROW
+                # psf.g:74:11: SLARROW
                 self.mSLARROW()
 
 
 
             elif alt4 == 2:
-                # psf.g:72:19: '<' ( '-' )+
+                # psf.g:74:19: '<' ( '-' )+
                 self.match(u'<')
 
-                # psf.g:72:22: ( '-' )+
+                # psf.g:74:22: ( '-' )+
                 cnt3 = 0
                 while True: #loop3
                     alt3 = 2
@@ -381,7 +404,7 @@ class psfLexer(Lexer):
 
 
                     if alt3 == 1:
-                        # psf.g:72:22: '-'
+                        # psf.g:74:22: '-'
                         self.match(u'-')
 
 
@@ -417,12 +440,12 @@ class psfLexer(Lexer):
         try:
             self.type = COMMENT
 
-            # psf.g:75:9: ( '//' (~ ( NL ) )* )
-            # psf.g:75:11: '//' (~ ( NL ) )*
+            # psf.g:77:9: ( '//' (~ ( NL ) )* )
+            # psf.g:77:11: '//' (~ ( NL ) )*
             self.match("//")
 
 
-            # psf.g:75:16: (~ ( NL ) )*
+            # psf.g:77:16: (~ ( NL ) )*
             while True: #loop5
                 alt5 = 2
                 LA5_0 = self.input.LA(1)
@@ -432,7 +455,7 @@ class psfLexer(Lexer):
 
 
                 if alt5 == 1:
-                    # psf.g:75:16: ~ ( NL )
+                    # psf.g:77:16: ~ ( NL )
                     if (u'\u0000' <= self.input.LA(1) <= u'\t') or (u'\u000B' <= self.input.LA(1) <= u'\f') or (u'\u000E' <= self.input.LA(1) <= u'\u2027') or (u'\u202A' <= self.input.LA(1) <= u'\uFFFE'):
                         self.input.consume();
 
@@ -469,9 +492,9 @@ class psfLexer(Lexer):
         try:
             self.type = EATWS
 
-            # psf.g:78:8: ( ( WS )+ )
-            # psf.g:78:10: ( WS )+
-            # psf.g:78:10: ( WS )+
+            # psf.g:80:8: ( ( WS )+ )
+            # psf.g:80:10: ( WS )+
+            # psf.g:80:10: ( WS )+
             cnt6 = 0
             while True: #loop6
                 alt6 = 2
@@ -482,7 +505,7 @@ class psfLexer(Lexer):
 
 
                 if alt6 == 1:
-                    # psf.g:78:11: WS
+                    # psf.g:80:11: WS
                     self.mWS()
 
 
@@ -516,8 +539,8 @@ class psfLexer(Lexer):
     def mWS(self, ):
 
         try:
-            # psf.g:80:12: ( ( '\\u0009' | '\\u000b' | '\\u000c' | '\\u0020' | '\\u00a0' | USP ) )
-            # psf.g:80:14: ( '\\u0009' | '\\u000b' | '\\u000c' | '\\u0020' | '\\u00a0' | USP )
+            # psf.g:82:12: ( ( '\\u0009' | '\\u000b' | '\\u000c' | '\\u0020' | '\\u00a0' | USP ) )
+            # psf.g:82:14: ( '\\u0009' | '\\u000b' | '\\u000c' | '\\u0020' | '\\u00a0' | USP )
             if self.input.LA(1) == u'\t' or (u'\u000B' <= self.input.LA(1) <= u'\f') or self.input.LA(1) == u' ' or self.input.LA(1) == u'\u00A0' or self.input.LA(1) == u'\u1680' or (u'\u2000' <= self.input.LA(1) <= u'\u200B') or self.input.LA(1) == u'\u202F' or self.input.LA(1) == u'\u3000':
                 self.input.consume();
 
@@ -545,8 +568,8 @@ class psfLexer(Lexer):
         try:
             self.type = EQ
 
-            # psf.g:87:4: ( '=' )
-            # psf.g:87:6: '='
+            # psf.g:89:4: ( '=' )
+            # psf.g:89:6: '='
             self.match(u'=')
 
 
@@ -567,9 +590,9 @@ class psfLexer(Lexer):
         try:
             self.type = NEWLINE
 
-            # psf.g:89:9: ( ( NL )+ )
-            # psf.g:89:11: ( NL )+
-            # psf.g:89:11: ( NL )+
+            # psf.g:91:9: ( ( NL )+ )
+            # psf.g:91:11: ( NL )+
+            # psf.g:91:11: ( NL )+
             cnt7 = 0
             while True: #loop7
                 alt7 = 2
@@ -580,7 +603,7 @@ class psfLexer(Lexer):
 
 
                 if alt7 == 1:
-                    # psf.g:89:12: NL
+                    # psf.g:91:12: NL
                     self.mNL()
 
 
@@ -614,8 +637,8 @@ class psfLexer(Lexer):
     def mNL(self, ):
 
         try:
-            # psf.g:91:13: ( ( '\\u000a' | '\\u000d' | '\\u2028' | '\\u2029' ) )
-            # psf.g:91:15: ( '\\u000a' | '\\u000d' | '\\u2028' | '\\u2029' )
+            # psf.g:93:13: ( ( '\\u000a' | '\\u000d' | '\\u2028' | '\\u2029' ) )
+            # psf.g:93:15: ( '\\u000a' | '\\u000d' | '\\u2028' | '\\u2029' )
             if self.input.LA(1) == u'\n' or self.input.LA(1) == u'\r' or (u'\u2028' <= self.input.LA(1) <= u'\u2029'):
                 self.input.consume();
 
@@ -641,7 +664,7 @@ class psfLexer(Lexer):
     def mUSP(self, ):
 
         try:
-            # psf.g:93:13: ( '\\u1680' | '\\u2000' | '\\u2001' | '\\u2002' | '\\u2003' | '\\u2004' | '\\u2005' | '\\u2006' | '\\u2007' | '\\u2008' | '\\u2009' | '\\u200A' | '\\u200B' | '\\u202F' | '\\u3000' )
+            # psf.g:95:13: ( '\\u1680' | '\\u2000' | '\\u2001' | '\\u2002' | '\\u2003' | '\\u2004' | '\\u2005' | '\\u2006' | '\\u2007' | '\\u2008' | '\\u2009' | '\\u200A' | '\\u200B' | '\\u202F' | '\\u3000' )
             # psf.g:
             if self.input.LA(1) == u'\u1680' or (u'\u2000' <= self.input.LA(1) <= u'\u200B') or self.input.LA(1) == u'\u202F' or self.input.LA(1) == u'\u3000':
                 self.input.consume();
@@ -670,11 +693,11 @@ class psfLexer(Lexer):
         try:
             self.type = VOCTAG
 
-            # psf.g:111:9: ( '\\\\' ( WS )* ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' ) )
-            # psf.g:111:11: '\\\\' ( WS )* ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )
+            # psf.g:113:9: ( '\\\\' ( WS )* ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' ) )
+            # psf.g:113:11: '\\\\' ( WS )* ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )
             self.match(u'\\')
 
-            # psf.g:111:16: ( WS )*
+            # psf.g:113:16: ( WS )*
             while True: #loop8
                 alt8 = 2
                 LA8_0 = self.input.LA(1)
@@ -684,7 +707,7 @@ class psfLexer(Lexer):
 
 
                 if alt8 == 1:
-                    # psf.g:111:16: WS
+                    # psf.g:113:16: WS
                     self.mWS()
 
 
@@ -693,7 +716,7 @@ class psfLexer(Lexer):
                     break #loop8
 
 
-            # psf.g:111:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )
+            # psf.g:113:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )
             alt9 = 6
             LA9_0 = self.input.LA(1)
 
@@ -711,7 +734,7 @@ class psfLexer(Lexer):
                         else:
                             alt9 = 3
                     else:
-                        nvae = NoViableAltException("111:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )", 9, 3, self.input)
+                        nvae = NoViableAltException("113:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )", 9, 3, self.input)
 
                         raise nvae
 
@@ -731,52 +754,52 @@ class psfLexer(Lexer):
                         else:
                             alt9 = 4
                     else:
-                        nvae = NoViableAltException("111:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )", 9, 5, self.input)
+                        nvae = NoViableAltException("113:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )", 9, 5, self.input)
 
                         raise nvae
 
                 else:
                     alt9 = 2
             else:
-                nvae = NoViableAltException("111:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )", 9, 0, self.input)
+                nvae = NoViableAltException("113:20: ( 'V' | 'v' | 'VOC' | 'voc' | 'VOCATIVE' | 'vocative' )", 9, 0, self.input)
 
                 raise nvae
 
             if alt9 == 1:
-                # psf.g:111:21: 'V'
+                # psf.g:113:21: 'V'
                 self.match(u'V')
 
 
 
             elif alt9 == 2:
-                # psf.g:111:25: 'v'
+                # psf.g:113:25: 'v'
                 self.match(u'v')
 
 
 
             elif alt9 == 3:
-                # psf.g:111:29: 'VOC'
+                # psf.g:113:29: 'VOC'
                 self.match("VOC")
 
 
 
 
             elif alt9 == 4:
-                # psf.g:111:35: 'voc'
+                # psf.g:113:35: 'voc'
                 self.match("voc")
 
 
 
 
             elif alt9 == 5:
-                # psf.g:111:41: 'VOCATIVE'
+                # psf.g:113:41: 'VOCATIVE'
                 self.match("VOCATIVE")
 
 
 
 
             elif alt9 == 6:
-                # psf.g:111:52: 'vocative'
+                # psf.g:113:52: 'vocative'
                 self.match("vocative")
 
 
@@ -801,11 +824,11 @@ class psfLexer(Lexer):
         try:
             self.type = INTTAG
 
-            # psf.g:113:9: ( '\\\\' ( WS )* ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' ) )
-            # psf.g:113:11: '\\\\' ( WS )* ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )
+            # psf.g:115:9: ( '\\\\' ( WS )* ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' ) )
+            # psf.g:115:11: '\\\\' ( WS )* ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )
             self.match(u'\\')
 
-            # psf.g:113:16: ( WS )*
+            # psf.g:115:16: ( WS )*
             while True: #loop10
                 alt10 = 2
                 LA10_0 = self.input.LA(1)
@@ -815,7 +838,7 @@ class psfLexer(Lexer):
 
 
                 if alt10 == 1:
-                    # psf.g:113:16: WS
+                    # psf.g:115:16: WS
                     self.mWS()
 
 
@@ -824,7 +847,7 @@ class psfLexer(Lexer):
                     break #loop10
 
 
-            # psf.g:113:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )
+            # psf.g:115:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )
             alt11 = 6
             LA11_0 = self.input.LA(1)
 
@@ -842,7 +865,7 @@ class psfLexer(Lexer):
                         else:
                             alt11 = 3
                     else:
-                        nvae = NoViableAltException("113:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )", 11, 3, self.input)
+                        nvae = NoViableAltException("115:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )", 11, 3, self.input)
 
                         raise nvae
 
@@ -862,52 +885,52 @@ class psfLexer(Lexer):
                         else:
                             alt11 = 4
                     else:
-                        nvae = NoViableAltException("113:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )", 11, 5, self.input)
+                        nvae = NoViableAltException("115:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )", 11, 5, self.input)
 
                         raise nvae
 
                 else:
                     alt11 = 2
             else:
-                nvae = NoViableAltException("113:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )", 11, 0, self.input)
+                nvae = NoViableAltException("115:20: ( 'I' | 'i' | 'INT' | 'int' | 'INTERJECTION' | 'interjection' )", 11, 0, self.input)
 
                 raise nvae
 
             if alt11 == 1:
-                # psf.g:113:21: 'I'
+                # psf.g:115:21: 'I'
                 self.match(u'I')
 
 
 
             elif alt11 == 2:
-                # psf.g:113:25: 'i'
+                # psf.g:115:25: 'i'
                 self.match(u'i')
 
 
 
             elif alt11 == 3:
-                # psf.g:113:29: 'INT'
+                # psf.g:115:29: 'INT'
                 self.match("INT")
 
 
 
 
             elif alt11 == 4:
-                # psf.g:113:35: 'int'
+                # psf.g:115:35: 'int'
                 self.match("int")
 
 
 
 
             elif alt11 == 5:
-                # psf.g:113:41: 'INTERJECTION'
+                # psf.g:115:41: 'INTERJECTION'
                 self.match("INTERJECTION")
 
 
 
 
             elif alt11 == 6:
-                # psf.g:113:56: 'interjection'
+                # psf.g:115:56: 'interjection'
                 self.match("interjection")
 
 
@@ -932,8 +955,8 @@ class psfLexer(Lexer):
         try:
             self.type = DOLLARTOKEN
 
-            # psf.g:116:2: ( '$' ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )* )
-            # psf.g:116:4: '$' ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
+            # psf.g:118:2: ( '$' ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )* )
+            # psf.g:118:4: '$' ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
             self.match(u'$')
 
             if (u'A' <= self.input.LA(1) <= u'Z') or self.input.LA(1) == u'_' or (u'a' <= self.input.LA(1) <= u'z'):
@@ -945,7 +968,7 @@ class psfLexer(Lexer):
                 raise mse
 
 
-            # psf.g:116:30: ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
+            # psf.g:118:30: ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
             while True: #loop12
                 alt12 = 2
                 LA12_0 = self.input.LA(1)
@@ -989,21 +1012,21 @@ class psfLexer(Lexer):
         try:
             self.type = TOKEN
 
-            # psf.g:118:9: ( (~ ( NL | WS | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW ) )+ )
-            # psf.g:118:11: (~ ( NL | WS | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW ) )+
-            # psf.g:118:11: (~ ( NL | WS | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW ) )+
+            # psf.g:120:9: ( (~ ( NL | WS | HEAD | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW ) )+ )
+            # psf.g:120:11: (~ ( NL | WS | HEAD | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW ) )+
+            # psf.g:120:11: (~ ( NL | WS | HEAD | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW ) )+
             cnt13 = 0
             while True: #loop13
                 alt13 = 2
                 LA13_0 = self.input.LA(1)
 
-                if ((u'\u0000' <= LA13_0 <= u'\b') or (u'\u000E' <= LA13_0 <= u'\u001F') or (u'!' <= LA13_0 <= u'\'') or (u'*' <= LA13_0 <= u';') or LA13_0 == u'=' or (u'?' <= LA13_0 <= u'Z') or LA13_0 == u'\\' or (u'^' <= LA13_0 <= u'z') or LA13_0 == u'|' or (u'~' <= LA13_0 <= u'\u009F') or (u'\u00A1' <= LA13_0 <= u'\u167F') or (u'\u1681' <= LA13_0 <= u'\u1FFF') or (u'\u200C' <= LA13_0 <= u'\u2027') or (u'\u202A' <= LA13_0 <= u'\u202E') or (u'\u2030' <= LA13_0 <= u'\u2FFF') or (u'\u3001' <= LA13_0 <= u'\uFFFE')) :
+                if ((u'\u0000' <= LA13_0 <= u'\b') or (u'\u000E' <= LA13_0 <= u'\u001F') or (u'!' <= LA13_0 <= u'\'') or (u'+' <= LA13_0 <= u';') or LA13_0 == u'=' or (u'?' <= LA13_0 <= u'Z') or LA13_0 == u'\\' or (u'^' <= LA13_0 <= u'z') or LA13_0 == u'|' or (u'~' <= LA13_0 <= u'\u009F') or (u'\u00A1' <= LA13_0 <= u'\u167F') or (u'\u1681' <= LA13_0 <= u'\u1FFF') or (u'\u200C' <= LA13_0 <= u'\u2027') or (u'\u202A' <= LA13_0 <= u'\u202E') or (u'\u2030' <= LA13_0 <= u'\u2FFF') or (u'\u3001' <= LA13_0 <= u'\uFFFE')) :
                     alt13 = 1
 
 
                 if alt13 == 1:
-                    # psf.g:118:11: ~ ( NL | WS | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW )
-                    if (u'\u0000' <= self.input.LA(1) <= u'\b') or (u'\u000E' <= self.input.LA(1) <= u'\u001F') or (u'!' <= self.input.LA(1) <= u'\'') or (u'*' <= self.input.LA(1) <= u';') or self.input.LA(1) == u'=' or (u'?' <= self.input.LA(1) <= u'Z') or self.input.LA(1) == u'\\' or (u'^' <= self.input.LA(1) <= u'z') or self.input.LA(1) == u'|' or (u'~' <= self.input.LA(1) <= u'\u009F') or (u'\u00A1' <= self.input.LA(1) <= u'\u167F') or (u'\u1681' <= self.input.LA(1) <= u'\u1FFF') or (u'\u200C' <= self.input.LA(1) <= u'\u2027') or (u'\u202A' <= self.input.LA(1) <= u'\u202E') or (u'\u2030' <= self.input.LA(1) <= u'\u2FFF') or (u'\u3001' <= self.input.LA(1) <= u'\uFFFE'):
+                    # psf.g:120:11: ~ ( NL | WS | HEAD | RCB | RRB | RSB | LCB | LRB | LSB | SRARROW | SLARROW )
+                    if (u'\u0000' <= self.input.LA(1) <= u'\b') or (u'\u000E' <= self.input.LA(1) <= u'\u001F') or (u'!' <= self.input.LA(1) <= u'\'') or (u'+' <= self.input.LA(1) <= u';') or self.input.LA(1) == u'=' or (u'?' <= self.input.LA(1) <= u'Z') or self.input.LA(1) == u'\\' or (u'^' <= self.input.LA(1) <= u'z') or self.input.LA(1) == u'|' or (u'~' <= self.input.LA(1) <= u'\u009F') or (u'\u00A1' <= self.input.LA(1) <= u'\u167F') or (u'\u1681' <= self.input.LA(1) <= u'\u1FFF') or (u'\u200C' <= self.input.LA(1) <= u'\u2027') or (u'\u202A' <= self.input.LA(1) <= u'\u202E') or (u'\u2030' <= self.input.LA(1) <= u'\u2FFF') or (u'\u3001' <= self.input.LA(1) <= u'\uFFFE'):
                         self.input.consume();
 
                     else:
@@ -1037,107 +1060,113 @@ class psfLexer(Lexer):
 
 
     def mTokens(self):
-        # psf.g:1:8: ( LSB | RSB | LCB | RCB | LRB | RRB | DCOLON | RARROW | LARROW | COMMENT | EATWS | EQ | NEWLINE | VOCTAG | INTTAG | DOLLARTOKEN | TOKEN )
-        alt14 = 17
+        # psf.g:1:8: ( HEAD | LSB | RSB | LCB | RCB | LRB | RRB | DCOLON | RARROW | LARROW | COMMENT | EATWS | EQ | NEWLINE | VOCTAG | INTTAG | DOLLARTOKEN | TOKEN )
+        alt14 = 18
         alt14 = self.dfa14.predict(self.input)
         if alt14 == 1:
-            # psf.g:1:10: LSB
-            self.mLSB()
+            # psf.g:1:10: HEAD
+            self.mHEAD()
 
 
 
         elif alt14 == 2:
-            # psf.g:1:14: RSB
-            self.mRSB()
+            # psf.g:1:15: LSB
+            self.mLSB()
 
 
 
         elif alt14 == 3:
-            # psf.g:1:18: LCB
-            self.mLCB()
+            # psf.g:1:19: RSB
+            self.mRSB()
 
 
 
         elif alt14 == 4:
-            # psf.g:1:22: RCB
-            self.mRCB()
+            # psf.g:1:23: LCB
+            self.mLCB()
 
 
 
         elif alt14 == 5:
-            # psf.g:1:26: LRB
-            self.mLRB()
+            # psf.g:1:27: RCB
+            self.mRCB()
 
 
 
         elif alt14 == 6:
-            # psf.g:1:30: RRB
-            self.mRRB()
+            # psf.g:1:31: LRB
+            self.mLRB()
 
 
 
         elif alt14 == 7:
-            # psf.g:1:34: DCOLON
-            self.mDCOLON()
+            # psf.g:1:35: RRB
+            self.mRRB()
 
 
 
         elif alt14 == 8:
-            # psf.g:1:41: RARROW
-            self.mRARROW()
+            # psf.g:1:39: DCOLON
+            self.mDCOLON()
 
 
 
         elif alt14 == 9:
-            # psf.g:1:48: LARROW
-            self.mLARROW()
+            # psf.g:1:46: RARROW
+            self.mRARROW()
 
 
 
         elif alt14 == 10:
-            # psf.g:1:55: COMMENT
-            self.mCOMMENT()
+            # psf.g:1:53: LARROW
+            self.mLARROW()
 
 
 
         elif alt14 == 11:
-            # psf.g:1:63: EATWS
-            self.mEATWS()
+            # psf.g:1:60: COMMENT
+            self.mCOMMENT()
 
 
 
         elif alt14 == 12:
-            # psf.g:1:69: EQ
-            self.mEQ()
+            # psf.g:1:68: EATWS
+            self.mEATWS()
 
 
 
         elif alt14 == 13:
-            # psf.g:1:72: NEWLINE
-            self.mNEWLINE()
+            # psf.g:1:74: EQ
+            self.mEQ()
 
 
 
         elif alt14 == 14:
-            # psf.g:1:80: VOCTAG
-            self.mVOCTAG()
+            # psf.g:1:77: NEWLINE
+            self.mNEWLINE()
 
 
 
         elif alt14 == 15:
-            # psf.g:1:87: INTTAG
-            self.mINTTAG()
+            # psf.g:1:85: VOCTAG
+            self.mVOCTAG()
 
 
 
         elif alt14 == 16:
-            # psf.g:1:94: DOLLARTOKEN
-            self.mDOLLARTOKEN()
+            # psf.g:1:92: INTTAG
+            self.mINTTAG()
 
 
 
         elif alt14 == 17:
-            # psf.g:1:106: TOKEN
+            # psf.g:1:99: DOLLARTOKEN
+            self.mDOLLARTOKEN()
+
+
+
+        elif alt14 == 18:
+            # psf.g:1:111: TOKEN
             self.mTOKEN()
 
 
@@ -1150,140 +1179,139 @@ class psfLexer(Lexer):
     # lookup tables for DFA #14
 
     DFA14_eot = DFA.unpack(
-        u"\7\uffff\1\21\1\uffff\1\21\1\uffff\1\21\1\uffff\1\24\1\uffff\2"
-        u"\21\1\uffff\1\33\1\34\1\uffff\1\37\1\uffff\1\37\2\40\1\44\2\uffff"
-        u"\1\34\1\21\2\uffff\3\21\1\uffff\1\44\2\37\2\40\22\21\2\40\6\21"
-        u"\2\37"
+        u"\10\uffff\1\22\1\uffff\1\22\1\uffff\1\22\1\uffff\1\25\1\uffff\2"
+        u"\22\1\uffff\1\34\1\36\2\uffff\2\40\2\37\1\46\1\uffff\1\36\3\uffff"
+        u"\4\22\1\46\1\uffff\2\40\2\37\20\22\2\40\10\22\2\37"
         )
 
     DFA14_eof = DFA.unpack(
-        u"\106\uffff"
+        u"\107\uffff"
         )
 
     DFA14_min = DFA.unpack(
-        u"\1\0\6\uffff\1\72\1\uffff\1\55\1\uffff\1\57\1\uffff\1\0\1\uffff"
-        u"\1\11\1\101\1\uffff\2\0\1\uffff\1\0\1\11\4\0\2\uffff\1\0\1\124"
-        u"\2\uffff\1\164\1\103\1\143\1\uffff\5\0\1\122\1\162\1\124\1\164"
-        u"\1\112\1\152\1\111\1\151\1\105\1\145\1\126\1\166\1\103\1\143\1"
-        u"\105\1\145\1\124\1\164\2\0\1\111\1\151\1\117\1\157\1\116\1\156"
+        u"\1\0\7\uffff\1\72\1\uffff\1\55\1\uffff\1\57\1\uffff\1\0\1\uffff"
+        u"\1\11\1\101\1\uffff\2\0\1\uffff\1\11\5\0\1\uffff\1\0\3\uffff\1"
+        u"\103\1\143\1\124\1\164\1\0\1\uffff\4\0\1\124\1\164\1\122\1\162"
+        u"\1\111\1\151\1\112\1\152\1\126\1\166\1\105\1\145\1\105\1\145\1"
+        u"\103\1\143\2\0\1\124\1\164\1\111\1\151\1\117\1\157\1\116\1\156"
         u"\2\0"
         )
 
     DFA14_max = DFA.unpack(
-        u"\1\ufffe\6\uffff\1\72\1\uffff\1\76\1\uffff\1\57\1\uffff\1\ufffe"
-        u"\1\uffff\1\u3000\1\172\1\uffff\2\ufffe\1\uffff\1\ufffe\1\u3000"
-        u"\4\ufffe\2\uffff\1\ufffe\1\124\2\uffff\1\164\1\103\1\143\1\uffff"
-        u"\5\ufffe\1\122\1\162\1\124\1\164\1\112\1\152\1\111\1\151\1\105"
-        u"\1\145\1\126\1\166\1\103\1\143\1\105\1\145\1\124\1\164\2\ufffe"
+        u"\1\ufffe\7\uffff\1\72\1\uffff\1\76\1\uffff\1\57\1\uffff\1\ufffe"
+        u"\1\uffff\1\u3000\1\172\1\uffff\2\ufffe\1\uffff\1\u3000\5\ufffe"
+        u"\1\uffff\1\ufffe\3\uffff\1\103\1\143\1\124\1\164\1\ufffe\1\uffff"
+        u"\4\ufffe\1\124\1\164\1\122\1\162\1\111\1\151\1\112\1\152\1\126"
+        u"\1\166\1\105\1\145\1\105\1\145\1\103\1\143\2\ufffe\1\124\1\164"
         u"\1\111\1\151\1\117\1\157\1\116\1\156\2\ufffe"
         )
 
     DFA14_accept = DFA.unpack(
-        u"\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\uffff\1\10\1\uffff\1\11\1\uffff"
-        u"\1\13\1\uffff\1\15\2\uffff\1\21\2\uffff\1\14\6\uffff\1\7\1\12\2"
-        u"\uffff\1\17\1\16\3\uffff\1\20\41\uffff"
+        u"\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\uffff\1\11\1\uffff\1\12"
+        u"\1\uffff\1\14\1\uffff\1\16\2\uffff\1\22\2\uffff\1\15\6\uffff\1"
+        u"\10\1\uffff\1\13\1\20\1\17\5\uffff\1\21\40\uffff"
         )
 
     DFA14_special = DFA.unpack(
-        u"\106\uffff"
+        u"\107\uffff"
         )
 
             
     DFA14_transition = [
-        DFA.unpack(u"\11\21\1\14\1\16\2\14\1\16\22\21\1\14\3\21\1\20\3\21"
-        u"\1\5\1\6\3\21\1\11\1\21\1\13\12\21\1\7\1\21\1\12\1\15\1\10\34\21"
-        u"\1\1\1\17\1\2\35\21\1\3\1\21\1\4\42\21\1\14\u15df\21\1\14\u097f"
-        u"\21\14\14\34\21\2\16\5\21\1\14\u0fd0\21\1\14\ucffe\21"),
+        DFA.unpack(u"\11\22\1\15\1\17\2\15\1\17\22\22\1\15\3\22\1\21\3\22"
+        u"\1\6\1\7\1\1\2\22\1\12\1\22\1\14\12\22\1\10\1\22\1\13\1\16\1\11"
+        u"\34\22\1\2\1\20\1\3\35\22\1\4\1\22\1\5\42\22\1\15\u15df\22\1\15"
+        u"\u097f\22\14\15\34\22\2\17\5\22\1\15\u0fd0\22\1\15\ucffe\22"),
         DFA.unpack(u""),
         DFA.unpack(u""),
         DFA.unpack(u""),
         DFA.unpack(u""),
         DFA.unpack(u""),
         DFA.unpack(u""),
-        DFA.unpack(u"\1\22"),
-        DFA.unpack(u""),
-        DFA.unpack(u"\1\11\20\uffff\1\10"),
         DFA.unpack(u""),
         DFA.unpack(u"\1\23"),
         DFA.unpack(u""),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\35\21\1\uffff\1\21\1\uffff"
-        u"\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff\34\21\2\uffff"
-        u"\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
+        DFA.unpack(u"\1\12\20\uffff\1\11"),
         DFA.unpack(u""),
-        DFA.unpack(u"\1\26\1\uffff\2\26\23\uffff\1\26\50\uffff\1\25\14\uffff"
-        u"\1\30\22\uffff\1\27\14\uffff\1\31\51\uffff\1\26\u15df\uffff\1\26"
+        DFA.unpack(u"\1\24"),
+        DFA.unpack(u""),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\35\22\1\uffff\1\22\1\uffff"
+        u"\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff\34\22\2\uffff"
+        u"\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u""),
+        DFA.unpack(u"\1\26\1\uffff\2\26\23\uffff\1\26\50\uffff\1\31\14\uffff"
+        u"\1\27\22\uffff\1\32\14\uffff\1\30\51\uffff\1\26\u15df\uffff\1\26"
         u"\u097f\uffff\14\26\43\uffff\1\26\u0fd0\uffff\1\26"),
-        DFA.unpack(u"\32\32\4\uffff\1\32\1\uffff\32\32"),
+        DFA.unpack(u"\32\33\4\uffff\1\33\1\uffff\32\33"),
         DFA.unpack(u""),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\35\21\1\uffff\1\21\1\uffff"
-        u"\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff\34\21\2\uffff"
-        u"\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\35\5\uffff\22\35\1\uffff\7\35\2\uffff\22\35\1\uffff"
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\35\22\1\uffff\1\22\1\uffff"
+        u"\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff\34\22\2\uffff"
+        u"\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\35\5\uffff\22\35\1\uffff\7\35\3\uffff\21\35\1\uffff"
         u"\1\35\1\uffff\34\35\1\uffff\1\35\1\uffff\35\35\1\uffff\1\35\1\uffff"
         u"\42\35\1\uffff\u15df\35\1\uffff\u097f\35\14\uffff\34\35\2\uffff"
         u"\5\35\1\uffff\u0fd0\35\1\uffff\ucffe\35"),
         DFA.unpack(u""),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\17\21\1\36\14\21\1\uffff\1\21\1\uffff\35\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
         DFA.unpack(u"\1\26\1\uffff\2\26\23\uffff\1\26\50\uffff\1\37\14\uffff"
         u"\1\40\22\uffff\1\37\14\uffff\1\40\51\uffff\1\26\u15df\uffff\1\26"
         u"\u097f\uffff\14\26\43\uffff\1\26\u0fd0\uffff\1\26"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\20\21\1\41\14\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\20\21\1\42\13\21\1\uffff\1\21\1\uffff\35\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\21\21\1\43\13\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\6\21\12\45"
-        u"\2\21\1\uffff\1\21\1\uffff\2\21\32\45\1\uffff\1\21\1\uffff\1\21"
-        u"\1\45\1\21\32\45\1\uffff\1\21\1\uffff\42\21\1\uffff\u15df\21\1"
-        u"\uffff\u097f\21\14\uffff\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1"
-        u"\uffff\ucffe\21"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\20\22\1\41\13\22\1\uffff\1\22\1\uffff\35\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\21\22\1\42\13\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\17\22\1\43\14\22\1\uffff\1\22\1\uffff\35\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\20\22\1\44\14\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\5\22\12\45"
+        u"\2\22\1\uffff\1\22\1\uffff\2\22\32\45\1\uffff\1\22\1\uffff\1\22"
+        u"\1\45\1\22\32\45\1\uffff\1\22\1\uffff\42\22\1\uffff\u15df\22\1"
+        u"\uffff\u097f\22\14\uffff\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1"
+        u"\uffff\ucffe\22"),
         DFA.unpack(u""),
-        DFA.unpack(u""),
-        DFA.unpack(u"\11\35\5\uffff\22\35\1\uffff\7\35\2\uffff\22\35\1\uffff"
+        DFA.unpack(u"\11\35\5\uffff\22\35\1\uffff\7\35\3\uffff\21\35\1\uffff"
         u"\1\35\1\uffff\34\35\1\uffff\1\35\1\uffff\35\35\1\uffff\1\35\1\uffff"
         u"\42\35\1\uffff\u15df\35\1\uffff\u097f\35\14\uffff\34\35\2\uffff"
         u"\5\35\1\uffff\u0fd0\35\1\uffff\ucffe\35"),
-        DFA.unpack(u"\1\46"),
+        DFA.unpack(u""),
         DFA.unpack(u""),
         DFA.unpack(u""),
         DFA.unpack(u"\1\47"),
         DFA.unpack(u"\1\50"),
         DFA.unpack(u"\1\51"),
+        DFA.unpack(u"\1\52"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\5\22\12\45"
+        u"\2\22\1\uffff\1\22\1\uffff\2\22\32\45\1\uffff\1\22\1\uffff\1\22"
+        u"\1\45\1\22\32\45\1\uffff\1\22\1\uffff\42\22\1\uffff\u15df\22\1"
+        u"\uffff\u097f\22\14\uffff\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1"
+        u"\uffff\ucffe\22"),
         DFA.unpack(u""),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\6\21\12\45"
-        u"\2\21\1\uffff\1\21\1\uffff\2\21\32\45\1\uffff\1\21\1\uffff\1\21"
-        u"\1\45\1\21\32\45\1\uffff\1\21\1\uffff\42\21\1\uffff\u15df\21\1"
-        u"\uffff\u097f\21\14\uffff\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1"
-        u"\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\6\21\1\52\25\21\1\uffff\1\21\1\uffff\35\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\7\21\1\53\25\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\2\21\1\54\31\21\1\uffff\1\21\1\uffff\35\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\3\21\1\55\31\21\1\uffff"
-        u"\1\21\1\uffff\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff"
-        u"\34\21\2\uffff\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\1\56"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\2\22\1\53\31\22\1\uffff\1\22\1\uffff\35\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\3\22\1\54\31\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\6\22\1\55\25\22\1\uffff\1\22\1\uffff\35\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\7\22\1\56\25\22\1\uffff"
+        u"\1\22\1\uffff\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff"
+        u"\34\22\2\uffff\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
         DFA.unpack(u"\1\57"),
         DFA.unpack(u"\1\60"),
         DFA.unpack(u"\1\61"),
@@ -1300,29 +1328,30 @@ class psfLexer(Lexer):
         DFA.unpack(u"\1\74"),
         DFA.unpack(u"\1\75"),
         DFA.unpack(u"\1\76"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\35\22\1\uffff\1\22\1\uffff"
+        u"\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff\34\22\2\uffff"
+        u"\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\35\22\1\uffff\1\22\1\uffff"
+        u"\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff\34\22\2\uffff"
+        u"\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
         DFA.unpack(u"\1\77"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\35\21\1\uffff\1\21\1\uffff"
-        u"\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff\34\21\2\uffff"
-        u"\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\35\21\1\uffff\1\21\1\uffff"
-        u"\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff\34\21\2\uffff"
-        u"\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
         DFA.unpack(u"\1\100"),
         DFA.unpack(u"\1\101"),
         DFA.unpack(u"\1\102"),
         DFA.unpack(u"\1\103"),
         DFA.unpack(u"\1\104"),
         DFA.unpack(u"\1\105"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\35\21\1\uffff\1\21\1\uffff"
-        u"\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff\34\21\2\uffff"
-        u"\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21"),
-        DFA.unpack(u"\11\21\5\uffff\22\21\1\uffff\7\21\2\uffff\22\21\1\uffff"
-        u"\1\21\1\uffff\34\21\1\uffff\1\21\1\uffff\35\21\1\uffff\1\21\1\uffff"
-        u"\42\21\1\uffff\u15df\21\1\uffff\u097f\21\14\uffff\34\21\2\uffff"
-        u"\5\21\1\uffff\u0fd0\21\1\uffff\ucffe\21")
+        DFA.unpack(u"\1\106"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\35\22\1\uffff\1\22\1\uffff"
+        u"\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff\34\22\2\uffff"
+        u"\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22"),
+        DFA.unpack(u"\11\22\5\uffff\22\22\1\uffff\7\22\3\uffff\21\22\1\uffff"
+        u"\1\22\1\uffff\34\22\1\uffff\1\22\1\uffff\35\22\1\uffff\1\22\1\uffff"
+        u"\42\22\1\uffff\u15df\22\1\uffff\u097f\22\14\uffff\34\22\2\uffff"
+        u"\5\22\1\uffff\u0fd0\22\1\uffff\ucffe\22")
     ]
 
     # class definition for DFA #14

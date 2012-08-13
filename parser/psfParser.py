@@ -1,4 +1,4 @@
-# $ANTLR 3.0.1 psf.g 2012-02-03 23:04:11
+# $ANTLR 3.0.1 psf.g 2012-08-13 16:03:20
 
 from antlr3 import *
 from antlr3.compat import set, frozenset
@@ -11,36 +11,37 @@ from antlr3.tree import *
 HIDDEN = BaseRecognizer.HIDDEN
 
 # token types
-SLARROW=19
-RRB=11
+SLARROW=20
+RRB=12
 RARROW=7
+HEAD=11
 LARROW=6
 LRB=10
-RCB=14
+RCB=15
 EOF=-1
-EATWS=24
-SRARROW=20
-TOKEN=12
-USP=25
+EATWS=25
+SRARROW=21
+TOKEN=13
+USP=26
 DCOLON=9
-WS=23
+WS=24
 NEWLINE=4
-LCB=13
+LCB=14
 DOLLARTOKEN=8
-RSB=16
-NL=21
+RSB=17
+NL=22
 EQ=5
-VOCTAG=17
-COMMENT=22
-LSB=15
-INTTAG=18
+VOCTAG=18
+COMMENT=23
+LSB=16
+INTTAG=19
 
 # token names
 tokenNames = [
     "<invalid>", "<EOR>", "<DOWN>", "<UP>", 
     "NEWLINE", "EQ", "LARROW", "RARROW", "DOLLARTOKEN", "DCOLON", "LRB", 
-    "RRB", "TOKEN", "LCB", "RCB", "LSB", "RSB", "VOCTAG", "INTTAG", "SLARROW", 
-    "SRARROW", "NL", "COMMENT", "WS", "EATWS", "USP"
+    "HEAD", "RRB", "TOKEN", "LCB", "RCB", "LSB", "RSB", "VOCTAG", "INTTAG", 
+    "SLARROW", "SRARROW", "NL", "COMMENT", "WS", "EATWS", "USP"
 ]
 
 
@@ -630,7 +631,7 @@ class psfParser(Parser):
 
 
     # $ANTLR start atom
-    # psf.g:39:1: atom : ( narrow | curlyset | LRB expr RRB );
+    # psf.g:39:1: atom : ( narrow | curlyset | LRB ( expr )+ ( HEAD ( expr )* )? RRB );
     def atom(self, ):
 
         retval = self.atom_return()
@@ -639,34 +640,38 @@ class psfParser(Parser):
         root_0 = None
 
         LRB24 = None
-        RRB26 = None
+        HEAD26 = None
+        RRB28 = None
         narrow22 = None
 
         curlyset23 = None
 
         expr25 = None
 
+        expr27 = None
+
 
         LRB24_tree = None
-        RRB26_tree = None
+        HEAD26_tree = None
+        RRB28_tree = None
 
         try:
             try:
-                # psf.g:39:6: ( narrow | curlyset | LRB expr RRB )
-                alt6 = 3
-                LA6 = self.input.LA(1)
-                if LA6 == DOLLARTOKEN or LA6 == TOKEN or LA6 == LSB:
-                    alt6 = 1
-                elif LA6 == LCB:
-                    alt6 = 2
-                elif LA6 == LRB:
-                    alt6 = 3
+                # psf.g:39:6: ( narrow | curlyset | LRB ( expr )+ ( HEAD ( expr )* )? RRB )
+                alt9 = 3
+                LA9 = self.input.LA(1)
+                if LA9 == DOLLARTOKEN or LA9 == TOKEN or LA9 == LSB:
+                    alt9 = 1
+                elif LA9 == LCB:
+                    alt9 = 2
+                elif LA9 == LRB:
+                    alt9 = 3
                 else:
-                    nvae = NoViableAltException("39:1: atom : ( narrow | curlyset | LRB expr RRB );", 6, 0, self.input)
+                    nvae = NoViableAltException("39:1: atom : ( narrow | curlyset | LRB ( expr )+ ( HEAD ( expr )* )? RRB );", 9, 0, self.input)
 
                     raise nvae
 
-                if alt6 == 1:
+                if alt9 == 1:
                     # psf.g:39:8: narrow
                     root_0 = self.adaptor.nil()
 
@@ -677,7 +682,7 @@ class psfParser(Parser):
                     self.adaptor.addChild(root_0, narrow22.tree)
 
 
-                elif alt6 == 2:
+                elif alt9 == 2:
                     # psf.g:40:4: curlyset
                     root_0 = self.adaptor.nil()
 
@@ -688,20 +693,87 @@ class psfParser(Parser):
                     self.adaptor.addChild(root_0, curlyset23.tree)
 
 
-                elif alt6 == 3:
-                    # psf.g:41:4: LRB expr RRB
+                elif alt9 == 3:
+                    # psf.g:41:4: LRB ( expr )+ ( HEAD ( expr )* )? RRB
                     root_0 = self.adaptor.nil()
 
                     LRB24 = self.input.LT(1)
                     self.match(self.input, LRB, self.FOLLOW_LRB_in_atom177)
 
-                    self.following.append(self.FOLLOW_expr_in_atom180)
-                    expr25 = self.expr()
-                    self.following.pop()
 
-                    self.adaptor.addChild(root_0, expr25.tree)
-                    RRB26 = self.input.LT(1)
-                    self.match(self.input, RRB, self.FOLLOW_RRB_in_atom182)
+                    LRB24_tree = self.adaptor.createWithPayload(LRB24)
+                    root_0 = self.adaptor.becomeRoot(LRB24_tree, root_0)
+                    # psf.g:41:9: ( expr )+
+                    cnt6 = 0
+                    while True: #loop6
+                        alt6 = 2
+                        LA6_0 = self.input.LA(1)
+
+                        if (LA6_0 == DOLLARTOKEN or LA6_0 == LRB or (TOKEN <= LA6_0 <= LCB) or LA6_0 == LSB) :
+                            alt6 = 1
+
+
+                        if alt6 == 1:
+                            # psf.g:41:9: expr
+                            self.following.append(self.FOLLOW_expr_in_atom180)
+                            expr25 = self.expr()
+                            self.following.pop()
+
+                            self.adaptor.addChild(root_0, expr25.tree)
+
+
+                        else:
+                            if cnt6 >= 1:
+                                break #loop6
+
+                            eee = EarlyExitException(6, self.input)
+                            raise eee
+
+                        cnt6 += 1
+
+
+                    # psf.g:41:15: ( HEAD ( expr )* )?
+                    alt8 = 2
+                    LA8_0 = self.input.LA(1)
+
+                    if (LA8_0 == HEAD) :
+                        alt8 = 1
+                    if alt8 == 1:
+                        # psf.g:41:16: HEAD ( expr )*
+                        HEAD26 = self.input.LT(1)
+                        self.match(self.input, HEAD, self.FOLLOW_HEAD_in_atom184)
+
+
+                        HEAD26_tree = self.adaptor.createWithPayload(HEAD26)
+                        self.adaptor.addChild(root_0, HEAD26_tree)
+
+                        # psf.g:41:21: ( expr )*
+                        while True: #loop7
+                            alt7 = 2
+                            LA7_0 = self.input.LA(1)
+
+                            if (LA7_0 == DOLLARTOKEN or LA7_0 == LRB or (TOKEN <= LA7_0 <= LCB) or LA7_0 == LSB) :
+                                alt7 = 1
+
+
+                            if alt7 == 1:
+                                # psf.g:41:21: expr
+                                self.following.append(self.FOLLOW_expr_in_atom186)
+                                expr27 = self.expr()
+                                self.following.pop()
+
+                                self.adaptor.addChild(root_0, expr27.tree)
+
+
+                            else:
+                                break #loop7
+
+
+
+
+
+                    RRB28 = self.input.LT(1)
+                    self.match(self.input, RRB, self.FOLLOW_RRB_in_atom191)
 
 
 
@@ -739,65 +811,65 @@ class psfParser(Parser):
 
         root_0 = None
 
-        TOKEN27 = None
-        DOLLARTOKEN28 = None
-        phrase29 = None
+        TOKEN29 = None
+        DOLLARTOKEN30 = None
+        phrase31 = None
 
 
-        TOKEN27_tree = None
-        DOLLARTOKEN28_tree = None
+        TOKEN29_tree = None
+        DOLLARTOKEN30_tree = None
 
         try:
             try:
                 # psf.g:44:8: ( TOKEN | DOLLARTOKEN | phrase )
-                alt7 = 3
-                LA7 = self.input.LA(1)
-                if LA7 == TOKEN:
-                    alt7 = 1
-                elif LA7 == DOLLARTOKEN:
-                    alt7 = 2
-                elif LA7 == LSB:
-                    alt7 = 3
+                alt10 = 3
+                LA10 = self.input.LA(1)
+                if LA10 == TOKEN:
+                    alt10 = 1
+                elif LA10 == DOLLARTOKEN:
+                    alt10 = 2
+                elif LA10 == LSB:
+                    alt10 = 3
                 else:
-                    nvae = NoViableAltException("44:1: narrow : ( TOKEN | DOLLARTOKEN | phrase );", 7, 0, self.input)
+                    nvae = NoViableAltException("44:1: narrow : ( TOKEN | DOLLARTOKEN | phrase );", 10, 0, self.input)
 
                     raise nvae
 
-                if alt7 == 1:
+                if alt10 == 1:
                     # psf.g:44:10: TOKEN
                     root_0 = self.adaptor.nil()
 
-                    TOKEN27 = self.input.LT(1)
-                    self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_narrow193)
+                    TOKEN29 = self.input.LT(1)
+                    self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_narrow202)
 
 
-                    TOKEN27_tree = self.adaptor.createWithPayload(TOKEN27)
-                    self.adaptor.addChild(root_0, TOKEN27_tree)
+                    TOKEN29_tree = self.adaptor.createWithPayload(TOKEN29)
+                    self.adaptor.addChild(root_0, TOKEN29_tree)
 
 
 
-                elif alt7 == 2:
+                elif alt10 == 2:
                     # psf.g:45:4: DOLLARTOKEN
                     root_0 = self.adaptor.nil()
 
-                    DOLLARTOKEN28 = self.input.LT(1)
-                    self.match(self.input, DOLLARTOKEN, self.FOLLOW_DOLLARTOKEN_in_narrow198)
+                    DOLLARTOKEN30 = self.input.LT(1)
+                    self.match(self.input, DOLLARTOKEN, self.FOLLOW_DOLLARTOKEN_in_narrow207)
 
 
-                    DOLLARTOKEN28_tree = self.adaptor.createWithPayload(DOLLARTOKEN28)
-                    self.adaptor.addChild(root_0, DOLLARTOKEN28_tree)
+                    DOLLARTOKEN30_tree = self.adaptor.createWithPayload(DOLLARTOKEN30)
+                    self.adaptor.addChild(root_0, DOLLARTOKEN30_tree)
 
 
 
-                elif alt7 == 3:
+                elif alt10 == 3:
                     # psf.g:46:4: phrase
                     root_0 = self.adaptor.nil()
 
-                    self.following.append(self.FOLLOW_phrase_in_narrow203)
-                    phrase29 = self.phrase()
+                    self.following.append(self.FOLLOW_phrase_in_narrow212)
+                    phrase31 = self.phrase()
                     self.following.pop()
 
-                    self.adaptor.addChild(root_0, phrase29.tree)
+                    self.adaptor.addChild(root_0, phrase31.tree)
 
 
                 retval.stop = self.input.LT(-1)
@@ -834,13 +906,13 @@ class psfParser(Parser):
 
         root_0 = None
 
-        LCB30 = None
-        RCB32 = None
-        atom31 = None
+        LCB32 = None
+        RCB34 = None
+        atom33 = None
 
 
-        LCB30_tree = None
-        RCB32_tree = None
+        LCB32_tree = None
+        RCB34_tree = None
 
         try:
             try:
@@ -848,36 +920,36 @@ class psfParser(Parser):
                 # psf.g:49:11: LCB ( atom )* RCB
                 root_0 = self.adaptor.nil()
 
-                LCB30 = self.input.LT(1)
-                self.match(self.input, LCB, self.FOLLOW_LCB_in_curlyset212)
+                LCB32 = self.input.LT(1)
+                self.match(self.input, LCB, self.FOLLOW_LCB_in_curlyset221)
 
 
-                LCB30_tree = self.adaptor.createWithPayload(LCB30)
-                root_0 = self.adaptor.becomeRoot(LCB30_tree, root_0)
+                LCB32_tree = self.adaptor.createWithPayload(LCB32)
+                root_0 = self.adaptor.becomeRoot(LCB32_tree, root_0)
                 # psf.g:49:16: ( atom )*
-                while True: #loop8
-                    alt8 = 2
-                    LA8_0 = self.input.LA(1)
+                while True: #loop11
+                    alt11 = 2
+                    LA11_0 = self.input.LA(1)
 
-                    if (LA8_0 == DOLLARTOKEN or LA8_0 == LRB or (TOKEN <= LA8_0 <= LCB) or LA8_0 == LSB) :
-                        alt8 = 1
+                    if (LA11_0 == DOLLARTOKEN or LA11_0 == LRB or (TOKEN <= LA11_0 <= LCB) or LA11_0 == LSB) :
+                        alt11 = 1
 
 
-                    if alt8 == 1:
+                    if alt11 == 1:
                         # psf.g:49:16: atom
-                        self.following.append(self.FOLLOW_atom_in_curlyset215)
-                        atom31 = self.atom()
+                        self.following.append(self.FOLLOW_atom_in_curlyset224)
+                        atom33 = self.atom()
                         self.following.pop()
 
-                        self.adaptor.addChild(root_0, atom31.tree)
+                        self.adaptor.addChild(root_0, atom33.tree)
 
 
                     else:
-                        break #loop8
+                        break #loop11
 
 
-                RCB32 = self.input.LT(1)
-                self.match(self.input, RCB, self.FOLLOW_RCB_in_curlyset218)
+                RCB34 = self.input.LT(1)
+                self.match(self.input, RCB, self.FOLLOW_RCB_in_curlyset227)
 
 
 
@@ -916,15 +988,15 @@ class psfParser(Parser):
 
         root_0 = None
 
-        LSB33 = None
-        TOKEN34 = None
-        TOKEN35 = None
-        RSB36 = None
+        LSB35 = None
+        TOKEN36 = None
+        TOKEN37 = None
+        RSB38 = None
 
-        LSB33_tree = None
-        TOKEN34_tree = None
-        TOKEN35_tree = None
-        RSB36_tree = None
+        LSB35_tree = None
+        TOKEN36_tree = None
+        TOKEN37_tree = None
+        RSB38_tree = None
 
         try:
             try:
@@ -932,52 +1004,52 @@ class psfParser(Parser):
                 # psf.g:52:10: LSB TOKEN ( TOKEN )+ RSB
                 root_0 = self.adaptor.nil()
 
-                LSB33 = self.input.LT(1)
-                self.match(self.input, LSB, self.FOLLOW_LSB_in_phrase229)
+                LSB35 = self.input.LT(1)
+                self.match(self.input, LSB, self.FOLLOW_LSB_in_phrase238)
 
 
-                LSB33_tree = self.adaptor.createWithPayload(LSB33)
-                root_0 = self.adaptor.becomeRoot(LSB33_tree, root_0)
-                TOKEN34 = self.input.LT(1)
-                self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_phrase232)
+                LSB35_tree = self.adaptor.createWithPayload(LSB35)
+                root_0 = self.adaptor.becomeRoot(LSB35_tree, root_0)
+                TOKEN36 = self.input.LT(1)
+                self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_phrase241)
 
 
-                TOKEN34_tree = self.adaptor.createWithPayload(TOKEN34)
-                self.adaptor.addChild(root_0, TOKEN34_tree)
+                TOKEN36_tree = self.adaptor.createWithPayload(TOKEN36)
+                self.adaptor.addChild(root_0, TOKEN36_tree)
 
                 # psf.g:52:21: ( TOKEN )+
-                cnt9 = 0
-                while True: #loop9
-                    alt9 = 2
-                    LA9_0 = self.input.LA(1)
+                cnt12 = 0
+                while True: #loop12
+                    alt12 = 2
+                    LA12_0 = self.input.LA(1)
 
-                    if (LA9_0 == TOKEN) :
-                        alt9 = 1
+                    if (LA12_0 == TOKEN) :
+                        alt12 = 1
 
 
-                    if alt9 == 1:
+                    if alt12 == 1:
                         # psf.g:52:22: TOKEN
-                        TOKEN35 = self.input.LT(1)
-                        self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_phrase235)
+                        TOKEN37 = self.input.LT(1)
+                        self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_phrase244)
 
 
-                        TOKEN35_tree = self.adaptor.createWithPayload(TOKEN35)
-                        self.adaptor.addChild(root_0, TOKEN35_tree)
+                        TOKEN37_tree = self.adaptor.createWithPayload(TOKEN37)
+                        self.adaptor.addChild(root_0, TOKEN37_tree)
 
 
 
                     else:
-                        if cnt9 >= 1:
-                            break #loop9
+                        if cnt12 >= 1:
+                            break #loop12
 
-                        eee = EarlyExitException(9, self.input)
+                        eee = EarlyExitException(12, self.input)
                         raise eee
 
-                    cnt9 += 1
+                    cnt12 += 1
 
 
-                RSB36 = self.input.LT(1)
-                self.match(self.input, RSB, self.FOLLOW_RSB_in_phrase239)
+                RSB38 = self.input.LT(1)
+                self.match(self.input, RSB, self.FOLLOW_RSB_in_phrase248)
 
 
 
@@ -1016,11 +1088,11 @@ class psfParser(Parser):
 
         root_0 = None
 
-        TOKEN37 = None
-        set38 = None
+        TOKEN39 = None
+        set40 = None
 
-        TOKEN37_tree = None
-        set38_tree = None
+        TOKEN39_tree = None
+        set40_tree = None
 
         try:
             try:
@@ -1028,23 +1100,23 @@ class psfParser(Parser):
                 # psf.g:55:11: TOKEN ( VOCTAG | INTTAG )
                 root_0 = self.adaptor.nil()
 
-                TOKEN37 = self.input.LT(1)
-                self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_tagexpr250)
+                TOKEN39 = self.input.LT(1)
+                self.match(self.input, TOKEN, self.FOLLOW_TOKEN_in_tagexpr259)
 
 
-                TOKEN37_tree = self.adaptor.createWithPayload(TOKEN37)
-                self.adaptor.addChild(root_0, TOKEN37_tree)
+                TOKEN39_tree = self.adaptor.createWithPayload(TOKEN39)
+                self.adaptor.addChild(root_0, TOKEN39_tree)
 
-                set38 = self.input.LT(1)
+                set40 = self.input.LT(1)
                 if (VOCTAG <= self.input.LA(1) <= INTTAG):
                     self.input.consume();
-                    root_0 = self.adaptor.becomeRoot(self.adaptor.createWithPayload(set38), root_0)
+                    root_0 = self.adaptor.becomeRoot(self.adaptor.createWithPayload(set40), root_0)
                     self.errorRecovery = False
 
                 else:
                     mse = MismatchedSetException(None, self.input)
                     self.recoverFromMismatchedSet(
-                        self.input, mse, self.FOLLOW_set_in_tagexpr252
+                        self.input, mse, self.FOLLOW_set_in_tagexpr261
                         )
                     raise mse
 
@@ -1081,11 +1153,11 @@ class psfParser(Parser):
         )
 
     DFA2_min = DFA.unpack(
-        u"\1\10\2\4\1\14\4\uffff\2\14\1\4"
+        u"\1\10\2\4\1\15\4\uffff\2\15\1\4"
         )
 
     DFA2_max = DFA.unpack(
-        u"\1\17\1\22\1\17\1\14\4\uffff\1\14\1\20\1\17"
+        u"\1\20\1\23\1\20\1\15\4\uffff\1\15\1\21\1\20"
         )
 
     DFA2_accept = DFA.unpack(
@@ -1098,10 +1170,10 @@ class psfParser(Parser):
 
             
     DFA2_transition = [
-        DFA.unpack(u"\1\2\1\uffff\1\4\1\uffff\1\1\1\4\1\uffff\1\3"),
-        DFA.unpack(u"\1\4\1\6\3\4\1\uffff\1\4\1\uffff\2\4\1\uffff\1\4\1"
+        DFA.unpack(u"\1\2\1\uffff\1\4\2\uffff\1\1\1\4\1\uffff\1\3"),
+        DFA.unpack(u"\1\4\1\6\3\4\1\uffff\1\4\2\uffff\2\4\1\uffff\1\4\1"
         u"\uffff\2\5"),
-        DFA.unpack(u"\1\4\1\6\3\4\1\7\1\4\1\uffff\2\4\1\uffff\1\4"),
+        DFA.unpack(u"\1\4\1\6\3\4\1\7\1\4\2\uffff\2\4\1\uffff\1\4"),
         DFA.unpack(u"\1\10"),
         DFA.unpack(u""),
         DFA.unpack(u""),
@@ -1109,7 +1181,7 @@ class psfParser(Parser):
         DFA.unpack(u""),
         DFA.unpack(u"\1\11"),
         DFA.unpack(u"\1\11\3\uffff\1\12"),
-        DFA.unpack(u"\1\4\1\6\3\4\1\uffff\1\4\1\uffff\2\4\1\uffff\1\4")
+        DFA.unpack(u"\1\4\1\6\3\4\1\uffff\1\4\2\uffff\2\4\1\uffff\1\4")
     ]
 
     # class definition for DFA #2
@@ -1117,42 +1189,44 @@ class psfParser(Parser):
     DFA2 = DFA
  
 
-    FOLLOW_line_in_annotate35 = frozenset([1, 4, 8, 10, 12, 13, 15])
-    FOLLOW_NEWLINE_in_annotate39 = frozenset([1, 4, 8, 10, 12, 13, 15])
+    FOLLOW_line_in_annotate35 = frozenset([1, 4, 8, 10, 13, 14, 16])
+    FOLLOW_NEWLINE_in_annotate39 = frozenset([1, 4, 8, 10, 13, 14, 16])
     FOLLOW_tagexpr_in_line51 = frozenset([1])
     FOLLOW_expr_in_line57 = frozenset([1])
     FOLLOW_conjexpr_in_line62 = frozenset([1])
     FOLLOW_corefexpr_in_line67 = frozenset([1])
     FOLLOW_narrow_in_corefexpr78 = frozenset([5])
-    FOLLOW_EQ_in_corefexpr80 = frozenset([8, 12, 15])
+    FOLLOW_EQ_in_corefexpr80 = frozenset([8, 13, 16])
     FOLLOW_narrow_in_corefexpr83 = frozenset([1])
     FOLLOW_lc_in_expr96 = frozenset([1])
     FOLLOW_rc_in_lc106 = frozenset([1, 6])
-    FOLLOW_LARROW_in_lc109 = frozenset([8, 10, 12, 13, 15])
+    FOLLOW_LARROW_in_lc109 = frozenset([8, 10, 13, 14, 16])
     FOLLOW_lc_in_lc112 = frozenset([1])
     FOLLOW_atom_in_rc124 = frozenset([1, 7])
-    FOLLOW_RARROW_in_rc127 = frozenset([8, 10, 12, 13, 15])
+    FOLLOW_RARROW_in_rc127 = frozenset([8, 10, 13, 14, 16])
     FOLLOW_atom_in_rc130 = frozenset([1, 7])
     FOLLOW_DOLLARTOKEN_in_conjexpr141 = frozenset([9])
-    FOLLOW_DCOLON_in_conjexpr143 = frozenset([8, 10, 12, 13, 15])
+    FOLLOW_DCOLON_in_conjexpr143 = frozenset([8, 10, 13, 14, 16])
     FOLLOW_atom_in_conjexpr146 = frozenset([1, 9])
-    FOLLOW_DCOLON_in_conjexpr149 = frozenset([8, 10, 12, 13, 15])
+    FOLLOW_DCOLON_in_conjexpr149 = frozenset([8, 10, 13, 14, 16])
     FOLLOW_atom_in_conjexpr152 = frozenset([1])
     FOLLOW_narrow_in_atom167 = frozenset([1])
     FOLLOW_curlyset_in_atom172 = frozenset([1])
-    FOLLOW_LRB_in_atom177 = frozenset([8, 10, 12, 13, 15])
-    FOLLOW_expr_in_atom180 = frozenset([11])
-    FOLLOW_RRB_in_atom182 = frozenset([1])
-    FOLLOW_TOKEN_in_narrow193 = frozenset([1])
-    FOLLOW_DOLLARTOKEN_in_narrow198 = frozenset([1])
-    FOLLOW_phrase_in_narrow203 = frozenset([1])
-    FOLLOW_LCB_in_curlyset212 = frozenset([8, 10, 12, 13, 14, 15])
-    FOLLOW_atom_in_curlyset215 = frozenset([8, 10, 12, 13, 14, 15])
-    FOLLOW_RCB_in_curlyset218 = frozenset([1])
-    FOLLOW_LSB_in_phrase229 = frozenset([12])
-    FOLLOW_TOKEN_in_phrase232 = frozenset([12])
-    FOLLOW_TOKEN_in_phrase235 = frozenset([12, 16])
-    FOLLOW_RSB_in_phrase239 = frozenset([1])
-    FOLLOW_TOKEN_in_tagexpr250 = frozenset([17, 18])
-    FOLLOW_set_in_tagexpr252 = frozenset([1])
+    FOLLOW_LRB_in_atom177 = frozenset([8, 10, 13, 14, 16])
+    FOLLOW_expr_in_atom180 = frozenset([8, 10, 11, 12, 13, 14, 16])
+    FOLLOW_HEAD_in_atom184 = frozenset([8, 10, 12, 13, 14, 16])
+    FOLLOW_expr_in_atom186 = frozenset([8, 10, 12, 13, 14, 16])
+    FOLLOW_RRB_in_atom191 = frozenset([1])
+    FOLLOW_TOKEN_in_narrow202 = frozenset([1])
+    FOLLOW_DOLLARTOKEN_in_narrow207 = frozenset([1])
+    FOLLOW_phrase_in_narrow212 = frozenset([1])
+    FOLLOW_LCB_in_curlyset221 = frozenset([8, 10, 13, 14, 15, 16])
+    FOLLOW_atom_in_curlyset224 = frozenset([8, 10, 13, 14, 15, 16])
+    FOLLOW_RCB_in_curlyset227 = frozenset([1])
+    FOLLOW_LSB_in_phrase238 = frozenset([13])
+    FOLLOW_TOKEN_in_phrase241 = frozenset([13])
+    FOLLOW_TOKEN_in_phrase244 = frozenset([13, 17])
+    FOLLOW_RSB_in_phrase248 = frozenset([1])
+    FOLLOW_TOKEN_in_tagexpr259 = frozenset([18, 19])
+    FOLLOW_set_in_tagexpr261 = frozenset([1])
 

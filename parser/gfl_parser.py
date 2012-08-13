@@ -163,7 +163,12 @@ def unicodify(s, encoding='utf8', *args):
   return unicode(s)
 
 def parse(text_tokens, psf_code, check_semantics=False):
-  """ text_tokens is a list of strings, psf_code is a string """
+  """ 
+  text_tokens is a list of strings: the allowable tokens.
+  psf_code is a string, the literal GFL code
+
+  returns the semantic Parse
+  """
   text_tokens = [unicodify(x) for x in text_tokens]
   parsetree = antlr_parse(psf_code)
   tree = parsetree.tree
@@ -171,13 +176,17 @@ def parse(text_tokens, psf_code, check_semantics=False):
   if not all_leaves:
     raise ParseError("no leaves in AST")
   if VERBOSE:
-    print text_tokens
-    antlr_dump(tree) # DEBUG
+    print "Tokens: ", text_tokens
+    print "ANTLR Parse Tree:"
+    antlr_dump(tree)
 
   consistency_check(text_tokens, tree)
 
   p = Parse()
   p.tokens = text_tokens[:]
+
+  # We iterate through the "tops", the top-level nodes that correspond to lines of input.
+  # And call out to process_chain() for the real (recursive) work.
 
   if tree.getType() == 0:
     tops = tree.children
@@ -189,8 +198,10 @@ def parse(text_tokens, psf_code, check_semantics=False):
 
     if typ == TOKEN:  # singleton
       continue
-    elif typ in (LARROW, RARROW, LSB):
+
+    elif typ in (LARROW, RARROW, LSB, LRB):
       process_chain(p, fragment)
+
     elif typ == EQ:
       equands = [process_chain(p,c) for c in fragment.children]
       equands = flatten(equands)
@@ -198,6 +209,7 @@ def parse(text_tokens, psf_code, check_semantics=False):
       for i in range(N):
         for j in range(i+1, N):
           p.add_node_edge(equands[i], equands[j], 'Anaph')
+
     elif typ == DCOLON:
       nodevar = fragment.children[0]
       if nodevar.getType() != DOLLARTOKEN:
@@ -230,11 +242,16 @@ def show(antlr_node):
 
 def process_chain(p, antlr_node):
   """ this function does dispatch among all parse node types """
+
   n = antlr_node
-  #print "PROCESSING",; show(n)
-  # return the HEAD(s) of the chain (can be more than one for multiheaded multiwords)
+  # print "PROCESSING",; show(n)
+  # antlr_dump(n)
+
+  # return head node(s) of the chain.
+  # ... multiple ones only for {a b} construct??
   # ... returned as Node ID's
   # while we're at it, add in all appropriate edges to the Parse 'p'
+
   if n.getType() == TOKEN:
     nodename = 'W(' + n.token.text + ')'
     p.add_nodeword_edge(nodename, n.token.text)
@@ -246,6 +263,15 @@ def process_chain(p, antlr_node):
     return process_head_child(p, n.children[1], n.children[0])
   elif n.getType() == LARROW:
     return process_head_child(p, n.children[0], n.children[1])
+  elif n.getType() == LRB:  # (
+    if len(n.children)==1:
+      # promote a singleton into this place.
+      return process_chain(p, n.children[0])
+    else:
+      print "BLA"
+      print n.children
+      assert False, "todo"
+    
   elif n.getType() == LCB:  # {
     children_heads = [process_chain(p,c) for c in n.children]
     nodes = flatten(children_heads)
@@ -357,9 +383,9 @@ def clean_code(code):
 
 def goparse(tokens, code):
   code = clean_code(code)
-  if VERBOSE:
-    print "\n---\n" + code
-    ap = antlr_parse(code); antlr_dump(ap.tree); print ""
+  # if VERBOSE:
+  #   print "\n---\n" + code
+  #   ap = antlr_parse(code); antlr_dump(ap.tree); print ""
   p = parse(tokens, code)
   if VERBOSE:
     print p; print ""
@@ -504,3 +530,4 @@ if __name__=='__main__':
   code = '\n'.join(sys.argv[1:])
   VERBOSE = True
   goparse(string.letters, code)
+

@@ -38,7 +38,7 @@ conjexpr:	DOLLARTOKEN DCOLON^ atom (DCOLON! atom)?
 // however, it makes the precedence weird
 atom	:	narrow
 	|	curlyset
-	|	LRB! expr RRB!
+	|	LRB^ expr+ (HEAD expr*)? RRB!
 	;
 
 narrow	:	TOKEN
@@ -53,6 +53,8 @@ phrase	:	LSB^ TOKEN (TOKEN)+ RSB!
 	;
 
 tagexpr :	TOKEN (VOCTAG|INTTAG)^ ;
+
+HEAD	:	'*' ;
 
 LSB 	:	 '[' ;
 RSB 	:	 ']' ;
@@ -115,5 +117,5 @@ INTTAG 	:	'\\' WS* ('I'|'i'|'INT'|'int'|'INTERJECTION'|'interjection') ;
 DOLLARTOKEN
 	:	'$'('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'_'|'0'..'9')*  ;
 
-TOKEN   :	~(NL|WS|RCB|RRB|RSB|LCB|LRB|LSB|SRARROW|SLARROW)+ ;
+TOKEN   :	~(NL|WS|HEAD|RCB|RRB|RSB|LCB|LRB|LSB|SRARROW|SLARROW)+ ;
 
