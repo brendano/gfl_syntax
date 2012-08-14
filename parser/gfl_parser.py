@@ -27,8 +27,8 @@ import antlr3
 from psfLexer import psfLexer
 from psfParser import psfParser
 
-alltypes = "COMMENT DCOLON DOLLARTOKEN EQ EOF INTTAG LARROW LCB LRB LSB NEWLINE RARROW RCB RRB RSB TOKEN Tokens VOCTAG WS".split()
-from psfLexer import COMMENT,DCOLON,DOLLARTOKEN,EOF,EQ,INTTAG,LARROW,LCB,LRB,LSB,NEWLINE,RARROW,RCB,RRB,RSB,TOKEN,Tokens,VOCTAG,WS
+alltypes = "COMMENT DCOLON DOLLARTOKEN EQ EOF HEAD INTTAG LARROW LCB LRB LSB NEWLINE RARROW RCB RRB RSB TOKEN Tokens VOCTAG WS".split()
+from psfLexer import COMMENT,DCOLON,DOLLARTOKEN,EOF,EQ,HEAD,INTTAG,LARROW,LCB,LRB,LSB,NEWLINE,RARROW,RCB,RRB,RSB,TOKEN,Tokens,VOCTAG,WS
 import psfLexer as psfLexer_module
 TypeNames = {getattr(psfLexer_module,n):n for n in alltypes}
 if 0 not in TypeNames: TypeNames[0] = 'type0'
@@ -94,7 +94,7 @@ class Parse:
 
   def add_node_edge(self, head, child, label=None):
     """
-    Default: add a standard directed edge.
+    Default: add a standard directed edge, between two nodes.
     If the label is for an undirected edge, put it in all special.
     """
     #print "ADDING",child," > ", head
@@ -106,7 +106,11 @@ class Parse:
       self.node_edges.add((head,child,label))
 
   def add_nodeword_edge(self, node, word, label=None):
-    """node and word are strings"""
+    """
+    Add the nodeword edge: between a word and node.
+    There is 1 or 0 nodeword edges per word.
+    node and word are strings.
+    """
     if label is None:
       self.node2words[node].add(word)
     else:
@@ -241,43 +245,81 @@ def show(antlr_node):
   print TypeNames[n.getType()], n.token
 
 def process_chain(p, antlr_node):
-  """ this function does dispatch among all parse node types """
+  """
+  This function does dispatch among all parse node types.
+  It returns the Parse node associated with the GFL fragment.
+  We usually call this the "head node".
 
-  n = antlr_node
-  # print "PROCESSING",; show(n)
-  # antlr_dump(n)
+  return head node(s) of the chain.
+  ... multiple ones only for {a b} construct??
+  ... returned as Node ID's (strings)
+  And, while we're at it, add in all appropriate edges to the Parse 'p'
 
-  # return head node(s) of the chain.
-  # ... multiple ones only for {a b} construct??
-  # ... returned as Node ID's
-  # while we're at it, add in all appropriate edges to the Parse 'p'
+  Thinking about handling {a b} in the later deduction phase we're talking
+  about making.  it's starting to make this code nastier.. if we didn't do it
+  here, then could throw it around as a nice simple node, and this function
+  could return just one node instead of a list.
+  """
 
-  if n.getType() == TOKEN:
-    nodename = 'W(' + n.token.text + ')'
-    p.add_nodeword_edge(nodename, n.token.text)
+  an = antlr_node
+  # print "PROCESSING",; show(an)
+  # antlr_dump(an)
+
+
+  if an.getType() == TOKEN:
+    nodename = 'W(' + an.token.text + ')'
+    p.add_nodeword_edge(nodename, an.token.text)
     return [nodename]
-  elif n.getType() == DOLLARTOKEN:
-    nodename = n.token.text
+  elif an.getType() == DOLLARTOKEN:
+    nodename = an.token.text
     return [nodename]
-  elif n.getType() == RARROW:
-    return process_head_child(p, n.children[1], n.children[0])
-  elif n.getType() == LARROW:
-    return process_head_child(p, n.children[0], n.children[1])
-  elif n.getType() == LRB:  # (
-    if len(n.children)==1:
+  elif an.getType() == RARROW:
+    return process_head_child(p, an.children[1], an.children[0])
+  elif an.getType() == LARROW:
+    return process_head_child(p, an.children[0], an.children[1])
+  elif an.getType() == LRB:  # (
+    if len(an.children)==1:
       # promote a singleton into this place.
-      return process_chain(p, n.children[0])
+      return process_chain(p, an.children[0])
+
+    starred_antlr_nodes =   [(i,c) for i,c in enumerate(an.children) if c.getType() == HEAD]
+
+    if not starred_antlr_nodes:
+      children = [process_chain(p, c) for c in an.children]
+      children = flatten(children)
+      cbb_nodeid = u'CBB({})'.format(u','.join(children))
+      for c in children:
+        p.add_node_edge(cbb_nodeid, c, 'unspec')
+
     else:
-      print "BLA"
-      print n.children
-      assert False, "todo"
+      assert len(starred_antlr_nodes)==1, "can have only one starred headnode in a CBB clause."
+      star_i = starred_antlr_nodes[0][0]
+      assert star_i>0, "star cannot be first term in a CBB clause."
+      headnode_antlr = an.children[star_i-1]
+      assert headnode_antlr.getType() != LCB, "we're not allowing {a b}* for now."
+      nonheads_antlr = [c for i,c in enumerate(an.children) if i not in (star_i, star_i-1)]
+
+      headnodes = process_chain(p, headnode_antlr)
+      nonhead_nodes = [process_chain(p, c) for c in nonheads_antlr]
+      assert len(headnodes)==1, "hm, why is there more than one headnode?  we don't know how to handle"
+      headnode = headnodes[0]
+      nonhead_nodes = flatten(nonhead_nodes)
+
+      cbb_nodeid = u'CBB({};{})'.format(headnode, u','.join(nonhead_nodes))
+
+      p.add_node_edge(cbb_nodeid, headnode, 'cbbhead')
+      for c in nonhead_nodes:
+        p.add_node_edge(cbb_nodeid, c, 'unspec')
+
+    return [cbb_nodeid]
+
     
-  elif n.getType() == LCB:  # {
-    children_heads = [process_chain(p,c) for c in n.children]
+  elif an.getType() == LCB:  # {
+    children_heads = [process_chain(p,c) for c in an.children]
     nodes = flatten(children_heads)
     return nodes
-  elif n.getType() == LSB:  # [
-    children_heads = [process_chain(p,c) for c in n.children]
+  elif an.getType() == LSB:  # [
+    children_heads = [process_chain(p,c) for c in an.children]
     wordnodes = flatten(children_heads)
 
     word_lists = [p.node2words[wn] for wn in wordnodes]
@@ -285,12 +327,12 @@ def process_chain(p, antlr_node):
     words = flatten(word_lists)
     # sorting is better for string comparability, but order-preserving is nicer for interpretation
     #mw_node = 'MW(' + ','.join(sorted(words)) + ')'
-    n = p.multiword_canonical_node(words)
-    mw_node = n if n else 'MW(' + '_'.join(words) + ')'
+    an = p.multiword_canonical_node(words)
+    mw_node = an if an else 'MW(' + '_'.join(words) + ')'
     for w in words:
       p.add_nodeword_edge(mw_node, w)
-    #for n in wordnodes:
-    #  p.add_node_edge(mw_node, n)
+    #for an in wordnodes:
+    #  p.add_node_edge(mw_node, an)
 
     return [mw_node]
 
@@ -330,6 +372,7 @@ def consistency_check(text_tokens, tree):
   alltoks = set(text_tokens)
   for leaf in leaves(tree):
     if is_node(leaf): continue
+    if leaf.getType()==HEAD: continue
     if leaf.token.text not in alltoks:
       raise ParseError("Word %s not in original text" % repr(leaf.token.text))
       
