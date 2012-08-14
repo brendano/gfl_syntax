@@ -53,8 +53,28 @@ class Parse:
     self.nodes = set()
     self.is_finalized = False
 
+    self._cbb_counter = 0
+
+  # [not adequately tested]
+  # def rename_nodes(self, oldnew_pairs):
+  #   d = dict(oldnew_pairs)
+  #   assert len(d) == len(oldnew_pairs)
+  #   def replace(nodename):
+  #     return d.get(nodename, nodename)
+  #   self.node2words =       {replace(n):ws for n,ws in self.node2words.items()}
+  #   self.extra_node2words = {replace(n):ws for n,ws in self.extra_node2words.items()}
+  #   self.node_edges = { (replace(h),replace(c),label) for h,c,label in self.node_edges }
+
+  # def pretty_rename_nodes(self):
+  #   self.rename_nodes({})
+
+  def next_cbb_id(self):
+    self._cbb_counter += 1
+    return self._cbb_counter
+
   def finalize(self):
     self.gc()
+
     self.nodes = set(self.node2words)
     for x in flatten((h,c) for h,c,_ in self.node_edges):
       self.nodes.add(x)
@@ -235,6 +255,7 @@ def parse(text_tokens, psf_code, check_semantics=False):
 
     else:
       assert False, "bad type %s %s" % (typ, TypeNames[typ])
+
   p.finalize()
   if check_semantics:
     graph_semantics_check(p)
@@ -282,12 +303,13 @@ def process_chain(p, antlr_node):
       # promote a singleton into this place.
       return process_chain(p, an.children[0])
 
+    cbb_nodeid = u'CBB%s' % p.next_cbb_id()
     starred_antlr_nodes =   [(i,c) for i,c in enumerate(an.children) if c.getType() == HEAD]
 
     if not starred_antlr_nodes:
       children = [process_chain(p, c) for c in an.children]
       children = flatten(children)
-      cbb_nodeid = u'CBB({})'.format(u','.join(children))
+      # cbb_nodeid = u'CBB({})'.format(u','.join(children))
       for c in children:
         p.add_node_edge(cbb_nodeid, c, 'unspec')
 
@@ -305,7 +327,7 @@ def process_chain(p, antlr_node):
       headnode = headnodes[0]
       nonhead_nodes = flatten(nonhead_nodes)
 
-      cbb_nodeid = u'CBB({};{})'.format(headnode, u','.join(nonhead_nodes))
+      # cbb_nodeid = u'CBB({};{})'.format(headnode, u','.join(nonhead_nodes))
 
       p.add_node_edge(cbb_nodeid, headnode, 'cbbhead')
       for c in nonhead_nodes:

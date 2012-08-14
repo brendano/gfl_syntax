@@ -49,10 +49,11 @@ def psf2dot(parse):
     conjcol = '"#106010"'
     conjbg  = '"#90c090"'
     darkblue = '"#202090"'
+    gray = '"#606060"'
     for head,child,label in parse.node_edges:
         head=dot_clean(head)
         child=dot_clean(child)
-        col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple'}.get(label, 'blue')
+        col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple', 'unspec':gray}.get(label, 'blue')
         dir = {'Anaph':'none'}.get(label, 'back')
         weight = {'Anaph':0.01}.get(label, 5)
         lab = '' if not label else label
