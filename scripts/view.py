@@ -64,7 +64,7 @@ def psf2dot(parse):
     for node in parse.nodes:
         #label = re.sub(r'\(.*','', node)
         label = node
-        bg = conjbg if node.startswith('$') else '"#d0d0f0"'
+        bg = conjbg if node.startswith('$') or node.startswith('CBB') else '"#d0d0f0"'
         G.append('{name} [color={bg} style=filled fillcolor={bg} height=0.4 fontcolor=black label={label} fontsize={fontsize}]'.format(
             name=dot_clean(node), label=dot_clean(label, node_label=True), fontsize=fontsize, bg=bg))
 
