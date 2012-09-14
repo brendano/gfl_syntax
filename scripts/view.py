@@ -158,6 +158,7 @@ def process_potentially_multifile(filename):
         tokens = string.letters
         code = anno_text
         return [(tokens, code, anno_text)]
+    anno_text = anno_text.replace('\r\n','\n')
     multi_annos = re.split(r'(\n|^)--- *(\n|$)', anno_text)
     multi_annos = ['---\n' + x.strip() for x in multi_annos if x.strip()]
     if len(multi_annos) == 0:
