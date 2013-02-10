@@ -218,7 +218,7 @@ if __name__=='__main__':
             tokens,code,anno_text = tokens_codes_texts[0]
             try:
                 if not is_balanced(anno_text):
-                    raise Exception("Input has unbalanced parentheses")
+                    raise Exception("Unbalanced parentheses")
                 parse = gfl_parser.parse(tokens, code, check_semantics=True)
             except Exception:
                 if not batch_mode: raise
@@ -240,6 +240,8 @@ if __name__=='__main__':
                 parses.append(None)
             else:
                 try:
+                    if not is_balanced(text):
+                        raise Exception("Unbalanced parentheses in annotation:\n"+text)
                     p = gfl_parser.parse(tokens, code, check_semantics=True)
                     parses.append(p)
                 except Exception:
