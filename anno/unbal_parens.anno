@@ -1,0 +1,7 @@
+% TEXT
+job a b c
+
+% ANNO
+job < a)
+b > c
+
