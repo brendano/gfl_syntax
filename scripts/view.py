@@ -9,6 +9,16 @@ import gfl_parser
 
 show_words = False
 
+def is_balanced(s):
+    if '(' not in s and ')' not in s: return True
+    if '(' not in s and ')' in s: return False
+    d = 0
+    for c in s:
+        if c=='(': d += 1
+        if c==')': d -= 1
+        if d<0: return False
+    return d==0
+
 def parse_parts(tweet_text):
     s = tweet_text
     s = re.sub('^--- *', '', s)
@@ -207,6 +217,8 @@ if __name__=='__main__':
         if len(tokens_codes_texts)==1:
             tokens,code,anno_text = tokens_codes_texts[0]
             try:
+                if not is_balanced(anno_text):
+                    raise Exception("Input has unbalanced parentheses")
                 parse = gfl_parser.parse(tokens, code, check_semantics=True)
             except Exception:
                 if not batch_mode: raise
