@@ -94,8 +94,10 @@ class FUDGNode(TreeNode):
 	def __repr__(self):
 		return '<'+self.name+'>'
 	
-	#@property
-	def descendants(self): return itertools.groupby(itertools.chain(self.children, itertools.imap(FUDGNode.descendants, self.children)))
+	def descendantsIter(self): return itertools.groupby(itertools.chain(self.children, itertools.imap(FUDGNode.descendantsIter, self.children)))
+	@property
+	def descendants(self): return set(self.descendantsIter())
+	
 	
 	@property
 	def isRoot(self): return isinstance(self, RootNode)
@@ -290,23 +292,24 @@ def downward(G):
 	for n in sorted(G.nodes, key=lambda node: node.depth):
 		assert not n.isCoord	# graph should have been simplified to remove coordination nodes
 		if not n.isRoot:
-			n.parentcandidates = G.firmNodes - {n} - set(n.descendants())
+			n.parentcandidates = G.firmNodes - {n} - n.descendants
 			print(n, n.parentcandidates)
 			for (p,e) in n.parentedges:
 				if p.isCBB:
 					print('   CBB topcandidates:',p.topcandidates)
 					if n in p.members:
 						cands = set()
-						if n in p.topcandidates:
-							cands = set(p.parentcandidates)
-						if p.topcandidates!={n}:
+						if n in p.topcandidates:	# n might be the top of the CBB
+							cands |= p.parentcandidates
+						if p.topcandidates!={n}:	# n might not be the top of the CBB
 							cands |= (p.members - {n})
 						n.parentcandidates &= cands
 					else:
-						assert n in p.externalchildren
-						n.parentcandidates &= p.topcandidates
-				elif p.isFirm:
-					n.parentcandidates &= {p}
+						assert n in p.externalchildren	# edge modifies a CBB
+						n.parentcandidates &= p.topcandidates	# can be any firm node that might be the top of the CBB
+				else:
+					assert p.isFirm
+					n.parentcandidates &= {p}	# edge attaches to something other than a CBB, so we know it's for real
 				#print('    after',(p,e),n.parentcandidates)
 			print()
 			assert n.parentcandidates,n.parentcandidates
