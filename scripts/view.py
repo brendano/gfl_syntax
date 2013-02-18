@@ -9,6 +9,8 @@ import gfl_parser
 
 show_words = False
 
+ROOT = '$$'
+
 def is_balanced(s):
     def check(l,r):
         if l not in s and r not in s: return True
@@ -63,8 +65,10 @@ def psf2dot(parse):
     darkblue = '"#202090"'
     gray = '"#606060"'
     for head,child,label in parse.node_edges:
-        head=dot_clean(head)
+        if child=='W('+ROOT+')' and label not in ('cbbhead','Anaph'): raise Exception("The root node "+ROOT+" cannot be a dependent except as cbbhead or Anaph.")
+        # TODO: if ROOT is a cbbhead, the above doesn't verify that the CBB is the root of the annotation graph
         child=dot_clean(child)
+        head=dot_clean(head)
         col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple', 'unspec':gray}.get(label, 'blue')
         dir = {'Anaph':'none'}.get(label, 'back')
         weight = {'Anaph':0.01}.get(label, 5)
