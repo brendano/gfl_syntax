@@ -10,14 +10,16 @@ import gfl_parser
 show_words = False
 
 def is_balanced(s):
-    if '(' not in s and ')' not in s: return True
-    if '(' not in s and ')' in s: return False
-    d = 0
-    for c in s:
-        if c=='(': d += 1
-        if c==')': d -= 1
-        if d<0: return False
-    return d==0
+    def check(l,r):
+        if l not in s and r not in s: return True
+        if l not in s and r in s: return False
+        d = 0
+        for c in s:
+            if c==l: d += 1
+            if c==r: d -= 1
+            if d<0: return False
+        return d==0
+    return check('(',')') and check('[',']') and check('{','}')
 
 def parse_parts(tweet_text):
     s = tweet_text
@@ -218,7 +220,7 @@ if __name__=='__main__':
             tokens,code,anno_text = tokens_codes_texts[0]
             try:
                 if not is_balanced(code):
-                    raise Exception("Unbalanced parentheses in annotation")
+                    raise Exception("Unbalanced parentheses, brackets, or braces in annotation")
                 parse = gfl_parser.parse(tokens, code, check_semantics=True)
             except Exception:
                 if not batch_mode: raise
@@ -241,7 +243,7 @@ if __name__=='__main__':
             else:
                 try:
                     if not is_balanced(code):
-                        raise Exception("Unbalanced parentheses in annotation:\n"+code)
+                        raise Exception("Unbalanced parentheses, brackets, or braces in annotation:\n"+code)
                     p = gfl_parser.parse(tokens, code, check_semantics=True)
                     parses.append(p)
                 except Exception:

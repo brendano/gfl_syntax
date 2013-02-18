@@ -11,6 +11,7 @@ Some things done here but not in the parser:
 TODO:
 - simplify coordinations before upward() and downward()
 - ensure CBBs with identical childsets are merged, without losing cbbhead information
+- ensure nodes attaching to root can't also attach to something else unless it is a CBB
 
 - prohibit:
 [a b]
