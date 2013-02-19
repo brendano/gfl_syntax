@@ -248,6 +248,8 @@ if __name__=='__main__':
                 try:
                     if not is_balanced(code):
                         raise Exception("Unbalanced parentheses, brackets, or braces in annotation:\n"+code)
+                    if VERBOSE:
+                    	print 'Parsing: '+str(tokens)
                     p = gfl_parser.parse(tokens, code, check_semantics=True)
                     parses.append(p)
                 except Exception:
