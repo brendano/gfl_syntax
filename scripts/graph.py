@@ -59,7 +59,7 @@ class FUDGNode(TreeNode):
 		self.depth = 0
 		self.frag = Fragment({self}, {self})
 	
-	def add_child(self, node, label=None):
+	def add_child(self, node, label=None, adjust_fragments=True):
 		assert self.name!=node.name
 		assert not node.isRoot
 		TreeNode.add_child(self, node)
@@ -68,8 +68,9 @@ class FUDGNode(TreeNode):
 		node.parents.add(self)
 		self._setMinHeight(node.height+1)
 		
-		self.frag |= node.frag	# unify the fragments, updating all references from member nodes
-		self.frag.roots.remove(node)	# no longer a root because it has a parent
+		if adjust_fragments:
+			self.frag |= node.frag	# unify the fragments, updating all references from member nodes
+			self.frag.roots.remove(node)	# no longer a root because it has a parent
 		# recompute depths in the entire fragment
 		for n in self.frag.nodes:
 			n.depth = float('inf')
@@ -134,7 +135,6 @@ class CoordinationNode(FUDGNode):
 		FUDGNode.__init__(self, name, [])	# no TreeNode children, as we won't be traversing CoordinationNodes anyway
 		self.coords = coords
 		self.conjuncts = conjuncts or set()
-		self.modifiers = modifiers or set()
 
 class CBBNode(FUDGNode):
 	def __init__(self, name, members=None, externalchildren=None, top=None):
@@ -152,9 +152,9 @@ class CBBNode(FUDGNode):
 			self.top = node
 		FUDGNode.add_child(self, node, label=('top' if specified_top else 'unspec'))
 		
-	def add_child(self, node):
+	def add_child(self, node, **kwargs):
 		self.externalchildren.add(node)
-		FUDGNode.add_child(self, node)
+		FUDGNode.add_child(self, node, **kwargs)
 	
 class Fragment(object):
 	def __init__(self, roots, nodes):
@@ -253,12 +253,69 @@ class FUDGGraph(Graph):
 		
 
 
-
-def simplify(G):
+def simplify_coord(G):
 	'''
 	Simplify the graph by removing coordination nodes, choosing one of the coordinators as the head.
 	'''
-	pass
+	for n in sorted(G.nodes, key=lambda node: node.height):
+		if n.isCoord:
+			newhead = next(iter(sorted(n.coords, key=lambda v: v.name)))	# arbitrary but consistent choice
+			
+			# detach newhead
+			#n.children.remove(newhead)
+			#n.childedges -= {(c,e) for (c,e) in n.childedges if c is newhead}
+			#print(newhead.parents)
+			#newhead.parents.remove(n)
+			#newhead.parentedges -= {(p,e) for (p,e) in newhead.parentedges if p is n}
+			
+
+
+			
+			maxht = float('-inf')
+			for c in n.coords | n.conjuncts:
+				if c is not newhead:
+					# detach c from n
+					'''
+					assert c not in n.frag.roots
+					c.frag = Fragment({c}, {c} | c.descendants)
+					for d in c.frag.nodes:
+						n.frag.nodes.remove(d)
+					'''
+					# attach c to newhead
+					maxht = max(maxht, c.height)
+					#print(c.frag,c.frag.roots,c.frag.nodes)
+					newhead.add_child(c, adjust_fragments=False)
+
+			for c in n.children:	# modifiers
+				# detach c from n
+				'''
+				assert c not in n.frag.roots
+				c.frag = Fragment({c}, {c} | c.descendants)
+				for d in c.frag.nodes:
+					n.frag.nodes.remove(d)
+				'''
+				#n.children.remove(c)
+				#n.childedges -= {(c,e) for (c,e) in n.childedges if c is c}
+				#print(n,c,c.parents)
+				c.parents.remove(n)
+				c.parentedges -= {(p,e) for (p,e) in c.parentedges if p is n}
+				
+				# attach c to newhead
+				maxht = max(maxht, c.height)
+				newhead.add_child(c, adjust_fragments=False)
+				
+			assert newhead.height==maxht+1
+			
+			for p in n.parents:
+				p.add_child(newhead)
+
+			assert newhead.depth==n.depth,(n,n.depth,newhead,newhead.depth)
+
+				
+			# remove n utterly
+			n.frag.nodes.remove(n)
+			
+	G.nodes -= {n for n in G.nodes if n.isCoord}
 
 def upward(F):
 	'''
@@ -297,6 +354,7 @@ def downward(G):
 		if not n.isRoot:
 			n.parentcandidates = G.firmNodes - {n} - n.descendants
 			#print(n, n.parentcandidates)
+			print(n, n.parentedges, n.parents, n.parentcandidates)
 			for (p,e) in n.parentedges:
 				if p.isCBB:
 					#print('   CBB topcandidates:',p.topcandidates)
@@ -328,6 +386,7 @@ def test():
 	graphs = [g1,g2,g3,g4,g5][1:]	# skipping the first one for now, as it has coordination
 	for g in graphs:
 		f = FUDGGraph(g)
+		simplify_coord(f)
 		upward(f)
 		downward(f)
 		for cbb in f.cbbnodes:

@@ -6,7 +6,7 @@ from __future__ import print_function, division
 import os, re, sys, fileinput, json
 from collections import Counter, defaultdict
 
-from graph import FUDGGraph, upward, downward
+from graph import FUDGGraph, simplify_coord, upward, downward
 from spanningtrees import spanning
 
 
@@ -16,9 +16,10 @@ def single_ann_measures(a):
 	c['coordnodes'] = len(a.coordnodes)
 	c['FNs'] = len(a.cbbnodes)
 	c['explicitly rooted utterances'] = len(a.root.children)
+	simplify_coord(a)
 	upward(a)
 	downward(a)
-	c['possibly rooted utterances'] = len({int('$$' in c.parentcandidates) for c in a.lexnodes})
+	c['possibly rooted utterances'] = sum(int(a.root in c.parentcandidates) for c in a.lexnodes)
 	return c
 	
 def iaa_measures(a1,a2):
