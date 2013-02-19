@@ -56,7 +56,7 @@ def spanning(G, root):
 	
 	result = []
 	
-	def grow():
+	def grow(j=0):
 		"Finds all spanning trees rooted at 'root' containing T"
 		global L
 		if len(vertices(T))==len(vertices(G)):
@@ -70,35 +70,43 @@ def spanning(G, root):
 				e = F.pop()
 				u,v = e
 				assert u in vertices(T),(e,T)
-				assert v not in vertices(T)
+				assert v not in vertices(T),(v,vertices(T))
 				T.add(e)
 				for w in vertices(G) - vertices(T):
 					if (v,w) in G:
 						F.append((v,w))
-						
-				removedFromT = set()
-				for w in vertices(T):
-					if (w,v) in F:
-						F.remove((w,v))
-						removedFromT.add((w,v))
 				
-				grow()
+				print(j,'a:',F)	
+				removedFromT = []
 				
+				#for w in vertices(T):
+				#	if (w,v) in F:
+				for w,V in F:
+					if V==v and w in vertices(T):
+						i = F.index((w,v))
+						F.pop(i)
+						removedFromT.append((i,w,v))
+				print(j,'b:',F)
+				grow(j+1)
+				print(j,'c:',F)
 				while F and F[-1][0]==v and F[-1][1] not in vertices(T):
 					F.pop()
-					
+				print(j,'d:',F)
 				# restore
-				for w,v in removedFromT:
+				while removedFromT:
+					i,w,V = removedFromT.pop()
+					assert V==v
 					assert w in vertices(T)
-					F.append((w,v))
-					
+					F.insert(i,(w,v))
+				print(j,'e:',F)
+				
 				# remove @11
 				T.remove(e)
 				G.remove(e)
 				FF.append(e)
 				
 				descV = descendants(v,L)
-				ww = {w for w,x in G if x==v}
+				ww = {w for w,V in G if V==v}
 				if not ww - descV:
 					break
 				

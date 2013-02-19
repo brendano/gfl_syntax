@@ -117,6 +117,7 @@ class LexicalNode(FUDGNode):
 	parentcandidates = None
 	
 	def __init__(self, name, tokens, token2lexnode):
+		assert name!='$$'
 		FUDGNode.__init__(self, name, [])
 		self.tokens = tokens
 		for tkn in tokens:
@@ -191,12 +192,14 @@ class FUDGGraph(Graph):
 		self.root = RootNode()
 		self.coordnodes = set()
 		self.coordnodenames = {}
-		self.nodesbyname = {'$$': self.root}	# GFL name -> node
+		self.nodesbyname = {'W($$)': self.root}	# GFL name -> node
 		
 		# lexical nodes
 		coordNodes = set()
 		for lex in graphJ['nodes']:
-			if lex.startswith('MW('):
+			if lex=='W($$)':
+				continue
+			elif lex.startswith('MW('):
 				lname = lex[3:-1]
 				tokens = set(graphJ['node2words'][lex])
 				n = LexicalNode(lname, tokens, self.token2lexnode)
@@ -208,14 +211,13 @@ class FUDGGraph(Graph):
 				self.lexnodes.add(n)
 				self.nodesbyname[lex] = n
 			elif lex[0]=='$':
-				if lex!='$$':
-					coordNodes.add(lex)
+				coordNodes.add(lex)
 			else:
 				assert lex.startswith('CBB')
 				n = CBBNode(lex)
 				self.cbbnodes.add(n)
 				self.nodesbyname[lex] = n
-					
+				
 		# coordination nodes (which depend on lexical nodes)
 		for lex in coordNodes:
 			coords = set()
@@ -294,10 +296,10 @@ def downward(G):
 		assert not n.isCoord	# graph should have been simplified to remove coordination nodes
 		if not n.isRoot:
 			n.parentcandidates = G.firmNodes - {n} - n.descendants
-			print(n, n.parentcandidates)
+			#print(n, n.parentcandidates)
 			for (p,e) in n.parentedges:
 				if p.isCBB:
-					print('   CBB topcandidates:',p.topcandidates)
+					#print('   CBB topcandidates:',p.topcandidates)
 					if n in p.members:
 						cands = set()
 						if n in p.topcandidates:	# n might be the top of the CBB
@@ -312,11 +314,12 @@ def downward(G):
 					assert p.isFirm
 					n.parentcandidates &= {p}	# edge attaches to something other than a CBB, so we know it's for real
 				#print('    after',(p,e),n.parentcandidates)
-			print()
+			#print()
 			assert n.parentcandidates,n.parentcandidates
 
 def test():
 	'''Some rudimentary test cases.'''
+	from spanningtrees import spanning
 	g1 = {'tokens': ['I', 'think', "I'm", 'a', 'wait', 'an', 'hour', 'or', '2', '&', 'THEN', 'tweet', '@sinittaofficial', '...'], 'node_edges': [['$a', 'W(tweet)', 'Conj'], ['$a', 'W(wait)', 'Conj'], ['$o', 'W(2)', 'Conj'], ['$o', 'W(hour)', 'Conj'], ["W(I'm)", '$a', None], ['W(hour)', 'W(an)', None], ['W(think)', "W(I'm)", None], ['W(think)', 'W(I)', None], ['W(tweet)', 'W(@sinittaofficial)', None], ['W(wait)', '$o', None]], 'nodes': ['$a', '$o', 'MW(&_THEN)', 'W(2)', 'W(@sinittaofficial)', "W(I'm)", 'W(I)', 'W(an)', 'W(hour)', 'W(think)', 'W(tweet)', 'W(wait)'], 'extra_node2words': {'$o': [['or', 'Coord']], '$a': [['&', 'Coord'], ['THEN', 'Coord']]}, 'node2words': {'W(@sinittaofficial)': ['@sinittaofficial'], "W(I'm)": ["I'm"], 'W(2)': ['2'], 'W(think)': ['think'], 'W(tweet)': ['tweet'], 'W(I)': ['I'], 'W(an)': ['an'], 'W(wait)': ['wait'], 'W(hour)': ['hour'], 'MW(&_THEN)': ['THEN', '&']}}
 	g2 = {"tokens": ["@mandaffodil", "lol", ",", "we", "are", "one", ".", "and", "that", "was", "me", "this", "weekend", "especially", ".", "maybe", "put", "it", "off", "until", "you", "feel", "like", "~", "talking", "again", "?"], "node_edges": [["CBB1", "W(again)", "unspec"], ["CBB1", "W(feel)", "cbbhead"], ["CBB1", "W(you)", None], ["MW(put_off)", "W(it)", None], ["MW(put_off)", "W(until)", None], ["W($$)", "W(are)", None], ["W($$)", "W(lol)", None], ["W($$)", "W(maybe)", None], ["W($$)", "W(was)", None], ["W(are)", "W(one)", None], ["W(are)", "W(we)", None], ["W(feel)", "W(like)", None], ["W(like)", "W(talking)", None], ["W(maybe)", "MW(put_off)", None], ["W(until)", "CBB1", None], ["W(was)", "W(me)", None], ["W(was)", "W(that)", None], ["W(was)", "W(weekend)", None], ["W(weekend)", "W(especially)", None], ["W(weekend)", "W(this)", None]], "nodes": ["CBB1", "MW(put_off)", "W($$)", "W(again)", "W(are)", "W(especially)", "W(feel)", "W(it)", "W(like)", "W(lol)", "W(maybe)", "W(me)", "W(one)", "W(talking)", "W(that)", "W(this)", "W(until)", "W(was)", "W(we)", "W(weekend)", "W(you)"], "extra_node2words": {}, "node2words": {"W(are)": ["are"], "W(especially)": ["especially"], "W(like)": ["like"], "W(again)": ["again"], "W(that)": ["that"], "W(me)": ["me"], "W($$)": ["$$"], "W(maybe)": ["maybe"], "MW(put_off)": ["put", "off"], "W(was)": ["was"], "W(until)": ["until"], "W(you)": ["you"], "W(we)": ["we"], "W(feel)": ["feel"], "W(it)": ["it"], "W(talking)": ["talking"], "W(this)": ["this"], "W(one)": ["one"], "W(lol)": ["lol"], "W(weekend)": ["weekend"]}}
 	g3 = {"tokens": ["A", "Top", "Quality", "Sandwich", "made", "to", "artistic", "standards", "."], "node_edges": [["CBB1", "W(A)", "unspec"], ["CBB1", "W(Quality)", "unspec"], ["CBB1", "W(Sandwich)", "cbbhead"], ["CBB1", "W(Top)", "unspec"], ["CBB2", "W(artistic)", "unspec"], ["CBB2", "W(standards)", "cbbhead"], ["W($$)", "CBB1", None], ["W(Sandwich)", "W(made)", None], ["W(made)", "W(to)", None], ["W(to)", "CBB2", None]], "nodes": ["CBB1", "CBB2", "W($$)", "W(A)", "W(Quality)", "W(Sandwich)", "W(Top)", "W(artistic)", "W(made)", "W(standards)", "W(to)"], "extra_node2words": {}, "node2words": {"W(made)": ["made"], "W(standards)": ["standards"], "W($$)": ["$$"], "W(to)": ["to"], "W(Top)": ["Top"], "W(artistic)": ["artistic"], "W(A)": ["A"], "W(Sandwich)": ["Sandwich"], "W(Quality)": ["Quality"]}}
@@ -329,6 +332,15 @@ def test():
 		downward(f)
 		for cbb in f.cbbnodes:
 			print(cbb.name, cbb.topcandidates, cbb.parentcandidates)
+		assert len({n.name for n in f.lexnodes})==len(f.lexnodes)
+		for c in f.lexnodes:
+			assert not c.isRoot
+			#print(c, c.parentcandidates)
+		stg = {(p.name,c.name) for c in f.lexnodes for p in c.parentcandidates}
+		print(stg)
+		print(spanning(stg, '$$'))
+		print(len(spanning(stg, '$$')))
+		#assert False
 
 if __name__=='__main__':
 	test()
