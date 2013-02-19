@@ -7,11 +7,11 @@ Some things done here but not in the parser:
 - ensure only one cbbhead child per CBB
 - ensure no token appears in more than one lexical node
 - ensure the root is never attached to anything else
+- ensure CBBs with identical childsets are merged, without losing cbbhead information
 
 TODO:
-- simplify coordinations before upward() and downward()
-- ensure CBBs with identical childsets are merged, without losing cbbhead information
 - ensure nodes attaching to root can't also attach to something else unless it is a CBB
+  (or is this enforced already via the forest-except-CBB-edges constraint?)
 
 - prohibit:
 [a b]
@@ -69,8 +69,10 @@ class FUDGNode(TreeNode):
 		self._setMinHeight(node.height+1)
 		
 		if adjust_fragments:
+			#print(self,'.add_child',node)
 			self.frag |= node.frag	# unify the fragments, updating all references from member nodes
-			self.frag.roots.remove(node)	# no longer a root because it has a parent
+			#self.frag.roots.remove(node)	# no longer a root because it has a parent
+			self.frag.roots -= {node}	# TODO
 		# recompute depths in the entire fragment
 		for n in self.frag.nodes:
 			n.depth = float('inf')
@@ -141,9 +143,11 @@ class CBBNode(FUDGNode):
 		self.top = top
 		self.members = members or set()
 		self.externalchildren = externalchildren or set()
+		self._pointerto = None
 		FUDGNode.__init__(self, name, self.members | self.externalchildren)
-		self.parentcandidates = None
-		self.topcandidates = None
+		self._parentcandidates = None
+		self._topcandidates = None
+
 		
 	def add_member(self, node, specified_top):
 		self.members.add(node)
@@ -155,6 +159,41 @@ class CBBNode(FUDGNode):
 	def add_child(self, node, **kwargs):
 		self.externalchildren.add(node)
 		FUDGNode.add_child(self, node, **kwargs)
+		
+	def become_pointer(self, node):
+		'''Merge the two CBBs and assume a reference to the other instance'''
+		print('MERGE CBB ',self,'into',node)
+		assert node.isCBB
+		assert node.members==self.members
+		assert (node.top is None) or (self.top is None) or node.top==self.top
+		if node.top is None: node.top = self.top
+		else: self.top = node.top
+		node.height = max(self.height,node.height)
+		node.depth = min(self.depth,node.depth)
+		for c in self.externalchildren:
+			node.add_child(c)
+		self.externalchildren = node.externalchildren
+		self.members = node.members
+		self.children = node.children
+		self.parents = node.parents
+		self.childedges = node.childedges
+		self.parentedges = node.parentedges
+		self._pointerto = node
+		#assert False
+	def __getattr__(self, name):
+		assert name in ('parentcandidates', 'topcandidates', 'height', 'depth'),(name,self.__dict__)
+		if self._pointerto is not None:
+			#assert getattr(self._pointerto, '_'+name) is not None,self.__dict__
+			return getattr(self._pointerto, '_'+name)
+		return self.__dict__['_'+name]
+	def __setattr__(self, name, val):
+		if name in ('parentcandidates', 'topcandidates', 'height', 'depth'):
+			if self._pointerto is not None:
+				self._pointerto.__setattr__(name, val)
+			else:
+				FUDGNode.__setattr__(self, '_'+name, val)
+		else:
+			FUDGNode.__setattr__(self, name, val)
 	
 class Fragment(object):
 	def __init__(self, roots, nodes):
@@ -175,6 +214,9 @@ class Fragment(object):
 			
 		return self
 
+	def __repr__(self):
+		return '<Fragment@'+str(id(self))+'> '+str(self.roots)+' '+str(self.nodes)
+	
 class Graph(object):
 	def __init__(self, nodes):
 		self.nodes = nodes
@@ -189,6 +231,7 @@ class FUDGGraph(Graph):
 		self.token2lexnode = {}
 		self.lexnodes = set()
 		self.cbbnodes = set()
+		self.anaphlinks = set()
 		self.root = RootNode()
 		self.coordnodes = set()
 		self.coordnodenames = {}
@@ -245,12 +288,20 @@ class FUDGGraph(Graph):
 			elif lbl=='cbbhead':
 				pnode.add_member(cnode, specified_top=True)
 			elif lbl=='Anaph':
-				pass	# ignore anaphoric links for the present purposes
+				self.anaphlinks.add((p,c))	# simply store these for the present purposes
 			else:
 				assert lbl is None,lbl
 				pnode.add_child(cnode)
 				
-		
+		# merge CBBs with identical member sets
+		cbbs = list(sorted(self.cbbnodes, key=lambda n: n.name))
+		for i in range(len(cbbs)):
+			for h in range(i):
+				if cbbs[h] and cbbs[h].members==cbbs[i].members:
+					cbbs[i].become_pointer(cbbs[h])
+					self.cbbnodes.remove(cbbs[i])
+					self.nodes.remove(cbbs[i])
+					cbbs[i] = None
 
 
 def simplify_coord(G):
@@ -284,7 +335,10 @@ def simplify_coord(G):
 					# attach c to newhead
 					maxht = max(maxht, c.height)
 					#print(c.frag,c.frag.roots,c.frag.nodes)
-					newhead.add_child(c, adjust_fragments=False)
+					#print('BEFORE:',c.frag,n.frag)
+					newhead.add_child(c, adjust_fragments=True)
+					#print('AFTER:',c.frag,n.frag)
+					#assert False
 
 			for c in n.children:	# modifiers
 				# detach c from n
@@ -354,13 +408,14 @@ def downward(G):
 		if not n.isRoot:
 			n.parentcandidates = G.firmNodes - {n} - n.descendants
 			#print(n, n.parentcandidates)
-			print(n, n.parentedges, n.parents, n.parentcandidates)
+			#print(n, n.parentedges, n.parents, n.parentcandidates)
 			for (p,e) in n.parentedges:
 				if p.isCBB:
 					#print('   CBB topcandidates:',p.topcandidates)
 					if n in p.members:
 						cands = set()
 						if n in p.topcandidates:	# n might be the top of the CBB
+							assert p.parentcandidates is not None,(n,p,p._pointerto,n.depth,p.depth,p._pointerto.depth,p.height,p._pointerto.height)
 							cands |= p.parentcandidates
 						if p.topcandidates!={n}:	# n might not be the top of the CBB
 							cands |= (p.members - {n})
@@ -373,7 +428,7 @@ def downward(G):
 					n.parentcandidates &= {p}	# edge attaches to something other than a CBB, so we know it's for real
 				#print('    after',(p,e),n.parentcandidates)
 			#print()
-			assert n.parentcandidates,n.parentcandidates
+			assert n.parentcandidates,'Could not find any possible heads for '+repr(n)+'. Is the annotation valid?' #(n,n.parents,n.parentedges,[p.topcandidates for p in n.parents if p.isCBB],n.parentcandidates)
 
 def test():
 	'''Some rudimentary test cases.'''
