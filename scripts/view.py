@@ -269,7 +269,11 @@ if __name__=='__main__':
             base = "%s.%d" % (bigbase,i)
             print "\t",base
             if parse is not None:
-                process_one_parse(parse, base)
+                try:
+	                process_one_parse(parse, base)
+                except:
+                    print parse
+                    raise
             print_html(out, anno_text, base + '.png' if parse is not None else None)
         out.close()
         if do_open:
