@@ -19,6 +19,7 @@ def single_ann_measures(a):
 	c['anaphlinks'] = len(a.anaphlinks)
 	c['FNs'] = len(a.cbbnodes)
 	c['explicitly rooted utterances'] = len(a.root.children)
+	#print({n: n.depth for n in a.nodes})
 	simplify_coord(a)
 	# literal number of connected components in the graph (not counting the root when nothing was explicitly attached to it)
 	c['fragments'] = len({n.frag for n in a.nodes if n.frag.nodes!={a.root}})

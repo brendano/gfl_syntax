@@ -55,8 +55,8 @@ class FUDGNode(TreeNode):
 		self.childedges = set()
 		self.parentedges = set()
 		self.parents = set()
-		self.height = 0
-		self.depth = 0
+		self.height = 0	# length of longest path from this node to a leaf
+		self.depth = -1	# length of longest path from a parentless node to this one
 		self.frag = Fragment({self}, {self})
 	
 	def add_child(self, node, label=None, adjust_fragments=True):
@@ -75,9 +75,9 @@ class FUDGNode(TreeNode):
 			self.frag.roots -= {node}	# TODO
 		# recompute depths in the entire fragment
 		for n in self.frag.nodes:
-			n.depth = float('inf')
+			n.depth = -1
 		for n in self.frag.roots:
-			n._setMaxDepth(0)
+			n._setMinDepth(0)
 	
 	def remove_child(self, child):
 		raise Exception('Not supported')
@@ -89,14 +89,15 @@ class FUDGNode(TreeNode):
 				assert p.name!=self.name,(self,self.parents)
 				p._setMinHeight(h+1)
 	
-	def _setMaxDepth(self, d):
-		if self.depth>d:
+	def _setMinDepth(self, d):
+		if self.depth<d:
 			self.depth = d
+			#print(self,d,self.children)
 			for c in self.children:
-				c._setMaxDepth(d+1)
+				c._setMinDepth(d+1)
 	
 	def __repr__(self):
-		return '<'+self.name+'>'
+		return '<'+self.name.encode('utf-8')+'>'
 	
 	def descendantsIter(self): return itertools.groupby(itertools.chain(self.children, itertools.imap(FUDGNode.descendantsIter, self.children)))
 	@property
@@ -169,7 +170,7 @@ class CBBNode(FUDGNode):
 		if node.top is None: node.top = self.top
 		else: self.top = node.top
 		node.height = max(self.height,node.height)
-		node.depth = min(self.depth,node.depth)
+		node.depth = max(self.depth,node.depth)
 		for c in self.externalchildren:
 			node.add_child(c)
 		self.externalchildren = node.externalchildren
@@ -360,8 +361,15 @@ def simplify_coord(G):
 				
 			assert newhead.height==maxht+1
 			
-			for p in n.parents:
-				p.add_child(newhead)
+			if n.parents:
+				for p in n.parents:
+					p.add_child(newhead)
+			else:	# n is headless
+				assert n in n.frag.roots
+				for v in n.frag.nodes:
+					v.depth = -1
+				for v in n.frag.roots:
+					v._setMinDepth(0)
 
 			assert newhead.depth==n.depth,(n,n.depth,newhead,newhead.depth)
 
@@ -415,7 +423,7 @@ def downward(G):
 					if n in p.members:
 						cands = set()
 						if n in p.topcandidates:	# n might be the top of the CBB
-							assert p.parentcandidates is not None,(n,p,p._pointerto,n.depth,p.depth,p._pointerto.depth,p.height,p._pointerto.height)
+							assert p.parentcandidates is not None,(n,p,p._pointerto,n.depth,p.depth,n.frag,p.frag)
 							cands |= p.parentcandidates
 						if p.topcandidates!={n}:	# n might not be the top of the CBB
 							cands |= (p.members - {n})
