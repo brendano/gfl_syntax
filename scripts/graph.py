@@ -27,7 +27,7 @@ c > b
 @since: 2013-02-14
 """
 from __future__ import print_function, division
-import itertools
+import os, sys, re, itertools
 
 
 # from Naomi's code:
@@ -47,7 +47,10 @@ class TreeNode(object):
                         [child.deepcopy() for child in self.children])
                         
 
-
+def reachable(n1,n2):
+	if n1 is n2: return True
+	for c in n1.children:
+		if reachable(c,n2): return True
 
 class FUDGNode(TreeNode):
 	def __init__(self, *args, **kwargs):
@@ -64,6 +67,10 @@ class FUDGNode(TreeNode):
 		assert not node.isRoot or (self.isCBB and label is not None)
 		TreeNode.add_child(self, node)
 		self.childedges.add((node, label))
+		# check for cycles
+		if reachable(node, self):
+			raise Exception('Adding {0} as a child of {1} would create a cycle!'.format(node,self))
+		
 		node.parentedges.add((self, label))
 		node.parents.add(self)
 		self._setMinHeight(node.height+1)
@@ -163,7 +170,7 @@ class CBBNode(FUDGNode):
 		
 	def become_pointer(self, node):
 		'''Merge the two CBBs and assume a reference to the other instance'''
-		print('MERGE CBB ',self,'into',node)
+		print('MERGE CBB ',self,'into',node, file=sys.stderr)
 		assert node.isCBB
 		assert node.members==self.members
 		assert (node.top is None) or (self.top is None) or node.top==self.top
@@ -240,9 +247,19 @@ class FUDGGraph(Graph):
 		
 		# lexical nodes
 		coordNodes = set()
+		cbbmws = set()
 		
 		for punct in set('.,!-()$:') | {'....'}:	# TODO: deal with dependency converted input
 			graphJ['nodes'][:] = [x for x in graphJ['nodes'] if x in graphJ['node2words'] or x!='W('+punct+')']
+		
+		def add_lex(lex, tkns):
+			lname = lex[2:-1]
+			if isinstance(tkns, basestring):
+				n = LexicalNode(lname, {tkns}, self.token2lexnode)
+			else:
+				n = LexicalNode(lname, set(tkns), self.token2lexnode)
+			self.lexnodes.add(n)
+			self.nodesbyname[lex] = n
 		
 		for lex in graphJ['nodes']:
 			if lex=='W(,)':
@@ -256,17 +273,14 @@ class FUDGGraph(Graph):
 				self.lexnodes.add(n)
 				self.nodesbyname[lex] = n
 			elif lex.startswith('W('):
-				lname = lex[2:-1]
-				if isinstance(graphJ['node2words'][lex], basestring):
-					n = LexicalNode(lname, {graphJ['node2words'][lex]}, self.token2lexnode)
-				else:
-					n = LexicalNode(lname, set(graphJ['node2words'][lex]), self.token2lexnode)
-				self.lexnodes.add(n)
-				self.nodesbyname[lex] = n
+				add_lex(lex, graphJ['node2words'][lex])
 			elif lex[0]=='$':
 				coordNodes.add(lex)
 			else:
 				assert lex.startswith('CBB')
+				members = set()
+				if lex.startswith('CBBMW'):	# multiword relaxed to a CBB
+					cbbmws.add(lex)
 				n = CBBNode(lex)
 				self.cbbnodes.add(n)
 				self.nodesbyname[lex] = n
@@ -284,6 +298,14 @@ class FUDGGraph(Graph):
 			n = CoordinationNode(lex, coords=coords)
 			self.coordnodes.add(n)
 			self.nodesbyname[lex] = n
+		
+		# CBBMWs (attach lexical node members)
+		for cbbmw in cbbmws:
+			cbb = self.nodesbyname[cbbmw]
+			for lex in graphJ['node2words'][cbbmw]:
+				if 'W('+lex+')' not in self.nodesbyname:
+					add_lex('W('+lex+')', lex)
+				cbb.add_member(self.nodesbyname['W('+lex+')'], False)
 		
 		self.nodes = {self.root} | self.lexnodes | self.coordnodes | self.cbbnodes
 		
@@ -370,7 +392,7 @@ def simplify_coord(G):
 				maxht = max(maxht, c.height)
 				newhead.add_child(c, adjust_fragments=False)
 				
-			assert newhead.height==maxht+1
+			assert newhead.height==maxht+1,(n,n.height,newhead,newhead.height,maxht,newhead.children)
 			
 			if n.parents:
 				for p in n.parents:
@@ -382,7 +404,10 @@ def simplify_coord(G):
 				for v in n.frag.roots:
 					v._setMinDepth(0)
 
-			assert newhead.depth==n.depth,(n,n.depth,newhead,newhead.depth)
+			try:
+				assert newhead.depth==n.depth,(n,n.depth,newhead,newhead.depth)
+			except AssertionError as ex:
+				print(ex, 'There is a legitimate edge case in which this fails: the coordinator is also a member of a CBB and so will continue to have greater depth than the coordination node even when it replaces it', file=sys.stderr)
 
 				
 			# remove n utterly
@@ -392,9 +417,9 @@ def simplify_coord(G):
 
 def upward(F):
 	'''
-	Identify the possible top nodes (internal heads) for each CBB in the graph or fragment 
-	by traversing bottom-up.
-	Result: .topcandidates
+	For each CBB in the graph or fragment, traverse bottom-up to identify the possible 
+	top nodes (internal heads) that might obtain in a full analysis. 
+	Result: .topcandidates, not containing any CBB nodes
 	'''
 	for n in sorted(F.nodes, key=lambda node: node.height):
 		assert not n.isCoord	# graph should have been simplified to remove coordination nodes
@@ -407,12 +432,19 @@ def upward(F):
 			for (c,e) in n.childedges:
 				if e=='top':
 					n.topcandidates = set(c.topcandidates) if c.isCBB else {c}
+					#n.topcandidates = {c}
+					#if c.isCBB:
+					#	n.topcandidates |= {x for x in c.topcandidates if not c.isCBB}
 					break	# there is only one cbbhead
 				elif e=='unspec':
-					n.topcandidates.add(c)
+					n.topcandidates |= c.topcandidates if c.isCBB else {c}
+					#n.topcandidates.add(c)
+					#if c.isCBB:
+					#	n.topcandidates |= {x for x in c.topcandidates if not c.isCBB}
 				else:
 					assert e is None
 			assert n not in n.topcandidates
+			assert not any(1 for x in n.topcandidates if x.isCBB)
 			#print(n, 'TOPCANDIDATES', n.topcandidates)
 
 def downward(G):
@@ -420,24 +452,28 @@ def downward(G):
 	For each lexical node, identify the possible attachments (heads, not CBBs) it might take in some full analysis.
 	For each CBB node, identify the possible attachments to non-CBB heads its *top node* (internal head) might take in some full analysis. 
 	If the node in question is unattached, that will be all non-CBB nodes that are not its descendants.
-	Result: .parentcandidates
+	Result: .parentcandidates, not containing any CBB nodes
 	'''
 	for n in sorted(G.nodes, key=lambda node: node.depth):
 		assert not n.isCoord	# graph should have been simplified to remove coordination nodes
 		if not n.isRoot:
 			n.parentcandidates = G.firmNodes - {n} - n.descendants
+			assert n.parentcandidates
 			#print(n, n.parentcandidates)
 			#print(n, n.parentedges, n.parents, n.parentcandidates)
 			for (p,e) in n.parentedges:
 				if p.isCBB:
-					#print('   CBB topcandidates:',p.topcandidates)
+					#print('   CBB topcandidates:',p,p.topcandidates)
 					if n in p.members:
+						tcands = n.topcandidates if n.isCBB else {n}
 						cands = set()
-						if n in p.topcandidates:	# n might be the top of the CBB
+						if p.topcandidates & tcands:	# (top of) n might be the top of the CBB
 							assert p.parentcandidates is not None,(n,p,p._pointerto,n.depth,p.depth,n.frag,p.frag)
 							cands |= p.parentcandidates
-						if p.topcandidates!={n}:	# n might not be the top of the CBB
-							cands |= (p.members - {n})
+						if p.topcandidates!=tcands:	# (top of) n might not be the top of the CBB
+							siblings = p.members - {n}
+							for sib in siblings:
+								cands |= sib.topcandidates if sib.isCBB else {sib}
 						n.parentcandidates &= cands
 					else:
 						assert n in p.externalchildren	# edge modifies a CBB
@@ -445,10 +481,10 @@ def downward(G):
 				else:
 					assert p.isFirm
 					n.parentcandidates &= {p}	# edge attaches to something other than a CBB, so we know it's for real
-				#print('    after',(p,e),n.parentcandidates)
+				#print('  ',n,'   after',(p,e),n.parentcandidates)
 			#print()
-			assert n.parentcandidates,'Could not find any possible heads for '+repr(n)+'. Is the annotation valid?' #(n,n.parents,n.parentedges,[p.topcandidates for p in n.parents if p.isCBB],n.parentcandidates)
-
+			#assert n.parentcandidates,(n,(n.topcandidates if n.isCBB else []), n.parents,n.parentedges,[p.topcandidates for p in n.parents if p.isCBB],n.parentcandidates)
+			assert n.parentcandidates,'Could not find any possible heads for '+repr(n)+'. Is the annotation valid?' 
 def test():
 	'''Some rudimentary test cases.'''
 	from spanningtrees import spanning
