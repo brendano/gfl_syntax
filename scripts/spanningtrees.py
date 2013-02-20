@@ -1,128 +1,105 @@
 #!/usr/bin/env python2.7
 '''
-Enumerates spanning trees of a rooted directed graph using the algorithm of Gabow & Myers 1978.
-The graph is encoded as a set of edge tuples.
+Enumerates spanning trees of a rooted directed graph using the algorithm 
+of Uno 1996. The graph is encoded as a set of edge tuples.
+
+@author: Naomi Saphra
+@since: 2013-02-19
 '''
 
-import os, sys, re
+from graph import FUDGGraph
+import copy
 
-def vertices(G):
-	"""
-	>>> t1 = {(0,1),(1,5),(1,8),(5,2),(2,6),(8,3),(6,2),(6,5),(6,8)}
-	>>> vv = vertices(t1)
-	>>> vv=={0,1,2,3,5,6,8}
-	True
-	>>> vv==vertices(t1 | {(None,0)})
-	True
-	"""
-	if not G: return set()
-	a,b = zip(*G)
-	return {v for v in a+b if v is not None}
+def find_tail(T, tail):
+    for (u,v) in T:
+        if v == tail:
+            return (u,v)
+    return None
 
-def descendants(v,T):
-	'''
-	>>> descendants(0,{(0,1),(1,5),(1,8),(5,2),(8,3),(2,6)})=={1,2,3,5,6,8}
-	True
-	>>> descendants(8,{(0,1),(1,5),(1,8),(5,2),(8,3),(2,6)})=={3}
-	True
-	'''
-	result = set()
-	for w in vertices(T):
-		if (v,w) in T:
-			result.add(w)
-			result |= descendants(w,T)
-	return result
+def find_head(T, head):
+    edges = []
+    for (u,v) in T:
+        if u == head:
+            edges.append((u,v))
+    return edges
 
-L = set()	# last tree returned
+def dfs(G, r):
+    inds = {r:0}
+    ind = 0
+    edges = set()
 
-def spanning(G, root):
-	"""
-	Finds all spanning trees rooted at 'root'
+    trail = []
+    trail += find_head(G, r)
+    while (len(trail)):
+        (u,v) = trail.pop()
+        if v in inds:
+            continue
 
-	>>> graph = {(0,1),(1,5),(1,8),(5,2),(2,6),(8,3),(6,2),(6,5),(6,8)}
-	>>> trees = spanning(graph, 0)
-	>>> {(0,1),(1,5),(1,8),(5,2),(8,3),(2,6)} in trees
-	True
-	>>> {(0,1),(1,5),(5,2),(8,3),(2,6),(6,8)} in trees
-	True
-	>>> len(trees)
-	2
-	>>> len(spanning(graph, 1))
-	0
-	>>> graph.remove((6,8))
-	>>> len(spanning(graph, 0))
-	1
-	"""
-	
-	result = []
-	
-	def grow(j=0):
-		"Finds all spanning trees rooted at 'root' containing T"
-		global L
-		if len(vertices(T))==len(vertices(G)):
-			L = set(T)
-			result.append(L - {(None,root)})
-			return
-		else:
-			FF = []
-			if not F: return	#??
-			while True:
-				e = F.pop()
-				u,v = e
-				assert u in vertices(T),(e,T)
-				assert v not in vertices(T),(v,vertices(T))
-				T.add(e)
-				for w in vertices(G) - vertices(T):
-					if (v,w) in G:
-						F.append((v,w))
-				
-				print(j,'a:',F)	
-				removedFromT = []
-				
-				#for w in vertices(T):
-				#	if (w,v) in F:
-				for w,V in F:
-					if V==v and w in vertices(T):
-						i = F.index((w,v))
-						F.pop(i)
-						removedFromT.append((i,w,v))
-				print(j,'b:',F)
-				grow(j+1)
-				print(j,'c:',F)
-				while F and F[-1][0]==v and F[-1][1] not in vertices(T):
-					F.pop()
-				print(j,'d:',F)
-				# restore
-				while removedFromT:
-					i,w,V = removedFromT.pop()
-					assert V==v
-					assert w in vertices(T)
-					F.insert(i,(w,v))
-				print(j,'e:',F)
-				
-				# remove @11
-				T.remove(e)
-				G.remove(e)
-				FF.append(e)
-				
-				descV = descendants(v,L)
-				ww = {w for w,V in G if V==v}
-				if not ww - descV:
-					break
-				
-			for e in FF:
-				F.append(e)
-				G.add(e)
-			FF[:] = []
-			
-	T = {(None,root)}
-	F = [(r,v) for r,v in G if r==root]
-	grow()
-	return result
+        edges.add((u,v))
+        ind += 1
+        inds[v] = ind
+        trail += find_head(G, v)
 
-def test():
-	import doctest
-	doctest.testmod()
-	
-if __name__=='__main__':
-	test()
+    return (edges, inds)
+
+def ancestors(start, G, root):
+    anc = set([start])
+    curr = start
+    while curr != root:
+        (u,v) = find_tail(G, curr)
+        assert v == curr
+        anc.add(u)
+        curr = u
+    return anc
+
+def spanning(G, r, threshold=20000):
+    (T0, inds) = dfs(G, r)
+    trees = [T0]
+
+    def getkey(x):
+        u,v = x
+        return inds[v]
+
+    def min_ind(T):
+        min = 0
+        for (u,v) in T:
+            if not min or inds[v] < min:
+                min = inds[v]
+        return min
+
+    def get_nonbacks(T, is_T0=False):
+        nonback = []
+        min = min_ind(T0 - T)
+
+        for (head, tail) in G:
+            if (head, tail) in T:
+                continue
+            if not is_T0 and inds[tail] >= min:
+                continue
+        
+            if tail not in ancestors(head, T, r):
+                nonback.append((head, tail))
+
+        nonback.sort(key=getkey)
+        return nonback
+
+    def spanning_iter(T, nonback, lvl=0):
+        if len(trees) > threshold:
+            raise Exception("Too many spanning trees.")
+
+        for f in nonback:
+            u,v = f
+            e = find_tail(T, v)
+            Tc = copy.copy(T)
+            Tc.add(f)
+            Tc.remove(e)
+            trees.append(Tc)
+
+            Tc_nonback = get_nonbacks(Tc)
+ 
+            spanning_iter(Tc, Tc_nonback, lvl+1)
+
+    nonback = get_nonbacks(T0, is_T0=True)
+    spanning_iter(T0, nonback)
+    return trees
+
