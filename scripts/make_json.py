@@ -32,7 +32,7 @@ for filename in args:
     parseJ = parse.to_json()
     ## hacky! if a token is on its own line in the annotation, it gets specially added to nodes
     for ln in code.splitlines():
-      if ln in tokens and ln not in parseJ['nodes']:
+      if ln in tokens and 'W('+ln+')' not in parseJ['nodes']:
         parseJ['nodes'].append('W('+ln+')')
         parseJ['node2words']['W('+ln+')'] = [ln]
     print "{id}\t{tokens}\t{parse}".format(id=sentence_id, tokens=' '.join(tokens), parse=json.dumps(parseJ))
