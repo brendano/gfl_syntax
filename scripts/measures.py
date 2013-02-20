@@ -92,7 +92,9 @@ def promcom(a, c):
 				yield analysis
 
 	stg = {(p.name,n.name) for n in a.lexnodes for p in n.parentcandidates}
-	#print(stg)
+	#stg = {(p.name,n.name) for n in a.nodes-{a.root} for ch in (n.topcandidates if n.isCBB else {n.name}) for p in n.parentcandidates}
+	assert any(1 for x,y in stg if x=='$$'),('The root $$ is not in the graph!',stg)
+	#print(stg, file=sys.stderr)
 	try:
 		strees = spanning(stg, '$$', threshold=20000)
 		assert len(strees)>0
@@ -143,44 +145,65 @@ def single_ann_measures(a):
 def iaa_measures(a1,a2):
 	pass
 
-def main(anns1F, anns2F=None):
+def main(anns1F, anns2F=None, verbose=False):
 	i = 0
 	a1C, a2C, iaC = Counter(), Counter(), Counter()
 	for ann1ln in anns1F:
+		if not ann1ln.strip(): continue
 		loc1, sent, ann1JS = ann1ln[:-1].split('\t')
 		ann1J = json.loads(ann1JS)
-		print(i, loc1, '<<', sent)
+		if verbose: print(i, loc1, '<<', sent)
 		a1 = FUDGGraph(ann1J)
 		a1single = single_ann_measures(a1)
 		a1C += a1single
-		print('   ',a1single)
+		if verbose: print('   ',a1single)
 		if anns2F is not None:
+			if not ann2ln.strip(): continue
 			ann2ln = next(anns2F)
 			loc2, sent2, ann2JS = ann2ln[:-1].split('\t')
 			assert sent2==sent
 			ann2J = json.loads(ann2JS)
 			assert len(ann1J['tokens'])==len(ann2J['tokens'])
 			a2 = FUDGGraph(ann2J)
-			print(i, loc2, '>>')
+			if verbose: print(i, loc2, '>>')
 			a2single = single_ann_measures(a2)
 			a2C += a2single
-			print('   ',a2single)
+			if verbose: print('   ',a2single)
 			iaa = iaa_measures(a1,a2)
 			iaC += iaa
-			print('   ',iaa)
+			if verbose: print('   ',iaa)
 		i += 1
-	print()
+	if verbose: print()
 	print(a1C)
 	if a2C:
+		print()
 		print(a2C)
+		print()
 		print(iaC)
 
 if __name__=='__main__':
 	anns1F = anns2F = None
-	if len(sys.argv)>1:
-		anns1F = fileinput.input([sys.argv[1]])
-		if len(sys.argv)>2:
-			anns2F = fileinput.input([sys.argv[2]])
-	else:
+	args = sys.argv[1:]
+	opts = {}
+	
+	while args and args[0].startswith('-'):
+		opts[{'-v': 'verbose', '-s': 'singleonly'}[args.pop(0)]] = True
+	
+	if not args:
 		anns1F = fileinput.input([])
-	main(anns1F,anns2F)
+	else:
+		if not opts.get('singleonly'):
+			anns1F = fileinput.input([args.pop(0)])
+			assert len(args)<=2,'Too many arguments'
+			if args:
+				anns2F = fileinput.input([args.pop(0)])
+	
+	if opts.get('singleonly'):
+		del opts['singleonly']
+		while True:
+			anns1F = fileinput.input([args.pop(0)])
+			main(anns1F,**opts)
+			if not args:
+				break
+	else:	# if there are two arguments, compare the two annotations
+		main(anns1F,anns2F,**opts)
