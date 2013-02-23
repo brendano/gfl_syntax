@@ -134,11 +134,19 @@ class LexicalNode(FUDGNode):
 		for tkn in tokens:
 			assert tkn not in token2lexnode,(tkn,token2lexnode)
 			token2lexnode[tkn] = self
+			
+	@property
+	def json_name(self):	# not guaranteed to be consistent across invocations!
+		return ('M' if len(self.tokens)>1 else '') + 'W('+self.name+')'
 
 class RootNode(FUDGNode):
 	def __init__(self, children=None):
 		FUDGNode.__init__(self, '$$', children or set())
 		self.parentcandidates = None
+	
+	@property
+	def json_name(self):
+		return 'W($$)'
 
 class CoordinationNode(FUDGNode):
 	def __init__(self, name, coords, conjuncts=None, modifiers=None):
@@ -188,6 +196,10 @@ class CBBNode(FUDGNode):
 		self.parentedges = node.parentedges
 		self._pointerto = node
 		#assert False
+		
+	@property
+	def json_name(self): return self.name
+		
 	def __getattr__(self, name):
 		assert name in ('parentcandidates', 'topcandidates', 'height', 'depth'),(name,self.__dict__)
 		if self._pointerto is not None:
@@ -337,6 +349,19 @@ class FUDGGraph(Graph):
 					
 		assert self.lexnodes
 
+	def to_json_simplecoord(self):
+		outJ = {"tokens": list(self.alltokens), "extra_node2words": {},
+				"nodes": [n.json_name for n in self.nodes], 
+				# exclude members of CBBMWs
+				"node2words": {n.json_name: list(n.tokens) for n in self.lexnodes if not any(1 for p in n.parents if p.isCBB and p.name.startswith('CBBMW'))},
+				"node_edges": [[p.json_name, n.json_name, lbl and lbl.replace('top','cbbhead')] for n in self.nodes for p,lbl in n.parentedges if not p.name.startswith('CBBMW')]}
+		for cbb in self.cbbnodes:
+			if cbb.name.startswith('CBBMW'):	# hacky
+				outJ["node2words"][cbb.name] = [tkn for n in cbb.members for tkn in n.tokens]
+		for e in self.anaphlinks:	# TODO
+			outJ["node_edges"]
+		return outJ
+		
 
 def simplify_coord(G):
 	'''
