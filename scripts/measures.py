@@ -7,8 +7,9 @@ from __future__ import print_function, division
 import os, re, sys, fileinput, json, math
 from collections import Counter, defaultdict
 
-from graph import FUDGGraph, simplify_coord, upward, downward
+from graph import FUDGGraph, LexicalNode, simplify_coord, upward, downward
 from spanningtrees import spanning
+from merge_annotations import *
 
 class ValueStats(object):
 	def __init__(self, val=None, show=None):
@@ -22,6 +23,12 @@ class ValueStats(object):
 		else:
 			self.instances[val] += 1
 		return self
+	def __float__(self):
+		if sum(self.instances.values())==1:
+			return float(self.instances.keys()[0])
+		assert sum(self.instances.values())==0
+		return float('nan')
+		
 	@property
 	def sum_n_mean_median_mode(self):
 		elts = tuple(self.instances.elements())
@@ -40,8 +47,9 @@ class ValueStats(object):
 	def power_threshold_histogram(self):
 		c = Counter()
 		c['0'] = self.instances[0]
+		c[     '<1'] = sum(v for k,v in self.instances.items() if k<1)
 		c['1'] = self.instances[1]
-		c[    '>=2'] = sum(v for k,v in self.instances.items() if k>=2)
+		c[     '>1'] = sum(v for k,v in self.instances.items() if k>1)
 		c[   '>=10'] = sum(v for k,v in self.instances.items() if k>=10)
 		c[  '>=100'] = sum(v for k,v in self.instances.items() if k>=100)
 		c[ '>=1000'] = sum(v for k,v in self.instances.items() if k>=1000)
@@ -66,6 +74,10 @@ def depth(v, parmap):
 	if parmap[v] not in parmap: return 0
 	return 1+depth(parmap[v],parmap)
 
+def com(prom, N):
+	com = 1-math.log(prom)/((N-2)*math.log(N)) if N>2 else prom
+	if N==2: assert prom in (0,1)
+	return com
 
 def promcom(a, c):
 	def compatible_analyses(spanning_trees, nodeswithext):
@@ -77,6 +89,7 @@ def promcom(a, c):
 			# determine tops of all CBBs in this analysis, going upward
 			tops = {}
 			for cbb in sorted(a.cbbnodes, key=lambda node: node.height):
+				assert cbb.members,(cbb,cbb._pointerto)
 				tops[cbb.name] = min((tops.get(n.name,n.name) for n in cbb.members), key=lambda v: depth(v,parmap))
 
 			for cbb in nodeswithext:
@@ -96,7 +109,7 @@ def promcom(a, c):
 	assert any(1 for x,y in stg if x=='$$'),('The root $$ is not in the graph!',stg)
 	#print(stg, file=sys.stderr)
 	try:
-		strees = spanning(stg, '$$', threshold=20000)
+		strees = spanning(stg, '$$', threshold=10000)
 		assert len(strees)>0
 		c['spanning trees'] = ValueStats(len(strees))
 		nodeswithext = {cbb for cbb in a.cbbnodes if cbb.externalchildren}
@@ -105,8 +118,7 @@ def promcom(a, c):
 		c['promiscuity'] = ValueStats(prom)
 		N = len(a.lexnodes)+1
 		assert N>=2
-		com = 1-math.log(prom)/((N-2)*math.log(N)) if N>2 else prom
-		c['commitment'] = ValueStats(com, show='mean')
+		c['commitment'] = ValueStats(com(prom,N), show='mean')
 
 	except Exception as ex:
 		if ex.message=='Too many spanning trees.':
@@ -116,6 +128,54 @@ def promcom(a, c):
 			c['commitment'] = ValueStats()	# TODO: ??
 		else:
 			raise
+
+def iapromcom(a1, a2, c, escapebrackets=False):
+	'''
+	Measures local compatibility of constraints in two annotations.
+	Assumes single_ann_measures() has already been run independently on the two annotation graphs.
+	See merge_annotations.py to measure global compatibility of two annotations (i.e. reasoning over the entire structure).
+	'''
+	a1J, a2J = a1.to_json_simplecoord(), a2.to_json_simplecoord()
+	#print()
+	#print(a1J)
+	#print()
+	#print(a2J)
+	m = merge([a1J, a2J], updatelex=True, escapebrackets=escapebrackets)
+	#ma = FUDGGraph(m)
+	a1U = FUDGGraph(a1J)
+	a2U = FUDGGraph(a2J)
+	upward(a1U)
+	downward(a1U)
+	upward(a2U)
+	downward(a2U)
+	for n in a1U.lexnodes | a2U.lexnodes:
+		assert n.json_name in a1U.nodesbyname,(n.json_name,m,'-------------------',a1J)
+		assert n.json_name in a2U.nodesbyname,(n.json_name,m,'-------------------',a2J)
+		#assert n.json_name in m['node2words'] or (n.json_name.startswith('MW(') and 'CBB'+n.json_name in m['node2words']),(n.json_name,m)
+
+	jointSuppParents = {n.name: {p.json_name for p in a1U.nodesbyname[n.json_name].parentcandidates} & {p.json_name for p in a2U.nodesbyname[n.json_name].parentcandidates} for n in (a1U.lexnodes|a2U.lexnodes)}
+	
+	# compute single-annotation commitment (w/ compatible lexical level)
+	a1C, a2C = Counter(), Counter()
+	promcom(a1U, a1C)
+	promcom(a2U, a2C)
+	a1com, a2com = a1C['commitment'], a2C['commitment']
+	
+	numer = sum(len(jointpars) for jointpars in jointSuppParents.values())
+	c['softprec_1|2'] = ValueStats(numer/sum(len(n.parentcandidates) for n in a1U.lexnodes))
+	c['softprec_2|1'] = ValueStats(numer/sum(len(n.parentcandidates) for n in a2U.lexnodes))
+	if math.isnan(float(a1com)) or math.isnan(float(a2com)):
+		c['softcomprec_1|2'] = ValueStats()
+		c['softcomprec_2|1'] = ValueStats()
+		c['softcomprec_discarded'] = 1
+	else:
+		assert 0.0<=float(a1com)<=1.0,float(a1com)
+		assert 0.0<=float(a2com)<=1.0,float(a2com)
+		c['a1com'] = ValueStats(a1com)
+		c['a2com'] = ValueStats(a2com)
+		c['softcomprec_1|2'] = ValueStats(float(a1com)*float(c['softprec_1|2']))
+		c['softcomprec_2|1'] = ValueStats(float(a2com)*float(c['softprec_2|1']))
+	
 
 def single_ann_measures(a):
 	c = Counter()
@@ -142,10 +202,12 @@ def single_ann_measures(a):
 
 	return c
 	
-def iaa_measures(a1,a2):
-	pass
+def iaa_measures(a1,a2,escapebrackets=False):
+	c = Counter()
+	iapromcom(a1,a2,c,escapebrackets=escapebrackets)
+	return c
 
-def main(anns1F, anns2F=None, verbose=False):
+def main(anns1F, anns2F=None, verbose=False, escapebrackets=False):
 	i = 0
 	a1C, a2C, iaC = Counter(), Counter(), Counter()
 	for ann1ln in anns1F:
@@ -158,18 +220,19 @@ def main(anns1F, anns2F=None, verbose=False):
 		a1C += a1single
 		if verbose: print('   ',a1single)
 		if anns2F is not None:
-			if not ann2ln.strip(): continue
 			ann2ln = next(anns2F)
+			if not ann2ln.strip(): continue
 			loc2, sent2, ann2JS = ann2ln[:-1].split('\t')
-			assert sent2==sent
+			#assert sent2==sent,(sent,sent2)
 			ann2J = json.loads(ann2JS)
 			assert len(ann1J['tokens'])==len(ann2J['tokens'])
+			#assert ann1J['tokens']==ann2J['tokens'],(ann1J['tokens'],ann2J['tokens'])
 			a2 = FUDGGraph(ann2J)
-			if verbose: print(i, loc2, '>>')
+			if verbose: print(i, loc2, '>>', sent2)
 			a2single = single_ann_measures(a2)
 			a2C += a2single
 			if verbose: print('   ',a2single)
-			iaa = iaa_measures(a1,a2)
+			iaa = iaa_measures(a1,a2, escapebrackets=escapebrackets)
 			iaC += iaa
 			if verbose: print('   ',iaa)
 		i += 1
@@ -179,6 +242,7 @@ def main(anns1F, anns2F=None, verbose=False):
 		print()
 		print(a2C)
 		print()
+		print('INTER-ANNOTATOR:')
 		print(iaC)
 
 if __name__=='__main__':
@@ -187,7 +251,7 @@ if __name__=='__main__':
 	opts = {}
 	
 	while args and args[0].startswith('-'):
-		opts[{'-v': 'verbose', '-s': 'singleonly'}[args.pop(0)]] = True
+		opts[{'-v': 'verbose', '-s': 'singleonly', '-b': 'escapebrackets'}[args.pop(0)]] = True
 	
 	if not args:
 		anns1F = fileinput.input([])
