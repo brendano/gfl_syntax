@@ -30,6 +30,14 @@ from __future__ import print_function, division
 import os, sys, re, itertools
 
 
+class FixedDict(dict):
+    '''Dict subclass which prevents reassignment to existing keys.'''
+    
+    def __setitem__(self, key, newvalue):
+        if key in self:
+            raise KeyError('FixedDict cannot reassign to key {0!r} (current: {1!r}, new value: {2!r})'.format(key,self[key],newvalue))
+        dict.__setitem__(self, key, newvalue)
+
 # from Naomi's code:
 class TreeNode(object):
     def __init__(self, name, children):
@@ -198,10 +206,11 @@ class CBBNode(FUDGNode):
 		#assert False
 		
 	@property
-	def json_name(self): return self.name
-		
+	def json_name(self): return self.name if self._pointerto is None else self._pointerto.name
+	
 	def __getattr__(self, name):
-		assert name in ('parentcandidates', 'topcandidates', 'height', 'depth'),(name,self.__dict__)
+		if name not in ('parentcandidates', 'topcandidates', 'height', 'depth'):
+			raise AttributeError(name)
 		if self._pointerto is not None:
 			#assert getattr(self._pointerto, '_'+name) is not None,self.__dict__
 			return getattr(self._pointerto, '_'+name)
@@ -255,7 +264,7 @@ class FUDGGraph(Graph):
 		self.root = RootNode()
 		self.coordnodes = set()
 		self.coordnodenames = {}
-		self.nodesbyname = {'W($$)': self.root}	# GFL name -> node
+		self.nodesbyname = FixedDict({'W($$)': self.root})	# GFL name -> node
 		
 		# lexical nodes
 		coordNodes = set()
@@ -318,12 +327,14 @@ class FUDGGraph(Graph):
 				if 'W('+lex+')' not in self.nodesbyname:
 					add_lex('W('+lex+')', lex)
 				cbb.add_member(self.nodesbyname['W('+lex+')'], False)
+			assert cbb.members
 		
 		self.nodes = {self.root} | self.lexnodes | self.coordnodes | self.cbbnodes
 		
 		# edges
 		for p,c,lbl in graphJ['node_edges']:
 			pnode = self.nodesbyname[p]
+			assert c in self.nodesbyname,(c,self.nodesbyname)
 			cnode = self.nodesbyname[c]
 			if lbl=='Conj':
 				pnode.conjuncts.add(cnode)
@@ -336,9 +347,13 @@ class FUDGGraph(Graph):
 			else:
 				assert lbl is None,lbl
 				pnode.add_child(cnode)
-				
+		
+		
+
+		
 		# merge CBBs with identical member sets
 		cbbs = list(sorted(self.cbbnodes, key=lambda n: n.name))
+		assert None not in cbbs
 		for i in range(len(cbbs)):
 			for h in range(i):
 				if cbbs[h] and cbbs[h].members==cbbs[i].members:
@@ -346,15 +361,21 @@ class FUDGGraph(Graph):
 					self.cbbnodes.remove(cbbs[i])
 					self.nodes.remove(cbbs[i])
 					cbbs[i] = None
+					break
 					
 		assert self.lexnodes
+		
 
 	def to_json_simplecoord(self):
 		outJ = {"tokens": list(self.alltokens), "extra_node2words": {},
 				"nodes": [n.json_name for n in self.nodes], 
-				# exclude members of CBBMWs
-				"node2words": {n.json_name: list(n.tokens) for n in self.lexnodes if not any(1 for p in n.parents if p.isCBB and p.name.startswith('CBBMW'))},
+				"node2words": {n.json_name: list(n.tokens) for n in self.lexnodes},
+				# exclude CBBMW member links (these are handled separately)
 				"node_edges": [[p.json_name, n.json_name, lbl and lbl.replace('top','cbbhead')] for n in self.nodes for p,lbl in n.parentedges if not p.name.startswith('CBBMW')]}
+		if any(self.root.json_name in (x,y) for x,y,l in outJ["node_edges"]):
+			outJ["node2words"][self.root.json_name] = ['$$']
+		else:
+			outJ["nodes"].remove(self.root.json_name)
 		for cbb in self.cbbnodes:
 			if cbb.name.startswith('CBBMW'):	# hacky
 				outJ["node2words"][cbb.name] = [tkn for n in cbb.members for tkn in n.tokens]
@@ -398,6 +419,7 @@ def simplify_coord(G):
 					newhead.add_child(c, adjust_fragments=True)
 					#print('AFTER:',c.frag,n.frag)
 					#assert False
+					assert c in G.nodes
 
 			for c in n.children:	# modifiers
 				# detach c from n
@@ -416,6 +438,7 @@ def simplify_coord(G):
 				# attach c to newhead
 				maxht = max(maxht, c.height)
 				newhead.add_child(c, adjust_fragments=False)
+				assert c in G.nodes
 				
 			assert newhead.height==maxht+1,(n,n.height,newhead,newhead.height,maxht,newhead.children)
 			
@@ -434,7 +457,8 @@ def simplify_coord(G):
 			except AssertionError as ex:
 				print(ex, 'There is a legitimate edge case in which this fails: the coordinator is also a member of a CBB and so will continue to have greater depth than the coordination node even when it replaces it', file=sys.stderr)
 
-				
+			assert newhead in G.nodes
+			
 			# remove n utterly
 			n.frag.nodes.remove(n)
 			
