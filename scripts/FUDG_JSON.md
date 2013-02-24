@@ -78,7 +78,7 @@ Includes:
 - regular dependency links of type `null`
 - CBB membership links of type `"cbbhead"` or `"unspec"`
 - conjunct links of type `"Conj"`
-- anaphoric linksn of type `"Anaph"`
+- anaphoric links of type `"Anaph"`
 
 Excludes:
 
