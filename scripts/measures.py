@@ -119,15 +119,16 @@ def promcom(a, c):
 		N = len(a.lexnodes)+1
 		assert N>=2
 		c['commitment'] = ValueStats(com(prom,N), show='mean')
-
 	except Exception as ex:
 		if ex.message=='Too many spanning trees.':
 			c['spanning tree overflow'] += 1
 			c['spanning trees'] = ValueStats()	# prevents this from being counted (otherwise registers as 0)
 			c['promiscuity'] = ValueStats()
 			c['commitment'] = ValueStats()	# TODO: ??
-		else:
+		elif 'No compatible trees' in ex.message:
 			raise
+		else:
+			raise Exception('No spanning trees for: '+repr(stg))
 
 def iapromcom(a1, a2, c, escapebrackets=False):
 	'''
@@ -141,7 +142,6 @@ def iapromcom(a1, a2, c, escapebrackets=False):
 	#print()
 	#print(a2J)
 	m = merge([a1J, a2J], updatelex=True, escapebrackets=escapebrackets)
-	#ma = FUDGGraph(m)
 	a1U = FUDGGraph(a1J)
 	a2U = FUDGGraph(a2J)
 	upward(a1U)
@@ -165,9 +165,16 @@ def iapromcom(a1, a2, c, escapebrackets=False):
 	c['softprec_1|2'] = ValueStats(numer/sum(len(n.parentcandidates) for n in a1U.lexnodes))
 	c['softprec_2|1'] = ValueStats(numer/sum(len(n.parentcandidates) for n in a2U.lexnodes))
 	if math.isnan(float(a1com)) or math.isnan(float(a2com)):
+		assert a1C['spanning tree overflow'] or a2C['spanning tree overflow'],('internally inconsistent:', a1C if math.isnan(float(a1com)) else a2C)
+		c['a1com'] = ValueStats()
+		c['a2com'] = ValueStats()
 		c['softcomprec_1|2'] = ValueStats()
 		c['softcomprec_2|1'] = ValueStats()
 		c['softcomprec_discarded'] = 1
+		c['too_many_spanning_trees'] = 1
+		c['comprec_1|2'] = ValueStats()
+		c['comprec_2|1'] = ValueStats()
+		return
 	else:
 		assert 0.0<=float(a1com)<=1.0,float(a1com)
 		assert 0.0<=float(a2com)<=1.0,float(a2com)
@@ -175,6 +182,51 @@ def iapromcom(a1, a2, c, escapebrackets=False):
 		c['a2com'] = ValueStats(a2com)
 		c['softcomprec_1|2'] = ValueStats(float(a1com)*float(c['softprec_1|2']))
 		c['softcomprec_2|1'] = ValueStats(float(a2com)*float(c['softprec_2|1']))
+	
+	try:
+		ma = FUDGGraph(m)
+		try:
+			upward(ma)
+			downward(ma)
+			maC = Counter()
+			try:
+				promcom(ma, maC)
+				maprom = maC['promiscuity']
+				macom = maC['commitment']
+				c['comprec_1|2'] = ValueStats(float(maprom)/float(a1C['promiscuity']))
+				c['comprec_2|1'] = ValueStats(float(maprom)/float(a2C['promiscuity']))
+				c['comprec_nonzero'] = 1
+			except Exception as ex:
+				c['comprec_1|2'] = ValueStats(0)
+				c['comprec_2|1'] = ValueStats(0)
+				if 'No spanning trees' in ex.message:
+					if "(u'SM', u'Cebu')" not in ex.message:
+						raise
+					c['no_spanning_trees'] = 1
+				elif 'No compatible trees' in ex.message:
+					c['no_compatible_trees'] = 1	# due to external-attachment-to-CBB constraint
+				else:
+					print('unknown error in promcom()', file=sys.stderr)
+					raise
+		except Exception as ex:
+			c['comprec_1|2'] = ValueStats(0)
+			c['comprec_2|1'] = ValueStats(0)
+			print(ex, file=sys.stderr)
+			if 'any possible heads' in ex.message:
+				c['empty_spanning_tree_graph'] = 1
+			else:
+				raise
+	except Exception as ex:
+		c['comprec_1|2'] = ValueStats(0)
+		c['comprec_2|1'] = ValueStats(0)
+		print(ex, file=sys.stderr)
+		if 'cycle' in ex.message:
+			c['merge_cycle'] = 1
+		elif 'specified top' in ex.message:
+			c['merge_extra_top'] = 1
+		else:
+			raise
+		c['no_valid_merge'] = 1
 	
 
 def single_ann_measures(a):

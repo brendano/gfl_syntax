@@ -176,7 +176,7 @@ class CBBNode(FUDGNode):
 	def add_member(self, node, specified_top):
 		self.members.add(node)
 		if specified_top:
-			assert self.top is None
+			assert self.top is None,'CBB can only have one specified top: '+repr(self.top)+', '+repr(node)
 			self.top = node
 		FUDGNode.add_child(self, node, label=('top' if specified_top else 'unspec'))
 		
