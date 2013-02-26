@@ -64,7 +64,12 @@ def psf2dot(parse):
     conjbg  = '"#90c090"'
     darkblue = '"#202090"'
     gray = '"#606060"'
-    for head,child,label in parse.node_edges:
+    
+    def idx(items, elt, default=None):
+    	if elt not in items: return default
+    	return items.index(elt)
+    
+    for head,child,label in sorted(parse.node_edges, key=lambda (h,c,l): (idx(parse.tokens, next(iter(parse.node2words.get(h,{None})))), idx(parse.tokens, next(iter(parse.node2words.get(c,{None})))))):
         if child=='W('+ROOT+')' and label not in ('cbbhead','Anaph'): raise Exception("The root node "+ROOT+" cannot be a dependent except as cbbhead or Anaph.")
         # TODO: if ROOT is a cbbhead, the above doesn't verify that the CBB is the root of the annotation graph
         child=dot_clean(child)
