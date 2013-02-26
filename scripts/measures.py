@@ -241,6 +241,7 @@ def single_ann_measures(a):
 	c['explicitly rooted utterances'] = len(a.root.children)
 	#print({n: n.depth for n in a.nodes})
 	simplify_coord(a)
+	c['projective'] = int(a.isProjective)
 	# literal number of connected components in the graph (not counting the root when nothing was explicitly attached to it)
 	c['fragments'] = len({n.frag for n in a.nodes if n.frag.nodes!={a.root}})
 	assert c['fragments']>0,(a.nodes,a.lexnodes)

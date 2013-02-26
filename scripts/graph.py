@@ -70,7 +70,7 @@ class FUDGNode(TreeNode):
 		self.depth = -1	# length of longest path from a parentless node to this one
 		self.frag = Fragment({self}, {self})
 	
-	def add_child(self, node, label=None, adjust_fragments=True):
+	def add_child(self, node, label=None):
 		assert self.name!=node.name
 		assert not node.isRoot or (self.isCBB and label is not None)
 		TreeNode.add_child(self, node)
@@ -83,11 +83,11 @@ class FUDGNode(TreeNode):
 		node.parents.add(self)
 		self._setMinHeight(node.height+1)
 		
-		if adjust_fragments:
-			#print(self,'.add_child',node)
-			self.frag |= node.frag	# unify the fragments, updating all references from member nodes
-			#self.frag.roots.remove(node)	# no longer a root because it has a parent
-			self.frag.roots -= {node}	# TODO
+		#print(self,'.add_child',node)
+		self.frag |= node.frag	# unify the fragments, updating all references from member nodes
+		#self.frag.roots.remove(node)	# no longer a root because it has a parent
+		self.frag.roots -= {node}	# TODO
+
 		# recompute depths in the entire fragment
 		for n in self.frag.nodes:
 			n.depth = -1
@@ -118,6 +118,7 @@ class FUDGNode(TreeNode):
 	@property
 	def descendants(self): return set(self.descendantsIter())
 	
+	def get_yield(self): return {tkn for c in self.children for tkn in c.get_yield()}
 	
 	@property
 	def isRoot(self): return isinstance(self, RootNode)
@@ -143,6 +144,9 @@ class LexicalNode(FUDGNode):
 			assert tkn not in token2lexnode,(tkn,token2lexnode)
 			token2lexnode[tkn] = self
 			
+	def get_yield(self):
+		return set(self.tokens) | FUDGNode.get_yield(self)
+	
 	@property
 	def json_name(self):	# not guaranteed to be consistent across invocations!
 		return ('M' if len(self.tokens)>1 else '') + 'W('+self.name+')'
@@ -366,6 +370,19 @@ class FUDGGraph(Graph):
 		assert self.lexnodes
 		
 
+	@property
+	def isProjective(self):
+		usedtokens = [tkn for tkn in self.alltokens if tkn in self.token2lexnode and len(self.token2lexnode[tkn].frag.nodes)>1]
+		# for each node, determine whether its yield corresponds to a contiguous portion of usedtokens
+		for n in self.nodes:
+			if n.isRoot or len(n.frag.nodes)<2: continue
+			yieldtkns = n.get_yield()
+			yieldoffsets = {usedtokens.index(tkn) for tkn in yieldtkns}
+			if max(yieldoffsets)-min(yieldoffsets)!=len(yieldoffsets)-1:
+				print('nonprojective:',usedtokens,n,yieldoffsets, file=sys.stderr)
+				return False
+		return True
+
 	def to_json_simplecoord(self):
 		outJ = {"tokens": list(self.alltokens), "extra_node2words": {},
 				"nodes": [n.json_name for n in self.nodes], 
@@ -416,7 +433,7 @@ def simplify_coord(G):
 					maxht = max(maxht, c.height)
 					#print(c.frag,c.frag.roots,c.frag.nodes)
 					#print('BEFORE:',c.frag,n.frag)
-					newhead.add_child(c, adjust_fragments=True)
+					newhead.add_child(c)
 					#print('AFTER:',c.frag,n.frag)
 					#assert False
 					assert c in G.nodes
@@ -437,7 +454,7 @@ def simplify_coord(G):
 				
 				# attach c to newhead
 				maxht = max(maxht, c.height)
-				newhead.add_child(c, adjust_fragments=False)
+				newhead.add_child(c)
 				assert c in G.nodes
 				
 			assert newhead.height==maxht+1,(n,n.height,newhead,newhead.height,maxht,newhead.children)
