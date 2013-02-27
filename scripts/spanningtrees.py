@@ -3,7 +3,7 @@
 Enumerates spanning trees of a rooted directed graph using the algorithm 
 of Uno 1996. The graph is encoded as a set of edge tuples.
 
-@author: Naomi Saphra
+@author: Naomi Saphra (nsaphra@andrew.cmu.edu)
 @since: 2013-02-19
 '''
 
