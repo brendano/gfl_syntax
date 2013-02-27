@@ -31,10 +31,5 @@ for filename in args:
     if len(tokens_codes_annos)>1: sentence_id += ':' + str(i)
     parse = gfl_parser.parse(tokens,code)
     parseJ = parse.to_json()
-    ## hacky! if a token is on its own line in the annotation, it gets specially added to nodes
-    for ln in code.splitlines():
-      if ln in tokens and 'W('+ln+')' not in parseJ['nodes']:
-        parseJ['nodes'].append('W('+ln+')')
-        parseJ['node2words']['W('+ln+')'] = [ln]
     print "{id}\t{tokens}\t{parse}".format(id=sentence_id, tokens=' '.join(tokens), parse=json.dumps(parseJ))
 
