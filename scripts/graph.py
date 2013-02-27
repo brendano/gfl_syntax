@@ -274,8 +274,10 @@ class FUDGGraph(Graph):
 		coordNodes = set()
 		cbbmws = set()
 		
+		'''
 		for punct in set('.,!-()$:') | {'....'}:	# TODO: deal with dependency converted input
 			graphJ['nodes'][:] = [x for x in graphJ['nodes'] if x in graphJ['node2words'] or x!='W('+punct+')']
+		'''
 		
 		def add_lex(lex, tkns):
 			lname = lex[2:-1]
@@ -288,7 +290,7 @@ class FUDGGraph(Graph):
 		
 		for lex in graphJ['nodes']:
 			if lex=='W(,)':
-				assert False,(graphJ['nodes'],graphJ['node2words'])
+				assert False,('Nodes list in JSON input should probably not contain punctuation:',graphJ['nodes'],graphJ['node2words'])
 			if lex=='W($$)':
 				continue
 			elif lex.startswith('MW('):
