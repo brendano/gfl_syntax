@@ -1,3 +1,4 @@
+# vim:sts=2:sw=2
 """
 Parse the high-level annotation format.
 ("psfParser.py" is the ANTLR parser.)
@@ -19,6 +20,7 @@ except ImportError:
   import json
 
 VERBOSE = False
+ADD_ORPHAN_NODES = True   # hack: make False for old unit tests to work
 
 class ParseError(Exception): pass
 class InvalidGraph(ParseError): pass
@@ -74,6 +76,8 @@ class Parse:
 
   def finalize(self):
     self.gc()
+    if ADD_ORPHAN_NODES:
+      add_nodes_for_orphans(self)
 
     self.nodes = set(self.node2words)
     for x in flatten((h,c) for h,c,_ in self.node_edges):
@@ -270,6 +274,17 @@ def parse(text_tokens, psf_code, check_semantics=False):
   if check_semantics:
     graph_semantics_check(p)
   return p
+
+def add_nodes_for_orphans(p):
+  # first, find all island words
+  seen_words = set()
+  for words in (list(p.node2words.values()) + list(p.extra_node2words.values())):
+    for word in words:
+      seen_words.add(word)
+  island_words = set(p.tokens) - seen_words
+  for word in island_words:
+    p.add_nodeword_edge('W(' + word + ')', word)
+
 
 def show(antlr_node):
   n=antlr_node
