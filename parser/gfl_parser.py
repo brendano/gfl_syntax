@@ -20,7 +20,6 @@ except ImportError:
   import json
 
 VERBOSE = False
-ADD_ORPHAN_NODES = True   # hack: make False for old unit tests to work
 
 class ParseError(Exception): pass
 class InvalidGraph(ParseError): pass
@@ -76,8 +75,6 @@ class Parse:
 
   def finalize(self):
     self.gc()
-    if ADD_ORPHAN_NODES:
-      add_nodes_for_orphans(self)
 
     self.nodes = set(self.node2words)
     for x in flatten((h,c) for h,c,_ in self.node_edges):
@@ -151,14 +148,23 @@ class Parse:
   ## END State manipulation
 
   def gc(self):
-    # need to garbage collect stranded wordnodes
-    wordnodes = {n for n in self.node2words if len(self.node2words[n])==1}
-    nodes_with_edges = set(flatten((h,c) for h,c,_ in self.node_edges))
-    orphan_wordnodes = wordnodes - nodes_with_edges
-    orphan_wordnodes = [x for x in orphan_wordnodes if not x.startswith('$')]
-    #print "BAD NODES", orphan_wordnodes
-    for n in orphan_wordnodes:
-      del self.node2words[n]
+    # garbage collect basic wordnodes in the case they're obsolete because the
+    # word has a multiword or other fancy node.
+    word2nodes = defaultdict(set)
+    for node,words in (self.node2words.items() + self.extra_node2words.items()):
+      for word in words:
+        word2nodes[word].add(node)
+    for word,nodes in word2nodes.items():
+      if len(nodes)==1: continue
+      basic_wordnodes = [n for n in nodes if n.startswith('W(')]
+      for n in basic_wordnodes:
+        if n in self.node2words:
+          self.node2words[n].remove(word)
+        if n in self.extra_node2words:
+          self.extra_node2words[n].remove(word)
+
+    clean_empty_entries(self.node2words)
+    clean_empty_entries(self.extra_node2words)
 
     
   def to_json(self, numberize=False):
@@ -193,6 +199,12 @@ class Parse:
     s += "\n\textra_node2words: " + json.dumps(d['extra_node2words'])
     s += "\n"
     return s
+
+def clean_empty_entries(dct):
+  """intended for a dictionary where values are sets or lists."""
+  for k in list(dct.keys()):
+    if len(dct[k])==0:
+      del dct[k]
 
 def unicodify(s, encoding='utf8', *args):
   "Safely translate anything into a unicode object"
@@ -235,7 +247,7 @@ def parse(text_tokens, psf_code, check_semantics=False):
     typ = fragment.getType()
 
     if typ == TOKEN:  # singleton
-      continue
+      process_chain(p, fragment)
 
     elif typ in (LARROW, RARROW, LSB, LRB):
       process_chain(p, fragment)
@@ -274,17 +286,6 @@ def parse(text_tokens, psf_code, check_semantics=False):
   if check_semantics:
     graph_semantics_check(p)
   return p
-
-def add_nodes_for_orphans(p):
-  # first, find all island words
-  seen_words = set()
-  for words in (list(p.node2words.values()) + list(p.extra_node2words.values())):
-    for word in words:
-      seen_words.add(word)
-  island_words = set(p.tokens) - seen_words
-  for word in island_words:
-    p.add_nodeword_edge('W(' + word + ')', word)
-
 
 def show(antlr_node):
   n=antlr_node
@@ -569,11 +570,8 @@ def test_football_wives():
   tokens = "@ciaranyree it was on football wives , one of the players and his wife own smash burger".split()
   go = lambda c: goparse(tokens,c)
   assert_same(go( """
-    @ciaranyree
     it > was < on < [football wives] 
-    , 
     one < of < (the > players)
-    and
     his > wife 
     $x :: {one wife} :: and
     $x > own < [smash burger]
@@ -606,6 +604,20 @@ def test_tree_constraint():
     graph_semantics_check(p)
   p = goparse(string.letters, "a > z \n b > z")
   graph_semantics_check(p)
+
+def test_orphans():
+  # https://github.com/brendano/gfl_syntax/issues/15
+  tokens = "a b c d".split()
+  p = goparse(tokens, """a > b""")
+  assert {'W(a)','W(b)'} == set(p.node2words.keys())
+  p = goparse(tokens, """a > b \n c""")
+  assert {'W(a)','W(b)','W(c)'} == set(p.node2words.keys())
+  p = goparse(tokens, """[a b] \n c""")
+  assert 'W(c)' in p.node2words
+  assert 'W(a)' not in p.node2words
+  assert 'W(b)' not in p.node2words
+  assert 'W(d)' not in p.node2words
+
 
 
 def assert_same(p1, p2):
