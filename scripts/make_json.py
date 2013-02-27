@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
-convert from annotations format to JSON.  Outputs one sentence (or rather, annotations
-container) per line, with the columns:
+Convert from annotations format to FUDG JSON, as specified in FUDG_JSON.md.
+Outputs one sentence (or rather, annotations container) per line, with the
+columns:
 
 SentenceID TAB SpaceSepTokens TAB {ParseGraphAsJson}
 
