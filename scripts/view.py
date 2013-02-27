@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim:sts=4:sw=4
 from __future__ import division
-import re,sys,os,traceback
+import re,sys,os,traceback,itertools,json
 from collections import defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../parser'))
@@ -193,6 +193,24 @@ def process_potentially_multifile(filename):
         tuples.append((tokens, code, anno_text))
     return tuples
 
+def is_json(s):
+    try:
+        json.loads(s)
+        return True
+    except ValueError:
+        return False
+
+def file_is_json(filename):
+    toplines = list(itertools.islice(open(filename), 5))
+    toprows = [L.rstrip('\n').split('\t') for L in toplines]
+    if all(is_json(row[-1]) for row in toprows):
+        return True
+    return False
+
+def filesafe_name(s):
+    s = s.replace("/",".").replace(" ","_")
+    return s
+
 if __name__=='__main__':
     import string
     from optparse import OptionParser
@@ -222,6 +240,23 @@ if __name__=='__main__':
             bigbase = 'tmp'
         else:
             bigbase = re.sub(r'\.(txt|anno)$','', filename)
+
+        if file_is_json(filename):
+            assert filename != '/dev/stdin', "can't view JSON on stdin sorry!"
+            for i,line in enumerate(open(filename)):
+                row = line.rstrip('\n').split('\t')
+                sentid = row[0]
+                obj = json.loads(row[-1])
+                parse = gfl_parser.Parse.from_json(obj)
+                base = "%s.%s.%d" % (bigbase, filesafe_name(sentid), i)
+                process_one_parse(parse, base)
+                htmlfile = make_html(base, u' '.join(obj['tokens']).encode('utf8'), base + ".png")
+                if do_open:
+                    if opts.open_html:
+                        desktop_open(htmlfile)
+                    else:
+                        desktop_open("{base}.png".format(**locals()))
+            continue
 
         tokens_codes_texts = process_potentially_multifile(filename)
 

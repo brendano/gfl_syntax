@@ -171,6 +171,16 @@ class Parse:
 
     return d
 
+  @staticmethod
+  def from_json(obj):
+    p = Parse()
+    p.tokens = obj['tokens']
+    p.node2words = obj['node2words']
+    p.extra_node2words = obj['extra_node2words']
+    p.node_edges = set(tuple(x) for x in obj['node_edges'])
+    p.finalize()
+    return p
+
   def __repr__(self):
     d = self.to_json()
     s = "Parse:"
