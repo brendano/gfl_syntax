@@ -9,6 +9,7 @@ from collections import Counter, defaultdict
 
 from graph import FUDGGraph, LexicalNode, simplify_coord, upward, downward
 from spanningtrees import spanning
+from kirchhoff import spanningtree
 from merge_annotations import *
 
 class ValueStats(object):
@@ -77,9 +78,25 @@ def depth(v, parmap):
 def com(prom, N):
 	com = 1-math.log(prom)/((N-2)*math.log(N)) if N>2 else prom
 	if N==2: assert prom in (0,1)
+	assert 0.0<=com<=1.0,(com,prom,N)
 	return com
 
-def promcom(a, c):
+def promcom(a, c, kirchhoff=False):
+	stg = {(p.name,n.name) for n in a.lexnodes for p in n.parentcandidates}
+	#stg = {(p.name,n.name) for n in a.nodes-{a.root} for ch in (n.topcandidates if n.isCBB else {n.name}) for p in n.parentcandidates}
+	assert any(1 for x,y in stg if x=='$$'),('The root $$ is not in the graph!',stg)
+
+	if kirchhoff:	# approximate promiscuity: count spanning trees with matrix tree theorem (instead of enumerating them). an upper bound.
+		prom = spanningtree(stg, '$$')
+		c['spanning trees'] = ValueStats(prom)
+		if prom==0:
+			raise Exception('No spanning trees for: '+repr(stg))
+		c['promiscuity'] = ValueStats(prom)
+		N = len(a.lexnodes)+1
+		assert N>=2
+		c['commitment'] = ValueStats(com(prom,N), show='mean')
+		return
+
 	def compatible_analyses(spanning_trees, nodeswithext):
 		for analysis in spanning_trees:
 			parmap = parentmap(analysis)
@@ -103,11 +120,7 @@ def promcom(a, c):
 				if violation: break
 			if not violation:
 				yield analysis
-
-	stg = {(p.name,n.name) for n in a.lexnodes for p in n.parentcandidates}
-	#stg = {(p.name,n.name) for n in a.nodes-{a.root} for ch in (n.topcandidates if n.isCBB else {n.name}) for p in n.parentcandidates}
-	assert any(1 for x,y in stg if x=='$$'),('The root $$ is not in the graph!',stg)
-	#print(stg, file=sys.stderr)
+	
 	try:
 		strees = spanning(stg, '$$', threshold=10000)
 		assert len(strees)>0
@@ -130,7 +143,7 @@ def promcom(a, c):
 		else:
 			raise Exception('No spanning trees for: '+repr(stg))
 
-def iapromcom(a1, a2, c, escapebrackets=False):
+def iapromcom(a1, a2, c, escapebrackets=False, kirchhoff=False):
 	'''
 	Measures local compatibility of constraints in two annotations.
 	Assumes single_ann_measures() has already been run independently on the two annotation graphs.
@@ -157,9 +170,12 @@ def iapromcom(a1, a2, c, escapebrackets=False):
 	
 	# compute single-annotation commitment (w/ compatible lexical level)
 	a1C, a2C = Counter(), Counter()
-	promcom(a1U, a1C)
-	promcom(a2U, a2C)
+	promcom(a1U, a1C, kirchhoff=kirchhoff)
+	promcom(a2U, a2C, kirchhoff=kirchhoff)
 	a1com, a2com = a1C['commitment'], a2C['commitment']
+	#if float(a2com)<1 and '"~2' not in a2U.alltokens:
+	#	promcom(a2U, a2C, kirchhoff=kirchhoff, debug=True)
+	#	assert False,(a2U.alltokens,a2C,a2.lexnodes)
 	
 	numer = sum(len(jointpars) for jointpars in jointSuppParents.values())
 	c['softprec_1|2'] = ValueStats(numer/sum(len(n.parentcandidates) for n in a1U.lexnodes))
@@ -190,18 +206,16 @@ def iapromcom(a1, a2, c, escapebrackets=False):
 			downward(ma)
 			maC = Counter()
 			try:
-				promcom(ma, maC)
+				promcom(ma, maC, kirchhoff=kirchhoff)
 				maprom = maC['promiscuity']
 				macom = maC['commitment']
-				c['comprec_1|2'] = ValueStats(float(maprom)/float(a1C['promiscuity']))
-				c['comprec_2|1'] = ValueStats(float(maprom)/float(a2C['promiscuity']))
+				c['comprec_1|2'] = ValueStats(float(macom)*float(maprom)/float(a1C['promiscuity']))
+				c['comprec_2|1'] = ValueStats(float(macom)*float(maprom)/float(a2C['promiscuity']))
 				c['comprec_nonzero'] = 1
 			except Exception as ex:
 				c['comprec_1|2'] = ValueStats(0)
 				c['comprec_2|1'] = ValueStats(0)
 				if 'No spanning trees' in ex.message:
-					if "(u'SM', u'Cebu')" not in ex.message:
-						raise
 					c['no_spanning_trees'] = 1
 				elif 'No compatible trees' in ex.message:
 					c['no_compatible_trees'] = 1	# due to external-attachment-to-CBB constraint
@@ -229,7 +243,7 @@ def iapromcom(a1, a2, c, escapebrackets=False):
 		c['no_valid_merge'] = 1
 	
 
-def single_ann_measures(a):
+def single_ann_measures(a, kirchhoff=False):
 	c = Counter()
 	c['lexnodes'] = len(a.lexnodes)
 	c['1W'] = sum(1 for n in a.lexnodes if len(n.tokens)==1)
@@ -251,16 +265,16 @@ def single_ann_measures(a):
 	upward(a)
 	downward(a)
 	c['possible utterance heads'] = sum(int(a.root in n.parentcandidates) for n in a.lexnodes)
-	promcom(a,c)
+	promcom(a,c, kirchhoff=kirchhoff)
 
 	return c
 	
-def iaa_measures(a1,a2,escapebrackets=False):
+def iaa_measures(a1,a2, escapebrackets=False, kirchhoff=False):
 	c = Counter()
-	iapromcom(a1,a2,c,escapebrackets=escapebrackets)
+	iapromcom(a1,a2,c, escapebrackets=escapebrackets, kirchhoff=kirchhoff)
 	return c
 
-def main(anns1F, anns2F=None, verbose=False, escapebrackets=False):
+def main(anns1F, anns2F=None, verbose=False, escapebrackets=False, kirchhoff=False):
 	i = 0
 	a1C, a2C, iaC = Counter(), Counter(), Counter()
 	for ann1ln in anns1F:
@@ -269,7 +283,7 @@ def main(anns1F, anns2F=None, verbose=False, escapebrackets=False):
 		ann1J = json.loads(ann1JS)
 		if verbose: print(i, loc1, '<<', sent)
 		a1 = FUDGGraph(ann1J)
-		a1single = single_ann_measures(a1)
+		a1single = single_ann_measures(a1, kirchhoff=kirchhoff)
 		a1C += a1single
 		if verbose: print('   ',a1single)
 		if anns2F is not None:
@@ -282,10 +296,10 @@ def main(anns1F, anns2F=None, verbose=False, escapebrackets=False):
 			#assert ann1J['tokens']==ann2J['tokens'],(ann1J['tokens'],ann2J['tokens'])
 			a2 = FUDGGraph(ann2J)
 			if verbose: print(i, loc2, '>>', sent2)
-			a2single = single_ann_measures(a2)
+			a2single = single_ann_measures(a2, kirchhoff=kirchhoff)
 			a2C += a2single
 			if verbose: print('   ',a2single)
-			iaa = iaa_measures(a1,a2, escapebrackets=escapebrackets)
+			iaa = iaa_measures(a1,a2, escapebrackets=escapebrackets, kirchhoff=kirchhoff)
 			iaC += iaa
 			if verbose: print('   ',iaa)
 		i += 1
@@ -304,7 +318,7 @@ if __name__=='__main__':
 	opts = {}
 	
 	while args and args[0].startswith('-'):
-		opts[{'-v': 'verbose', '-s': 'singleonly', '-b': 'escapebrackets'}[args.pop(0)]] = True
+		opts[{'-v': 'verbose', '-s': 'singleonly', '-b': 'escapebrackets', '-k': 'kirchhoff'}[args.pop(0)]] = True
 	
 	if not args:
 		anns1F = fileinput.input([])
