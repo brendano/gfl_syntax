@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim:sts=4:sw=4
 from __future__ import division
-import re,sys,os,traceback,itertools,json
+import re,sys,os,traceback,itertools,json,codecs
 from collections import defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../parser'))
@@ -66,8 +66,8 @@ def psf2dot(parse):
     gray = '"#606060"'
     
     def idx(items, elt, default=None):
-    	if elt not in items: return default
-    	return items.index(elt)
+        if elt not in items: return default
+        return items.index(elt)
     
     for head,child,label in sorted(parse.node_edges, key=lambda (h,c,l): (idx(parse.tokens, next(iter(parse.node2words.get(h,{None})))), idx(parse.tokens, next(iter(parse.node2words.get(c,{None})))))):
         if child=='W('+ROOT+')' and label not in ('cbbhead','Anaph'): raise Exception("The root node "+ROOT+" cannot be a dependent except as cbbhead or Anaph.")
@@ -123,7 +123,7 @@ def psf2dot(parse):
 
 def print_html(out, anno_text, png):
     img = '' if not png else "<img src={}>".format(os.path.basename(png))
-    print>>out, """
+    print>>out, u"""
     <hr>
     <pre>{anno_text}</pre>
     <p>{img}
@@ -150,20 +150,15 @@ def print_header(out):
     <body>
     """
 
-def make_html(basename, anno_text, png):
-    html_filename = basename + '.html'
-    with open(html_filename, 'w') as out:
-        print_header(out)
-        print_html(out, anno_text, png)
-    return html_filename
-
-def process_one_parse(p, base):
+def draw(p, base):
     # base is for OUTPUT
     dot = psf2dot(p)
     with open("{base}.dot".format(**locals()),'w') as f: print>>f, dot
-    cmd = "dot -Tpng < {base}.dot > {base}.png".format(**locals())
+    imgfilename = '{base}.png'.format(base=base)
+    cmd = "dot -Tpng < {base}.dot > {imgfilename}".format(**locals())
     print cmd
     os.system(cmd)
+    return imgfilename
 
 def desktop_open(filename):
     # TODO how does this work on other platforms
@@ -174,24 +169,25 @@ def desktop_open(filename):
         
 def process_potentially_multifile(filename):
     # parse container format and return GFL code .. do NOT parse it yet
-    anno_text = open(filename).read().strip()
-    if '%' not in anno_text:
-        tokens = string.letters
-        code = anno_text
-        return [(tokens, code, anno_text)]
-    anno_text = anno_text.replace('\r\n','\n')
-    multi_annos = re.split(r'(\n|^)--- *(\n|$)', anno_text)
-    multi_annos = ['---\n' + x.strip() for x in multi_annos if x.strip()]
-    if len(multi_annos) == 0:
-        print "empty annotations"
-        return None
-    tuples = []
-    for anno_text in multi_annos:
-        container = parse_parts(anno_text)
-        tokens = container.get('TEXT','').split()
-        code = container.get('ANNO','').strip()
-        tuples.append((tokens, code, anno_text))
-    return tuples
+    with codecs.open(filename, 'r', 'utf-8') as inF:
+		anno_text = inF.read().strip()
+		if '%' not in anno_text:
+			tokens = string.letters
+			code = anno_text
+			return [(tokens, code, anno_text)]
+		anno_text = anno_text.replace('\r\n','\n')
+		multi_annos = re.split(r'(\n|^)--- *(\n|$)', anno_text)
+		multi_annos = ['---\n' + x.strip() for x in multi_annos if x.strip()]
+		if len(multi_annos) == 0:
+			print "empty annotations"
+			return None
+		tuples = []
+		for anno_text in multi_annos:
+			container = parse_parts(anno_text)
+			tokens = container.get('TEXT','').split()
+			code = container.get('ANNO','').strip()
+			tuples.append((tokens, code, anno_text))
+		return tuples
 
 def is_json(s):
     try:
@@ -234,88 +230,66 @@ if __name__=='__main__':
         print "(use -h for help)"
         args = ['/dev/stdin']
 
+
+    def parseiter(filename):
+        if file_is_json(filename):  # JSON input
+            assert filename != '/dev/stdin', "can't view JSON on stdin sorry!"
+            with codecs.open(filename, 'r', 'utf-8') as inF:
+				for i,line in enumerate(inF):
+					row = line.rstrip('\n').split('\t')
+					sentid = row[0]
+					obj = json.loads(row[-1])
+					parse = gfl_parser.Parse.from_json(obj)
+					anno_text = u' '.join(obj['tokens'])
+					yield anno_text,parse
+        else:   # GFL annotation input
+            tokens_codes_texts = process_potentially_multifile(filename)
+            for tokens,code,text in tokens_codes_texts:
+                if not code or not tokens:
+                    parses.append(None)
+                else:
+                    try:
+                        if not is_balanced(code):
+                            raise Exception("Unbalanced parentheses, brackets, or braces in annotation:\n"+code)
+                        if VERBOSE:
+                            print 'Parsing: '+str(tokens)
+                        parse = gfl_parser.parse(tokens, code, check_semantics=True)
+                        yield text,parse
+                    except Exception:
+                        print code
+                        if not batch_mode: raise
+                        traceback.print_exc()
+                        yield text,None
+
+    def make_images(filename, bigbase):
+        for i,(anno_text,parse) in enumerate(parseiter(filename)):
+            smallbase = '{}.{}'.format(bigbase,i)
+            imgfilename = draw(parse, smallbase)
+            yield anno_text,imgfilename
+
     for filename in args:
         print "FILE",filename
         if filename=='/dev/stdin':
             bigbase = 'tmp'
         else:
             bigbase = re.sub(r'\.(txt|anno)$','', filename)
-
-        if file_is_json(filename):
-            assert filename != '/dev/stdin', "can't view JSON on stdin sorry!"
-            for i,line in enumerate(open(filename)):
-                row = line.rstrip('\n').split('\t')
-                sentid = row[0]
-                obj = json.loads(row[-1])
-                parse = gfl_parser.Parse.from_json(obj)
-                base = "%s.%s.%d" % (bigbase, filesafe_name(sentid), i)
-                process_one_parse(parse, base)
-                htmlfile = make_html(base, u' '.join(obj['tokens']).encode('utf8'), base + ".png")
+        
+        
+        #os.system("rm -f {bigbase}.*.png".format(**locals()))
+        
+        inputAndImage = list(make_images(filename, bigbase))
+        # if processing massive amounts of data, this can be refactored so the parses are 
+        # processed one at a time and not stored in memory
+        
+        ashtml = (opts.open_html or len(inputAndImage)>1)
+        if ashtml:
+            htmlfilename = bigbase + '.html'
+            with codecs.open(htmlfilename, 'w', 'utf-8') as htmlF:
+                for anno_text,imgfilename in inputAndImage:
+                    print_html(htmlF, anno_text, imgfilename)
                 if do_open:
-                    if opts.open_html:
-                        desktop_open(htmlfile)
-                    else:
-                        desktop_open("{base}.png".format(**locals()))
-            continue
-
-        tokens_codes_texts = process_potentially_multifile(filename)
-
-        if len(tokens_codes_texts)==1:
-            tokens,code,anno_text = tokens_codes_texts[0]
-            try:
-                if not is_balanced(code):
-                    raise Exception("Unbalanced parentheses, brackets, or braces in annotation")
-                parse = gfl_parser.parse(tokens, code, check_semantics=True)
-            except Exception:
-                if not batch_mode: raise
-                traceback.print_exc()
-                continue
-            base = bigbase
-            process_one_parse(parse, base)
-            htmlfile = make_html(base, anno_text, base+'.png')
-            if do_open:
-                if opts.open_html:
-                    desktop_open(htmlfile)
-                else:
-                    desktop_open("{base}.png".format(**locals()))
-            continue  ## to next file
-
-        parses = []
-        for tokens,code,text in tokens_codes_texts:
-            if not code or not tokens:
-                parses.append(None)
-            else:
-                try:
-                    if not is_balanced(code):
-                        raise Exception("Unbalanced parentheses, brackets, or braces in annotation:\n"+code)
-                    if VERBOSE:
-                    	print 'Parsing: '+str(tokens)
-                    p = gfl_parser.parse(tokens, code, check_semantics=True)
-                    parses.append(p)
-                except Exception:
-                    print code
-                    parses.append(None)
-                    if not batch_mode: raise
-                    traceback.print_exc()
-                    continue
-        os.system("rm -f {bigbase}.*.png".format(**locals()))
-
-        htmlfile = bigbase + '.html'
-        out = open(htmlfile, 'w')
-        print_header(out)
-        x = []
-        for i,parse in enumerate(parses):
-            anno_text = tokens_codes_texts[i][2]
-            base = "%s.%d" % (bigbase,i)
-            print "\t",base
-            if parse is not None:
-                try:
-	                process_one_parse(parse, base)
-                except:
-                    print parse
-                    raise
-            print_html(out, anno_text, base + '.png' if parse is not None else None)
-        out.close()
-        if do_open:
-            desktop_open(htmlfile)
-
+                    desktop_open(htmlfilename)
+        else:
+            for anno_text,imgfilename in inputAndImage:
+                if do_open:
+                    desktop_open(imgfilename)
