@@ -151,9 +151,13 @@ class Parse:
     # garbage collect basic wordnodes in the case they're obsolete because the
     # word has a multiword or other fancy node.
     word2nodes = defaultdict(set)
-    for node,words in (self.node2words.items() + self.extra_node2words.items()):
+    allpairs = self.node2words.items()
+    if self.extra_node2words:
+      allpairs += [(v,set(zip(*edges)[0])) for v,edges in self.extra_node2words.items()]
+    for node,words in allpairs:
       for word in words:
         word2nodes[word].add(node)
+
     for word,nodes in word2nodes.items():
       if len(nodes)==1: continue
       basic_wordnodes = [n for n in nodes if n.startswith('W(')]
@@ -186,7 +190,7 @@ class Parse:
     p = Parse()
     p.tokens = obj['tokens']
     p.node2words = obj['node2words']
-    p.extra_node2words = obj['extra_node2words']
+    p.extra_node2words = obj.get('extra_node2words',{})
     p.node_edges = set(tuple(x) for x in obj['node_edges'])
     p.finalize()
     return p
