@@ -31,8 +31,6 @@ t = (!~r"::([\s\]\)\}\*]|$)" 		# prohibit :: as a token
 # an alphanumeric character, currency symbol, % sign, 
 # or two or more punctuation characters (not counting quotes).
 
-# TODO: prohibit ::
-
 v = ~r"\$\S+"	# variable
 
 E = ((S / d) _ ">" _)* e "**"? (_ "<" _ (S / d))*	# general expression: some token or bracketed expression, possibly with > and/or < attachments
