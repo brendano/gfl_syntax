@@ -24,6 +24,12 @@ class FixedDict(dict):
             raise KeyError('FixedDict cannot reassign to key {0!r} (current: {1!r}, new value: {2!r})'.format(key,self[key],newvalue))
         dict.__setitem__(self, key, newvalue)
 
+
+class GFLError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+
 def visit(n,l=0):
     '''Visualize the output of the Parsimonious parser'''
     print('.'*l, n.expr_name, '|', n.text)
@@ -258,6 +264,16 @@ def analyze(tree):
     return n2w, w2n, ww2cbb, deps, anaph, coords
 
 
+def parse(gfl, grammar):
+    p = grammar.parse(gfl)
+    if p is None:
+        for ln in gfl.splitlines():
+            if grammar.parse(ln) is None:
+                raise GFLError('Cannot parse GFL line: '+ln)
+        assert False
+    # TODO: construct and return the parse data structure
+
+
 def test(inFP):
     with open(inFP) as inF:
         grammar = Grammar(clean(inF.read()))
@@ -295,7 +311,11 @@ def test(inFP):
                   'big > **', '{** happy} > days', '(my big** fat Greek wedding*)', 'big** > day', 
                   'hi :: there', ':-)', '(-:', '(0_0)~1', '*_*', ') (']
     for x in bad_inputs:
-        assert grammar.parse(x) is None,x
+        try:
+            parse(x, grammar)
+            assert False
+        except GFLError as ex:
+            print(ex)
     for x in good_inputs:
         p = grammar.parse(x)
         assert p is not None
