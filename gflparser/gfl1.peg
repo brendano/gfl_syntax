@@ -1,0 +1,56 @@
+# PEG (parsing expression grammar) for a GFL 1.0 annotation.
+# Designed for Parsimonious library (the https://github.com/erikrose/parsimonious), 
+# though a bit of automatic cleanup is required when loading this file.
+# Nathan Schneider, 2013-03-08
+
+ALL = (LINE ~r"[\n\r]|$")+
+LINE = (~"^"m ` v _ "::" _ S _ "::" _ S ` ~"$"m)	# coordination. TODO: can fudge expressions be coordinators??
+     / (~"^"m ` L (_ "=" _ L)+          ` ~"$"m) 	# anaphora. TODO: can fudge expressions be anaphorically linked??
+     / (~"^"m ` E (_ E)*                ` ~"$"m)	# everything else
+     / (~"^"m `                         ` ~"$"m)	# empty line
+
+_ = ~r"[^\S\n\r]+"
+` = ~r"[^\S\n\r]*"
+
+t = (!~r"::([\s\]\)\}\*]|$)" 		# prohibit :: as a token
+     ~r"[^\s\[\(\{]\S*[^\s\]\)\}\*]")	# tokens of at least 2 characters (must not start with open bracket or end with close bracket or asterisk)
+  / ~r"[^\s\[\]\(\)\{\}\<\>\*=]"	# single-character tokens: GFL operators are forbidden
+
+# Proprocessing guidelines:
+# Any token which (a) is repeated in the input, (b) is a single-character GFL operator or the :: operator, 
+# (c) ends with a close bracket or asterisk, or (d) starts with an open bracket 
+# must be escaped to appear in a GFL annotation. 
+# Our convention is to index it with a tilde, e.g. the~1 the~2 )~1 etc. 
+# To handle case (d), we can put a tilde as the prefix: ~(-:
+# This precludes an ambiguity like: (-: (~: -_-) 
+# [which open paren is GFL and which is part of a token?]. 
+# Tokens with brackets on either end should be given two tildes: ~(0_0)~1
+#
+# For automatic preprocessing before it is determined which tokens are part of the 
+# annotation, a good heuristic might be to include all tokens containing 
+# an alphanumeric character, currency symbol, % sign, 
+# or two or more punctuation characters (not counting quotes).
+
+# TODO: prohibit ::
+
+v = ~r"\$\S+"	# variable
+
+E = ((S / d) _ ">" _)* e "**"? (_ "<" _ (S / d))*	# general expression: some token or bracketed expression, possibly with > and/or < attachments
+D = ((S / d) _ ">" _)* d (_ "<" _ (S / d))*	# dependent expression: nothing in it may contain **
+S = "{" ` D (_ D)+ ` "}"					# set expression: always a dependent, never a head
+
+e = F / ("(" ` E ` ")") / L			# expression plus **, or a token, or a bracketed expression
+d = FD / ("(" ` D ` ")") / L		# dependent token or bracketed expression
+
+L = ("[" ` t (_ t)+ ` "]") / t		# lexical expression: token or multiword
+
+# fudge expressions
+F = ("(" ` ("**" _)? E (_ E)+ ` ")")	# head not designated with * (though possibly designated with **, which must be first). note that ((a b** c) (b** d e)) and (** (a b** c) (d e)) are allowed.
+  / ("(" ` Fh ` ")")					# head designated with *.
+Fh = (((S / d) _ ">" _)* e "*" (_ "<" _ (S / d))* (_ D)+)	# fudge contents, head designated with *
+   / ((D _)+ ((S / d) _ ">" _)* e "*" (_ "<" _ (S / d))* (_ D)*)
+
+FD = ("(" ` FDh ` ")")					# dependent fudge expression (** is not allowed at all), head designated with *
+   / ("(" ` D (_ D)+ ` ")") 			# dependent fudge expression, nothing designated with *
+FDh = (((S / d) _ ">" _)* d "*" (_ "<" _ (S / d))* (_ D)+)	# dependent fudge contents, head designated with *
+    / ((D _)+ ((S / d) _ ">" _)* d "*" (_ "<" _ (S / d))* (_ D)*)
