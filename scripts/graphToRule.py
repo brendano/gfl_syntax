@@ -38,7 +38,8 @@ def print_reverse_list(listNodes):
     for i in range(len(listNodes)-2, 0, -1):
         print ">", listNodes[i],
     print ">", 
-        
+
+#Merge two rules if their heads are identical
 def merge_and_print_rules(listPaths):
     
     i = 0
@@ -56,7 +57,8 @@ def merge_and_print_rules(listPaths):
             
     if i == len(listPaths)-1:
         print_list(listPaths[i])
-    
+
+#Collecting all the CBB members to be printed together
 def collect_cbb_members(node):
     
     cbbName = '( '
@@ -70,6 +72,8 @@ def collect_cbb_members(node):
     
     return cbbName
 
+#Recursively traverse the graph while storing the
+#rules in listPaths[]
 def traverse(node, path, listPaths):
     
     if node.isCBB:
