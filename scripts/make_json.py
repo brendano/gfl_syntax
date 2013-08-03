@@ -12,13 +12,17 @@ E.g.:
 ... It may be desirable to use ID information contained in other parts of the
 container, but I guess we'll use filenames for now...
 """
+from __future__ import print_function
+
 import sys,re,os
 try:
   import ujson as json
 except ImportError:
   import json
+
 import view
-import gfl_parser
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../gflparser'))
+import parser as gfl_parser
 
 args = sys.argv[1:]
 for filename in args:
@@ -29,7 +33,6 @@ for filename in args:
     if not code: continue
     sentence_id = doc_id
     if len(tokens_codes_annos)>1: sentence_id += ':' + str(i)
-    parse = gfl_parser.parse(tokens,code)
+    parse = gfl_parser.parse(tokens, code, check_semantics=True)
     parseJ = parse.to_json()
-    print "{id}\t{tokens}\t{parse}".format(id=sentence_id, tokens=' '.join(tokens), parse=json.dumps(parseJ))
-
+    print(sentence_id, ' '.join(tokens), json.dumps(parseJ), sep='\t')

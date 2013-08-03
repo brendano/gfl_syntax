@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # vim:sts=4:sw=4
-from __future__ import division
+from __future__ import division, absolute_import
 import re,sys,os,traceback,itertools,json,codecs
 from collections import defaultdict
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../parser'))
-import gfl_parser
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../gflparser'))
+import parser as gfl_parser
 
 show_words = False
 
@@ -69,7 +69,7 @@ def psf2dot(parse):
         if elt not in items: return default
         return items.index(elt)
     
-    for head,child,label in sorted(parse.node_edges, key=lambda (h,c,l): (idx(parse.tokens, next(iter(parse.node2words.get(h,{None})))), idx(parse.tokens, next(iter(parse.node2words.get(c,{None})))))):
+    for head,child,label in sorted(parse.node_edges, key=lambda (h,c,l): (idx(parse.tokens, next(iter(parse.n2w.get(h,{None})))), idx(parse.tokens, next(iter(parse.n2w.get(c,{None})))))):
         if child=='W('+ROOT+')' and label not in ('cbbhead','Anaph'): raise Exception("The root node "+ROOT+" cannot be a dependent except as cbbhead or Anaph.")
         # TODO: if ROOT is a cbbhead, the above doesn't verify that the CBB is the root of the annotation graph
         child=dot_clean(child)
@@ -93,26 +93,28 @@ def psf2dot(parse):
 
     # standard node-word edges only when "show_words" flag is on
     if show_words:
-        for node,words in parse.node2words.items():
+        for node,words in parse.n2w.items():
             node = dot_clean(node)
             # emit edges in surface order ... graphviz seems to respect this a little bit.
-            words = sorted(words, key=lambda w: parse.word2id[w])
+            words = sorted(words, key=parse.tokens.index)
             for w in words:
                 w = dot_clean(w)
                 seen_words.add(w)
                 e = '%s -> %s [color=gray weight=1 dir=none]' % (node, w)
                 G.append(e)
 
+    '''
     # all the funky node-word edges (e.g. coordinators) are always shown
-    for node,wordlabels in parse.extra_node2words.items():
+    for node,conjs,coords in parse.coords:
         node = dot_clean(node)
-        for w,label in wordlabels:
+        for w in coords:
             w = dot_clean(w)
             seen_words.add(w)
-            lab = '' if not label else dot_clean(label)
+            lab = 'Coord'
             e = '{node} -> {w} [color={conjcol} fontcolor={conjcol} fontsize={fontsize} weight=2 dir=none label={lab}]'.format(**locals())
             G.append(e)
-
+    '''
+    
     # styling for word boxes
     for word in seen_words:
         col = '"#e0e0e0"'
@@ -246,7 +248,7 @@ if __name__=='__main__':
             tokens_codes_texts = process_potentially_multifile(filename)
             for tokens,code,text in tokens_codes_texts:
                 if not code or not tokens:
-                    parses.append(None)
+                    yield text,None
                 else:
                     try:
                         if not is_balanced(code):

@@ -4,8 +4,8 @@
 # Nathan Schneider, 2013-03-08
 
 ALL = (LINE ~r"[\n\r]|$")+
-LINE = (~"^"m ` v _ "::" _ S _ "::" _ S ` ~"$"m)	# coordination. TODO: can fudge expressions be coordinators??
-     / (~"^"m ` L (_ "=" _ L)+          ` ~"$"m) 	# anaphora. TODO: can fudge expressions be anaphorically linked??
+LINE = (~"^"m ` v "**"? _ "::" _ s _ "::" _ (s / L) ` ~"$"m)	# coordination. TODO: can fudge expressions be coordinators??
+     / (~"^"m ` (FD / L) (_ "=" _ (FD / L))+          ` ~"$"m) 	# anaphora. (links between lexical and/or fudge expressions)
      / (~"^"m ` E (_ E)*                ` ~"$"m)	# everything else
      / (~"^"m `                         ` ~"$"m)	# empty line
 
@@ -36,6 +36,7 @@ v = ~r"\$\S+"	# variable
 E = ((S / d) _ ">" _)* e "**"? (_ "<" _ (S / d))*	# general expression: some token or bracketed expression, possibly with > and/or < attachments
 D = ((S / d) _ ">" _)* d (_ "<" _ (S / d))*	# dependent expression: nothing in it may contain **
 S = "{" ` D (_ D)+ ` "}"					# set expression: always a dependent, never a head
+s = "{" ` D (_ D)* ` "}"					# set expression allowing singletons
 
 e = F / ("(" ` E ` ")") / L			# expression plus **, or a token, or a bracketed expression
 d = FD / ("(" ` D ` ")") / L		# dependent token or bracketed expression
