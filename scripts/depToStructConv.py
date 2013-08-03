@@ -71,7 +71,7 @@ for lineRaw, lineDep in zip(open(rawFile,'r'),open(depFile, 'r')):
         tokens.append(word)
         nodes.append(node)
         nodeIndices[index] = node
-        node2words[node] = word
+        node2words[node] = [word]
         indexedEdges.append((index, connTo))
     else:
         #node = 'W('+word+')'
