@@ -4,8 +4,8 @@ from __future__ import division, absolute_import
 import re,sys,os,traceback,itertools,json,codecs
 from collections import defaultdict
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../gflparser'))
-import parser as gfl_parser
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'gflparser'))
+import gfl_parser
 
 show_words = False
 

@@ -21,8 +21,8 @@ except ImportError:
   import json
 
 import view
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../gflparser'))
-import parser as gfl_parser
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'gflparser'))
+import gfl_parser
 
 args = sys.argv[1:]
 for filename in args:
