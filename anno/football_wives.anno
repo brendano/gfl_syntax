@@ -1,0 +1,10 @@
+% TEXT
+@ciaranyree it was on football wives , one of the players and his wife own smash burger
+
+% ANNO
+it > was** < on < [football wives]
+one < of < (the > players)
+his > wife
+$x :: {one wife} :: and
+$x > own** < [smash burger]
+his = one

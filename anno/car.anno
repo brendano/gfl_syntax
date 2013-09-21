@@ -1,0 +1,9 @@
+% TEXT
+They " finished " the~1 work and told me the~2 car was ready .
+
+% ANNO
+They > $a
+$a :: {finished told} :: {and}
+finished < (the~1 > work)
+told < me
+told < (the~2 > car > was < ready)
