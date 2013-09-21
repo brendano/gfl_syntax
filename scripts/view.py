@@ -265,6 +265,7 @@ if __name__=='__main__':
 
     def make_images(filename, bigbase):
         for i,(anno_text,parse) in enumerate(parseiter(filename)):
+            assert parse,(i,anno_text,parse)
             smallbase = '{}.{}'.format(bigbase,i)
             imgfilename = draw(parse, smallbase)
             yield anno_text,imgfilename
