@@ -2,6 +2,7 @@
 He and his wife own smash burger
 
 % ANNO
-$x :: {He wife} :: and
+$a :: {He wife} :: and
 wife < his
-$x > own < [smash burger]
+$a > own < [smash burger]
+his = He

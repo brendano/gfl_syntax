@@ -2,4 +2,4 @@
 ice cream and~1 cake and~2 asparagus
 
 % ANNO
-$x :: {[ice cream] cake asparagus} :: { and~1 and~2 }
+$x :: {[ice cream] cake asparagus} :: {and~1 and~2}

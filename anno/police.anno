@@ -2,6 +2,7 @@
 The police arrested the man who robbed our bank .
 
 % ANNO
-The > police > arrested < (the > man)
+The > police > arrested < man
+the > man < robbed 
 who > robbed < (our > bank)
-who = man           // indicates coreferentiality
+who = man
