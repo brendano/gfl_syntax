@@ -9,7 +9,7 @@ import gfl_parser
 
 show_words = False
 
-ROOT = '$$'
+ROOT = '**'
 
 def is_balanced(s):
     def check(l,r):
@@ -76,9 +76,9 @@ def psf2dot(parse):
         head=dot_clean(head)
         col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple', 'unspec':gray}.get(label, 'blue')
         dir = {'Anaph':'none'}.get(label, 'back')
-        weight = {'Anaph':0.01}.get(label, 5)
+        constraint = 'constraint="false"' if label=='Anaph' else ''
         lab = '' if not label else label
-        e = '{head} -> {child} [color={col} fontsize={fontsize} fontcolor={col} dir={dir} weight={weight} label="{lab}"]'.format(**locals())
+        e = '{head} -> {child} [color={col} fontsize={fontsize} fontcolor={col} dir={dir} {constraint} label="{lab}"]'.format(**locals())
         G.append(e)
     
     ## Node information
