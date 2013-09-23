@@ -226,7 +226,7 @@ FEs that are inconsistent with the rest of the dependency annotations will cause
     to < save < (the > world)
     crazy > his
 
-The third line is an error, as it implies *crazy* has head outside the fudge expression.
+The third line is an error, as it implies *crazy* has a head outside the fudge expression.
 
 The head-marking may be recursively applied to a nested FE. This implies that the same word heads both the inner and outer FEs. E.g., `(a (b* c)*)` is equivalent to `(b* c) (a b*)` and therefore compatible only with `a > b < c`.
 
@@ -307,14 +307,14 @@ told < (the~2 > car > was < ready)
 
 ![They " finished " the~1 work and told me the~2 car was ready .](car.0.png)
 
-**Multiword conjunctions.** Correlative conjunctions (*either...or*, *both...and*, etc.) and expressions like *as well as* are treated as multiwords:
+**Multiword conjunctions.** Correlative conjunctions (<i>either...or</i>, *both...and*, etc.) and expressions like *as well as* are treated as multiwords:
 
-> Please bring either food or drink , as well as a gift .
+> You may bring either food or drink , as well as a gift .
 
 ```bash
 $o :: {food drink} :: {[either or]}
 $a :: {$o (a > gift)} :: {[as well as]}
-bring < $a
+You > may < bring < $a
 ```
 
 ## Verb complexes
@@ -332,7 +332,7 @@ For long and tricky-to-analyze verb chains, consider FEs:
 
 - `Ingrid > (would not have) < it`- `Ingrid > (would not have had) < it`
 
-**Infinitival *to*** is treated as the **head** of its non-finite verb:
+**Infinitival _to_** is treated as the **head** of its non-finite verb:
 
     I > will < try < to < (love < you) < more
 
@@ -354,7 +354,8 @@ GFL supports special **undirected node-node relations** for explicit anaphora. C
     who = man
     
 ![The police arrested the man who robbed our bank.](police.0.png)
-The *man* is both the object of *arrest* **and** the subject of *robbed*. But, syntactically, the complementizer *who* occupies the subject position of the RC. We therefore make the semantics of the semantic link clear by writing: `who = man`. The head of the embedded clause (the verb *robbed*) also serves as the dependent of the nominal head (*man*).
+
+Semantically, the *man* is both the object of *arrest* **and** the subject of *robbed*. But, syntactically, the complementizer *who* occupies the subject position of the RC. We therefore make the semantics of the semantic link clear by writing: `who = man`. The head of the embedded clause (the verb *robbed*) also serves as the dependent of the nominal head (*man*).
 
 Sometimes the relative pronoun is the object of a preposition, which may be stranded or fronted:
 
@@ -392,12 +393,12 @@ plus
 
 - **whom:**
      
-        whom > like
+        like < whom
         whom = one
 
 - **that:**
 
-        that > like
+        like < that
         that = one
 
 - **∅:** (no additional annotation fragments)
@@ -413,7 +414,7 @@ plus
 
 > They didn’t know *what (a) crime he had committed*.
 
-A detailed treatment of *wh-* expressions is out of scope here, but the general principle is that if no other noun phrase is available for an anaphoric link, the relative pronoun/*wh-*word is treated as the head of the clause. Thus:
+A detailed treatment of *wh-* expressions is out of scope here, but the general principle is that if no other noun phrase is available for an anaphoric link, the relative pronoun/<i>wh-</i>word is treated as the head of the clause. Thus:
 
     asked < who < would < look < after < (the > baby)
 
@@ -492,11 +493,11 @@ GFL does not currently mark non-anaphoric coreference or null anaphora (such as 
 
 ### Why special marking for anaphora?
 
-In the relative clause example just given, the same referent (*man*) occupies two semantic roles, as the agent of *robbed* and as the patient of *arrested*. Since GFL is a *graph* language, we could mark these roles explicitly with standard directed dependencies. However, if we did this, then the set of directed edges would no longer form a forest or tree (i.e., a single node, *man*, would have *two* parents). Since most natural language syntax seems to adhere to a tree/forest constraint, we provisionally adopt it as a hard constraint for annotation. However, having extra undirected anaphora edges lets us annotate important and useful coreference relations.
+In the relative clause example just given, the same referent (<i>man</i>) occupies two semantic roles, as the agent of *robbed* and as the patient of *arrested*. Since GFL is a *graph* language, we could mark these roles explicitly with standard directed dependencies. However, if we did this, then the set of directed edges would no longer form a forest or tree (i.e., a single node, *man*, would have *two* parents). Since most natural language syntax seems to adhere to a tree/forest constraint, we provisionally adopt it as a hard constraint for annotation. However, having extra undirected anaphoric edges lets us annotate important and useful coreference relations.
 
 With this established we state an important annotation guideline:
 
-**The graph determined by the set of **directed dependency edges** should be a tree or forest**. That is, in the graph the annotator creates, **every node has at most one head**—i.e., at most one outbound arrow.  (In our convention, arrows point *up* the tree.  A node may have many children, i.e. inbound arrows.)
+**The graph determined by the set of *directed dependency edges* should be a tree or forest**. That is, in the graph the annotator creates, **every node has at most one head**—i.e., at most one outbound arrow.  (In our convention, arrows point *up* the tree.  A node may have many children, i.e. inbound arrows.)  (Fudge expression membership edges, though directed, are excluded from this constraint: a lexical node may belong to multiple overlapping FEs.)
 
 Now consider the case: 
 
@@ -516,7 +517,7 @@ The possessive *’s* clitic (if tokenized) is the head of the noun phrase that 
 
 > all the king ’s horses
 
-    {all ((the > king) > ’s)} > horses
+    all > (the > king > ’s > horses)
 
 ## Comparative constructions
 
@@ -549,11 +550,11 @@ Though these tend to involve multiple correlated parts, we will ignore this corr
 
 ## Rooted fragments & discourse issues
 
-`**` serves as an optional top-level root marker. It is usually implicit, but can be provided to require that an expression *not *be headed by any word in the sentence.
+`**` serves as an optional top-level root marker. It is usually implicit, but can be provided to require that an expression *not* be headed by any word in the sentence.
 
 Though we have been calling the input a “sentence,” depending on the annotation project it may not be a linguistic sentence. The input may contain multiple “utterances,” which we use loosely to mean any unit that ought to form its own fragment in the full analysis. Interjections and emoticons can be considered separate utterances. If multiple utterances are present in the input, the head of each—typically the verb—should be marked with `**`.
 
-In a full analysis, every utterance will be a directed subtree (possibly with additional undirected links), with its head attached to the special node `**`.
+In a full (not underspecified) analysis, every utterance will be a directed subtree (possibly with additional undirected links), with its head attached to the special node `**`.
 
 **Discourse connectives.** “And …,” “though”, “however,” “first of all,” etc. are treated as independently rooted elements if they are kept in the analysis at all.
 
@@ -565,7 +566,7 @@ In a full analysis, every utterance will be a directed subtree (possibly with ad
 
 **Sentence-level adverbs.** “Obviously,” “fortunately,” “probably,” and the like (which convey the speaker’s attitude towards the content of the clause) should head the clause they apply to:
 
-> She is **obviously** going to win .
+> She is **obviously** going to win .  
 > **Obviously**, she is going to win .
 
     obviously** < (She > is < going < to < win)
@@ -573,6 +574,7 @@ In a full analysis, every utterance will be a directed subtree (possibly with ad
 > she **probably** the same size as the bop
 
 	she > size > probably**
+	{the same} > size < as < (the > bop)
 
 ## Measures
 
@@ -580,9 +582,9 @@ We have developed quantitative measures of the extent to which an annotation und
 
 ## Related work
 
-Dependency grammar is an well-established tradition in theoretical and computational syntax; see Nivre (2005) for a review. The formalism described here also has many similarities to the dependency-like syntactic analyses in the sentence diagramming tradition that was popular as a pedagogical language learning tool from the 19th to mid-20th century (Kellogg and Reed 1877).  The GFL formalism can represent a substantial subset of the analyses in [this introduction](http://www.utexas.edu/courses/langling/e360k/handouts/diagrams/diagram_basics/basics.html) to Reed-Kellogg system; see also Kolln and Funk (2005).  In 2010, Brendan ran a quick Mechanical Turk survey which found 80 people who said they have experience with sentence diagramming.  This could be very useful.  (Some more background in [this unimplemented proposal](http://brenocon.com/sentence_diagramming_proposal_2010.pdf).)
+Dependency grammar is an well-established tradition in theoretical and computational syntax; see Nivre (2005) for a review. The formalism described here also has many similarities to the dependency-like syntactic analyses in the sentence diagramming tradition that was popular as a pedagogical language learning tool from the 19th to mid-20th century (Kellogg and Reed 1877).  The GFL formalism can represent a substantial subset of the analyses in [this introduction](http://www.utexas.edu/courses/langling/e360k/handouts/diagrams/diagram_basics/basics.html) to the Reed-Kellogg system; see also Kolln and Funk (2005).  In 2010, Brendan ran a quick Mechanical Turk survey which found 80 people who said they have experience with sentence diagramming.  This could be very useful.  (Some more background in [this unimplemented proposal](http://brenocon.com/sentence_diagramming_proposal_2010.pdf).)
 
-There are also similarities to the theory of “catenae,” which aims to generalize the idea of constituents; see Osborne et al. (2011), or [the Wikipedia page](http://en.wikipedia.org/wiki/Catena_(linguistics)).
+There are also similarities to the theory of “catenae,” which aims to generalize the idea of constituents; see Osborne et al. (2011), or [the Wikipedia page](http://en.wikipedia.org/wiki/Catena_(linguistics\)).
 
 ## References
 
