@@ -209,25 +209,17 @@ def filesafe_name(s):
     s = s.replace("/",".").replace(" ","_")
     return s
 
-if __name__=='__main__':
+def main(args, show_words=False, suppress_open=False, VERBOSE=False, open_html=False):
+	
     import string
-    from optparse import OptionParser
-    p = OptionParser(usage="""
-    %prog filename.anno  [or multiple files]
-    Visualizes a GFL annotations file via GraphViz (as an image file).
-    Also can handle a file with multiple annotations in it (outputs HTML)""")
-    p.add_option('-w', dest="show_words", action='store_true', help="show words in graph")
-    p.add_option('-n', dest="supress_open", action='store_true', help="force to not open image when done")
-    p.add_option('-v', dest="verbose", action='store_true', help="verbose mode")
-    p.add_option('-m', dest="open_html", action='store_true', help="force to open html, not png, version")
-    opts,args = p.parse_args()
-    show_words = opts.show_words
+
     batch_mode = len(args) > 1
-    do_open = not batch_mode and not opts.supress_open
-    VERBOSE = opts.verbose
+    do_open = not batch_mode and not suppress_open
     multi_mode = None
     multi_annos = None
-
+	
+	
+	
     if not args:
         print "(use -h for help)"
         args = ['/dev/stdin']
@@ -284,7 +276,7 @@ if __name__=='__main__':
         # if processing massive amounts of data, this can be refactored so the parses are 
         # processed one at a time and not stored in memory
         
-        ashtml = (opts.open_html or len(inputAndImage)>1)
+        ashtml = (open_html or len(inputAndImage)>1)
         if ashtml:
             htmlfilename = bigbase + '.html'
             with codecs.open(htmlfilename, 'w', 'utf-8') as htmlF:
@@ -296,3 +288,19 @@ if __name__=='__main__':
             for anno_text,imgfilename in inputAndImage:
                 if do_open:
                     desktop_open(imgfilename)
+					
+
+	
+if __name__=='__main__':
+	from optparse import OptionParser
+	p = OptionParser(usage="""
+	%prog filename.anno  [or multiple files]
+	Visualizes a GFL annotations file via GraphViz (as an image file).
+	Also can handle a file with multiple annotations in it (outputs HTML)""")
+	p.add_option('-w', dest="show_words", action='store_true', help="show words in graph")
+	p.add_option('-n', dest="suppress_open", action='store_true', help="force to not open image when done")
+	p.add_option('-v', dest="verbose", action='store_true', help="verbose mode")
+	p.add_option('-m', dest="open_html", action='store_true', help="force to open html, not png, version")
+	(opts, args) = p.parse_args()
+	main(args, show_words=opts.show_words, suppress_open=opts.suppress_open, VERBOSE=opts.verbose, open_html=opts.open_html)
+    
