@@ -236,7 +236,7 @@ FEs have an **underspecification semantics**: an FE implies constraints on the s
 
 * Because the graph is a tree, this entails that *W* contains some word that dominates all the others (least common subsumer). This word, *LCS(W)*, may be identified by starring it. The head of every word in *W* except for *LCS(W)* is also in *W*.
 
-* W is not necessarily a full *subtree*. That is, words in W may have additional dependents not in *W*.
+* *W* is not necessarily a full *subtree*. That is, words in *W* may have additional dependents not in *W*.
 
 * `b < (a c)` is compatible only with `b < a < c` or `b < c < a` because `a` and `c` must form a connected subgraph. By contrast, `(a b* c)` is also compatible with `a > b < c`.
 
