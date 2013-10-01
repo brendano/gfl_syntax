@@ -7,6 +7,7 @@ David Bamman
 Noah A. Smith
 
 *Document history:*  
+2013-09-30: version 1.1: Nesting and the Substitution Principle  
 2013-09-22: version 1.0
 
 
@@ -20,6 +21,7 @@ I~1 = I~2
 $x :: {mistrust avoid} :: {and}
 The > will < to < (a~1 > system)
 will > is** < (a~2 > lack) < of < integrity
+[Friedrich Nietzsche]**
 ```
 
 This document is about two related things.
@@ -252,19 +254,30 @@ Examples for graph `a > b < c < d`  (having `b` as root):
 
 The FE conditions also hold for the case of optional use of parentheses for simple disambiguation of fully specified arrow relations: #1 should be true via some cute little induction proof off the binary base case, and #3 should be true because a node can have only one head.
 
-**Nesting**: we have decided that an FE clause asserts underspecified-grouping-hood recursively of all nested words.  For example, `(a > b c)`  or its notational variant  `((a > b) c)`  or  `((a b*) c)`
-
-is equivalent to having these two clauses: (#1)
-
-	a > b
-	(a b c)
-
-Note that it is NOT equivalent to  (#2)
+**Nesting**: If a fudge expression contains subexpressions, the head of the subexpression is taken to be a member of the fudge expression. E.g., `(a > b c)` or its notational variant `((a > b) c)` or `((a b*) c)` is equivalent to having these two clauses: (#1)
 
 	a > b
 	(b c)
 
-… #1 is weaker than #2; e.g., `c > a > b` is compatible only with the former.  This makes sense for non-headed pure FE nesting: for `((a b) c)` you can only infer `(a b c)`, because you don’t know who `c` attaches to.  Either `(a c)` or `(b c)` must be true, but you don’t know which.
+Note that it is NOT equivalent to (#2)
+
+	a > b
+	(a b c)
+
+In general, GFL observes the following **Substitutability Principle**: If a directed dependency fragment contains a parenthesized subexpression, moving the subexpression to another clause and substituting its internal head (if known) will yield an equivalent FUDG annotation.
+
+Here are some nested expressions and their decompositions following from substitutability:
+
+    (a > b) > c         a > b  b > c
+    a > (b > c)         a > c  b > c
+    ((a > b) c)         a > b  (b c)
+    (a b* c) > d        (a b* c)  b > d
+    ((a b* c) d)        (a b* c)  (b d)
+    {(a > b) c} > d     a > b  {b c} > d
+    (a (b c)* d) > e    (a (b c)* d)  (b c) > e
+    a > (b c* d)        a > c  (b c* d)
+
+The last of these—an external attachment to a fudge expression—may be subtle, but the Substitutability Principle precludes an analysis like `a > b > c < d` from being compatible with `a > (b c* d)`. It would not be compatible with `a > (b c d)`, either, because an outside node attaching to an FE in the annotation is required to attach in any compatible full analysis to the highest member of the FE. Note that `a > (b c d)` and `(a (b c d)*)` are equivalent.
 
 ## Coordination nodes
 
