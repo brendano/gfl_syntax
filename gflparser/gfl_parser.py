@@ -143,12 +143,13 @@ def analyze(tokens, tree, ignore_order=False):
             for a,b in zip(itms,itms[1:]):
                 anaph.add((a,b))
         elif '::' in n: # coordination
+            if n[1]=='**':
+                deps.add(('**',n[0]))
+                n = n[:1]+n[2:]
             v, a, j, b, c = n
             assert a==b=='::'
             assert v.startswith('$')
-            if v.endswith('**'):
-                v = v[:-2].strip()
-                deps.add(('**',v))
+            
             j = traverse(j)
             c = traverse(c)
             assert isinstance(j,set)
@@ -158,14 +159,19 @@ def analyze(tokens, tree, ignore_order=False):
             varnodes.add(v)
         elif n=='**':   # ** appearing as first item in a CBB
             return n
+        elif isinstance(n,basestring) and n.startswith('$'):    # variable
+            # note that if the coordination line hasn't been reached, varnodes will not yet contain the variable
+            w2n[frozenset([n])] = n
+            n2w[n] = {n}
+            return n
         elif isinstance(n,tuple):
             t, x = n
             if t=='L':  # lexical node
-                if len(x)==1 and x[0].startswith('$'):  # note that if the coordination line hasn't been reached, varnodes will not yet contain the variable
-                    nname = x[0]
-                else:
-                    assert not x[0].startswith('$')
-                    nname = 'W('+'_'.join(sorted(x, key=(None if ignore_order else tokens.index)))+')'
+                # there may be lexical nodes starting with a $ sign, like $250
+                for w in x:
+                    if tokens.count(w)!=1:
+                        raise GFLError('Token in lexical node must occur exactly once in the input: {}'.format(w))
+                nname = 'W('+'_'.join(sorted(x, key=(None if ignore_order else tokens.index)))+')'
                 if len(x)>1: nname = 'M'+nname
                 if frozenset(x) not in w2n and any(frozenset(x) & k for k in w2n):
                     raise GFLError('Lexical expression must not share any tokens in common with another lexical expression: {}'.format(tuple(x)))

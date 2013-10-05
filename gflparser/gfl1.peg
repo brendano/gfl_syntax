@@ -5,7 +5,7 @@
 
 ALL = (LINE ~r"[\n\r]|$")+
 LINE = (~"^"m ` v "**"? _ "::" _ s _ "::" _ (s / L) ` ~"$"m)	# coordination. TODO: can fudge expressions be coordinators??
-     / (~"^"m ` (FD / L) (_ "=" _ (FD / L))+          ` ~"$"m) 	# anaphora. (links between lexical and/or fudge expressions)
+     / (~"^"m ` (FD / v / L) (_ "=" _ (FD / v / L))+          ` ~"$"m) 	# anaphora. (links between lexical nodes and/or variables and/or fudge expressions)
      / (~"^"m ` E (_ E)*                ` ~"$"m)	# everything else
      / (~"^"m `                         ` ~"$"m)	# empty line
 
@@ -31,15 +31,15 @@ t = (!~r"::([\s\]\)\}\*]|$)" 		# prohibit :: as a token
 # an alphanumeric character, currency symbol, % sign, 
 # or two or more punctuation characters (not counting quotes).
 
-v = ~r"\$\S+"	# variable
+v = ~r"\$[A-Za-z_][^\s\(\)\{\}\[\]<>\*=]*"	# variable; must start with $ and a letter or underscore; must not contain special GFL characters
 
 E = ((S / d) _ ">" _)* e "**"? (_ "<" _ (S / d))*	# general expression: some token or bracketed expression, possibly with > and/or < attachments
 D = ((S / d) _ ">" _)* d (_ "<" _ (S / d))*	# dependent expression: nothing in it may contain **
 S = "{" ` D (_ D)+ ` "}"					# set expression: always a dependent, never a head
 s = "{" ` D (_ D)* ` "}"					# set expression allowing singletons
 
-e = F / ("(" ` E ` ")") / L			# expression plus **, or a token, or a bracketed expression
-d = FD / ("(" ` D ` ")") / L		# dependent token or bracketed expression
+e = F / ("(" ` E ` ")") / v / L			# expression plus **, or a variable, token, or bracketed expression
+d = FD / ("(" ` D ` ")") / v / L		# dependent variable, token, or bracketed expression
 
 L = ("[" ` t (_ t)+ ` "]") / t		# lexical expression: token or multiword
 
