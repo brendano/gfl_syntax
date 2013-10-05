@@ -35,4 +35,4 @@ for filename in args:
     if len(tokens_codes_annos)>1: sentence_id += ':' + str(i)
     parse = gfl_parser.parse(tokens, code, check_semantics=True)
     parseJ = parse.to_json()
-    print(sentence_id, ' '.join(tokens), json.dumps(parseJ), sep='\t')
+    print(sentence_id, ' '.join(tokens).encode('utf-8'), json.dumps(parseJ), sep='\t')
