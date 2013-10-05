@@ -125,7 +125,9 @@ def analyze(tokens, tree, ignore_order=False):
     deps = set()
     anaph = set()
     coords = set()
+    coordvars = set()
     varnodes = set()
+    # by the end of the annotation, varnodes should be a subset of coordvars
     
     if not ignore_order:
         assert tokens
@@ -156,13 +158,13 @@ def analyze(tokens, tree, ignore_order=False):
             if not isinstance(c,set):   # coordinator is a single lexical item
                 c = [c]
             coords.add((v,frozenset(j),frozenset(c)))
-            varnodes.add(v)
+            coordvars.add(v)
         elif n=='**':   # ** appearing as first item in a CBB
             return n
         elif isinstance(n,basestring) and n.startswith('$'):    # variable
-            # note that if the coordination line hasn't been reached, varnodes will not yet contain the variable
             w2n[frozenset([n])] = n
             n2w[n] = {n}
+            varnodes.add(n)
             return n
         elif isinstance(n,tuple):
             t, x = n
@@ -329,6 +331,10 @@ def analyze(tokens, tree, ignore_order=False):
             
     for ln in tree:
         traverse(ln)
+    
+    if not varnodes<=coordvars:
+        raise GFLError('Variable(s) not defined in any coordination: {}'.format(', '.join(varnodes-coordvars)))
+    varnodes = coordvars
     
     # remove variables from node-word mappings
     for v in varnodes:
