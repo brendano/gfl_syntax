@@ -7,6 +7,7 @@ David Bamman
 Noah A. Smith
 
 *Document history:*  
+2013-10-26: version 1.2: Contractions  
 2013-09-30: version 1.1: Nesting and the Substitution Principle  
 2013-09-22: version 1.0
 
@@ -329,6 +330,34 @@ $o :: {food drink} :: {[either or]}
 $a :: {$o (a > gift)} :: {[as well as]}
 You > may < bring < $a
 ```
+
+## Contractions
+
+If contractions are not split as part of the tokenization, 
+they function in the parse as the head would if split. 
+For example, *I’m* and *didn’t* count as verbs.
+This sometimes has subtle implications:
+
+> I’m hungry and wanting to eat
+
+```bash
+$a :: {hungry wanting} :: {and}
+I’m < $a
+wanting < to < eat
+```
+
+> I’m hungry and want to eat
+
+```bash
+$a :: {I’m want} :: {and}
+I’m < hungry
+want < to < eat
+```
+
+In the first case, the verbal clitic *’m* heads both *hungry* and *wanting*.
+In the second case it heads only *hungry*, 
+so the parse does not encode any relationship
+between *want* and its implied subject *I*.
 
 ## Verb complexes
 
