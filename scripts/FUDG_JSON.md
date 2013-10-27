@@ -16,8 +16,7 @@ tab-separated columns:
   2. Raw input
   3. JSON object
 
-An example line (wrapped for readability):
-
+An example line:
 
     ewtb55.anno.nschneid:52	Friendly , knowledgeable , and above all fair .	{...JSON...}
 
