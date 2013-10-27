@@ -23,14 +23,14 @@ def mw2CBBMW(ann, n):
 	assert 'CBB'+n not in ann['nodes']
 	
 	ann['nodes'][ann['nodes'].index(n)] = 'CBB'+n
-	ann['node2words']['CBB'+n] = ann['node2words'][n]
-	del ann['node2words'][n]
+	ann['n2w']['CBB'+n] = ann['n2w'][n]
+	del ann['n2w'][n]
 	
 	# create single-word tokens
-	for tkn in ann['node2words']['CBB'+n]:
+	for tkn in ann['n2w']['CBB'+n]:
 		if 'W('+tkn+')' not in ann['nodes']:	# may already be there due to an overlapping CBBMW
 			ann['nodes'].append('W('+tkn+')')
-			ann['node2words']['W('+tkn+')'] = [tkn]
+			ann['n2w']['W('+tkn+')'] = [tkn]
 	
 	# ensure edges use CBBMW(...)
 	for e in ann['node_edges']:
@@ -39,10 +39,20 @@ def mw2CBBMW(ann, n):
 		if x==n: e[0] = 'CBB'+n
 		if y==n: e[1] = 'CBB'+n
 		assert e[0]!=e[1]
-	for v in ann['extra_node2words'].values():
-		for e in v:
-			if e[0]==n: e[0] = 'CBB'+n
-
+	
+	# derive "deps", "anaph", and "coords" from "node_edges"
+	ann['anaph'] = [[x,y] for x,y,lbl in ann['node_edges'] if lbl=='Anaph']
+	coordinators = {}
+	conjuncts = {}
+	for x,y,lbl in ann['node_edges']:
+		if lbl=='Coord':
+			coordinators.setdefault(x,set()).add(y)
+		elif lbl=='Conj':
+			conjuncts.setdefault(x,set()).add(y)
+	assert set(coordinators.keys())==set(conjuncts.keys())
+	ann['varnodes'] = list(conjuncts.keys())
+	ann['coords'] = [[v,list(conjs),list(coordinators[v])] for v,conjs in conjuncts.items()]
+	ann['deps'] = [[x,y,lbl] for x,y,lbl in ann['node_edges'] if lbl not in ('Anaph','Coord','Conj')]
 
 def merge(annsJ, updatelex=False, escapebrackets=False):
 
@@ -52,7 +62,7 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 	
 				#print(j,file=sys.stderr)
 				lexnodes = {n for n in annJ['nodes'] if 'W(' in n}	# excluding root
-				assert set(annJ['node2words'].keys())==lexnodes,('Mismatch between nodes and node2words in input',j,lexnodes^set(annJ['node2words'].keys()),annJ)
+				assert set(annJ['n2w'].keys())==lexnodes,('Mismatch between nodes and n2w in input',j,lexnodes^set(annJ['n2w'].keys()),annJ)
 				
 				# normalize tokens: bracket escaping
 				if escapebrackets:
@@ -86,24 +96,24 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 					extra = set(enumerate(annJ['tokens']))-set(enumerate(mergedJ['tokens']))
 					repeated = {(i,wtype) for i,wtype in extra if annJ['tokens'].count(wtype)>1}
 					for i,wtype in repeated:
-						assert updatelex
+						assert updatelex,wtype	# may be triggered by ambiguous token that is sometimes (but not always) indexed
 						assert mergedJ['tokens'][i][:mergedJ['tokens'][i].rindex('~')]==wtype
 						assert mergedJ['tokens'][i] not in annJ['tokens']
 						annJ['tokens'][i] = mergedJ['tokens'][i]
-							
-					print('After attempting to reconcile tilde indices:',annJ['tokens'],mergedJ['tokens'],file=sys.stderr)
+						
+					#print('After attempting to reconcile tilde indices:',annJ['tokens'],mergedJ['tokens'],file=sys.stderr)
 					
-					assert annJ['tokens']==mergedJ['tokens']
+					assert annJ['tokens']==mergedJ['tokens'],('Differences in token disambiguation not automatically reconciled--please update manually:',set(enumerate(annJ['tokens']))^set(enumerate(mergedJ['tokens'])))
 				
 				
 				# TODO: smart renaming of conflicting CBBs?
-				conflictingN2W = {k for k in (set(annJ['node2words'].keys()) & set(mergedJ['node2words'].keys())) if annJ['node2words'][k]!=mergedJ['node2words'][k]}
-				assert not conflictingN2W
+				conflictingN2W = {k for k in (set(annJ['n2w'].keys()) & set(mergedJ['n2w'].keys())) if annJ['n2w'][k]!=mergedJ['n2w'][k]}
+				assert not conflictingN2W,('Differences in lexical node-word mappings not automatically reconciled--please update manually:',conflictingN2W)
 				
 				# TODO: smart renaming of conflicting variables?
 				'''
-				conflictingEN2W = {k for k in (set(annJ['extra_node2words'].keys()) & set(mergedJ['extra_node2words'].keys())) if annJ['extra_node2words'][k]!=mergedJ['extra_node2words'][k]}
-				for k in conflictingEN2W:
+				conflictingVN2W = {k for k in (set(annJ['extra_node2words'].keys()) & set(mergedJ['extra_node2words'].keys())) if annJ['extra_node2words'][k]!=mergedJ['extra_node2words'][k]}
+				for k in conflictingVN2W:
 					annJ['extra_node2words'][k+'_'] = annJ['extra_node2words'][k]	# TODO: Hacky
 					del annJ['extra_node2words'][k]
 					annJ['nodes'][annJ['nodes'].index(k)] = k+'_'
@@ -113,8 +123,10 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 						if y==k: e[1] = k+'_'
 				print(annJ)
 				'''
-				conflictingEN2W = {k for k in (set(annJ['extra_node2words'].keys()) & set(mergedJ['extra_node2words'].keys())) if annJ['extra_node2words'][k]!=mergedJ['extra_node2words'][k]}
-				assert not conflictingEN2W,conflictingEN2W
+				annVN2W = {varname: [conjuncts,coordinators] for varname,conjuncts,coordinators in annJ['coords']}
+				mergedVN2W = {varname: [conjuncts,coordinators] for varname,conjuncts,coordinators in mergedJ['coords']}
+				conflictingVN2W = {varname for varname in (set(annVN2W.keys()) & set(mergedVN2W.keys())) if set(annVN2W[varname][1])!=set(mergedVN2W[varname][1])}
+				assert not conflictingVN2W,('Differences in coordination variable not automatically reconciled--please update manually:',conflictingVN2W)
 
 
 				# union the ordinary edges
@@ -123,8 +135,9 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 						mergedJ['node_edges'].append(list(e))
 				
 				# special nodes
-				for n in set(annJ['extra_node2words'].keys()) - set(mergedJ['extra_node2words'].keys()):
-					mergedJ['extra_node2words'][n] = json.loads(json.dumps(annJ['extra_node2words'][n]))
+				for varname in set(annVN2W.keys()) - set(mergedVN2W.keys()):
+					mergedJ['varnodes'].append(varname)
+					mergedJ['coords'].append(json.loads(json.dumps([varname]+annVN2W[varname])))
 
 
 				# register any new nodes
@@ -135,6 +148,8 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 
 					# newly encountered lexical nodes
 					for n in set(annJ['nodes']) - set(mergedJ['nodes']):
+						if n=='**':
+							continue
 						if n.startswith('MW('):	# this annotation has MW, the merge doesn't, so make it a CBBMW
 							if 'CBB'+n not in mergedJ['nodes']:	# merge doesn't have a CBBMW, so make one
 								if n in mergedJ['nodes']:	# merge has MW
@@ -149,7 +164,7 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 										# slightly hacky: add MW, then convert it to CBBMW (this also converts the edges)
 									for ann in [mergedJ]+(annsJ[:-1] if updatelex else []):
 										ann['nodes'].append(n)
-										ann['node2words'][n] = list(annJ['node2words'][n])
+										ann['n2w'][n] = list(annJ['n2w'][n])
 										mw2CBBMW(ann, n)
 
 							if updatelex:
@@ -165,15 +180,15 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 							for ann in considerupdating:
 								if n in ann['nodes']: continue
 								if n.startswith('W('):	# ensure single word is not already covered by a MW (CBBMW is OK)
-									if any(lexnode.startswith('MW(') and n[2:-1] in tkns for lexnode,tkns in ann['node2words'].items()):
+									if any(lexnode.startswith('MW(') and n[2:-1] in tkns for lexnode,tkns in ann['n2w'].items()):
 										continue
 								elif n.startswith('CBBMW('):	# do not add a CBBMW if it overlaps with an MW
-									cbbmwtkns = annJ['node2words'][n]
-									if any(lexnode.startswith('MW(') and set(cbbmwtkns)&set(mwtkns) for lexnode,mwtkns in ann['node2words'].items()):
+									cbbmwtkns = annJ['n2w'][n]
+									if any(lexnode.startswith('MW(') and set(cbbmwtkns)&set(mwtkns) for lexnode,mwtkns in ann['n2w'].items()):
 										continue
 								ann['nodes'].append(n)
-								if n in annJ['node2words']:
-									ann['node2words'][n] = list(annJ['node2words'][n])
+								if n in annJ['n2w']:
+									ann['n2w'][n] = list(annJ['n2w'][n])
 							'''
 							if n.startswith('W('):	# ensure single word is not already covered by a MW (CBBMW is OK)
 								tkn = n[2:-1]
@@ -193,7 +208,9 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 					# note that the merge can acquire single-word nodes not in either annotation 
 					# if a MW from one of the annotations is converted to a CBBMW in the merge!
 					for n in set(mergedJ['nodes']) - set(annJ['nodes']):
-						if n.startswith('MW('):
+						if n=='**':
+							continue
+						elif n.startswith('MW('):
 							# in the merge, relax MW to a CBBMW
 							mw2CBBMW(mergedJ, n)
 							newcbbmmw = True
@@ -208,31 +225,31 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 							for ann in considerupdating:
 								if n in ann['nodes']: continue
 								if n.startswith('W('):	# ensure single word is not already covered by a MW (CBBMW is OK)
-									if any(lexnode.startswith('MW(') and n[2:-1] in mwtkns for lexnode,mwtkns in ann['node2words'].items()):
+									if any(lexnode.startswith('MW(') and n[2:-1] in mwtkns for lexnode,mwtkns in ann['n2w'].items()):
 										continue
 								elif n.startswith('CBBMW('):	# do not add a CBBMW if it overlaps with an MW
-									cbbmwtkns = mergedJ['node2words'][n]
-									if any(lexnode.startswith('MW(') and set(cbbmwtkns)&set(mwtkns) for lexnode,mwtkns in ann['node2words'].items()):
+									cbbmwtkns = mergedJ['n2w'][n]
+									if any(lexnode.startswith('MW(') and set(cbbmwtkns)&set(mwtkns) for lexnode,mwtkns in ann['n2w'].items()):
 										continue
 								ann['nodes'].append(n)
-								if n in mergedJ['node2words']:
-									ann['node2words'][n] = list(mergedJ['node2words'][n])
+								if n in mergedJ['n2w']:
+									ann['n2w'][n] = list(mergedJ['n2w'][n])
 									
 				
 	
 				if updatelex:
-					yy = {k for k in mergedJ['node2words'] if k not in annJ['node2words'] and not k.startswith('CBBMW(')}
-					assert not yy,(yy,mergedJ['nodes'],mergedJ['node2words'],annJ['nodes'],annJ['node2words'])
-					xx = {k for k in annJ['node2words'] if k not in mergedJ['node2words']}
+					yy = {k for k in mergedJ['n2w'] if k not in annJ['n2w'] and not k.startswith('CBBMW(')}
+					assert not yy,(yy,mergedJ['nodes'],mergedJ['n2w'],annJ['nodes'],annJ['n2w'])
+					xx = {k for k in annJ['n2w'] if k not in mergedJ['n2w']}
 				else:
-					xx = {k for k in annJ['node2words'] if k not in mergedJ['node2words'] and (not k.startswith('MW(') or 'CBB'+k not in mergedJ['node2words'])}
+					xx = {k for k in annJ['n2w'] if k not in mergedJ['n2w'] and (not k.startswith('MW(') or 'CBB'+k not in mergedJ['n2w'])}
 				assert not xx,xx
 
 					
 				# a token may be used by multiple CBBMWs, but for any other type of lexical node it must appear only once
-				tokenreps = Counter([t for tkns in mergedJ['node2words'].values() for t in tkns])
+				tokenreps = Counter([t for tkns in mergedJ['n2w'].values() for t in tkns])
 				tokennodetypes = defaultdict(set)
-				for n,tkns in mergedJ['node2words'].items():
+				for n,tkns in mergedJ['n2w'].items():
 					for t in tkns:
 						tokennodetypes[t].add(n[:n.index('(')])
 				for tkn,reps in tokenreps.items():
@@ -244,17 +261,17 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 		assert len(set(annsJ[i]['nodes']))==len(annsJ[i]['nodes']),('Nodes are not unique in annsJ['+str(i)+']: '+' '.join(n for n in annsJ[i]['nodes'] if annsJ[i]['nodes'].count(n)>1))
 
 	lexnodes = {n for n in mergedJ['nodes'] if 'W(' in n}	# excluding root
-	assert set(mergedJ['node2words'].keys())==lexnodes,('Mismatch between nodes and node2words in merge',j,lexnodes^set(mergedJ['node2words'].keys()),mergedJ)
+	assert set(mergedJ['n2w'].keys())==lexnodes,('Mismatch between nodes and n2w in merge',j,lexnodes^set(mergedJ['n2w'].keys()),mergedJ)
 	
 	# ensure single-word elements of CBBMWs also have their own entries
 	for ann in [mergedJ]+(annsJ if updatelex else []):
-		for n,tkns in ann['node2words'].items():
+		for n,tkns in ann['n2w'].items():
 			if n.startswith('CBBMW('):
 				for tkn in tkns:
-					assert 'W('+tkn+')' in ann['node2words'],(tkn,ann['node2words'])
+					assert 'W('+tkn+')' in ann['n2w'],(tkn,ann['n2w'])
 	
 	# sort nodes by token order
-	mergedJ['nodes'].sort(key=lambda n: ((['$$']+mergedJ['tokens']).index(mergedJ['node2words'][n][0]) if n in mergedJ['node2words'] else float('inf'),
+	mergedJ['nodes'].sort(key=lambda n: ((['**']+mergedJ['tokens']).index(mergedJ['n2w'][n][0]) if n in mergedJ['n2w'] else float('inf'),
 										 n.split('(')[0]))
 	
 	return mergedJ
@@ -335,10 +352,15 @@ def main(annsFF, verbose=False, simplifycoords=False, updatelex=False, escapebra
 if __name__=='__main__':
 	annsFF = []
 	args = sys.argv[1:]
-	opts = {}
+	opts = {'updatelex': True}
 	
 	while args and args[0].startswith('-'):
-		opts[{'-v': 'verbose', '-s': 'singleonly', '-c': 'simplifycoords', '-b': 'escapebrackets'}[args.pop(0)]] = True
+		opts[{'-v': 'verbose', '-s': 'singleonly', '-c': 'simplifycoords', '-b': 'escapebrackets', 
+			'-l': 'strict_lexical_node_agreement'}[args.pop(0)]] = True
+	
+	if 'strict_lexical_node_agreement' in opts:
+		opts['updatelex'] = False
+		del opts['strict_lexical_node_agreement']
 	
 	assert len(args)>=2
 	

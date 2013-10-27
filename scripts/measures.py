@@ -84,10 +84,10 @@ def com(prom, N):
 def promcom(a, c, kirchhoff=False):
 	stg = {(p.name,n.name) for n in a.lexnodes for p in n.parentcandidates}
 	#stg = {(p.name,n.name) for n in a.nodes-{a.root} for ch in (n.topcandidates if n.isCBB else {n.name}) for p in n.parentcandidates}
-	assert any(1 for x,y in stg if x=='$$'),('The root $$ is not in the graph!',stg)
+	assert any(1 for x,y in stg if x=='**'),('The root ** is not in the graph!',stg)
 
 	if kirchhoff:	# approximate promiscuity: count spanning trees with matrix tree theorem (instead of enumerating them). an upper bound.
-		prom = spanningtree(stg, '$$')
+		prom = spanningtree(stg, '**')
 		c['spanning trees'] = ValueStats(prom)
 		if prom==0:
 			raise Exception('No spanning trees for: '+repr(stg))
@@ -122,7 +122,7 @@ def promcom(a, c, kirchhoff=False):
 				yield analysis
 	
 	try:
-		strees = spanning(stg, '$$', threshold=10000)
+		strees = spanning(stg, '**', threshold=10000)
 		assert len(strees)>0
 		c['spanning trees'] = ValueStats(len(strees))
 		nodeswithext = {cbb for cbb in a.cbbnodes if cbb.externalchildren}
@@ -215,6 +215,8 @@ def iapromcom(a1, a2, c, escapebrackets=False, kirchhoff=False):
 			except Exception as ex:
 				c['comprec_1|2'] = ValueStats(0)
 				c['comprec_2|1'] = ValueStats(0)
+				print('~',ex, file=sys.stderr)
+				print(' '.join(a1.alltokens)+'\n', file=sys.stderr)
 				if 'No spanning trees' in ex.message:
 					c['no_spanning_trees'] = 1
 				elif 'No compatible trees' in ex.message:
@@ -225,7 +227,8 @@ def iapromcom(a1, a2, c, escapebrackets=False, kirchhoff=False):
 		except Exception as ex:
 			c['comprec_1|2'] = ValueStats(0)
 			c['comprec_2|1'] = ValueStats(0)
-			print(ex, file=sys.stderr)
+			print('~',ex, file=sys.stderr)
+			print(' '.join(a1.alltokens)+'\n', file=sys.stderr)
 			if 'any possible heads' in ex.message:
 				c['empty_spanning_tree_graph'] = 1
 			else:
@@ -233,7 +236,8 @@ def iapromcom(a1, a2, c, escapebrackets=False, kirchhoff=False):
 	except Exception as ex:
 		c['comprec_1|2'] = ValueStats(0)
 		c['comprec_2|1'] = ValueStats(0)
-		print(ex, file=sys.stderr)
+		print('~',ex, file=sys.stderr)
+		print(' '.join(a1.alltokens)+'\n', file=sys.stderr)
 		if 'cycle' in ex.message:
 			c['merge_cycle'] = 1
 		elif 'specified top' in ex.message:
@@ -248,7 +252,7 @@ def single_ann_measures(a, kirchhoff=False):
 	c['lexnodes'] = len(a.lexnodes)
 	c['1W'] = sum(1 for n in a.lexnodes if len(n.tokens)==1)
 	c['MW'] = sum(1 for n in a.lexnodes if len(n.tokens)>1)
-	c['omittedtoks'] = len(a.alltokens)-sum(1 for n in a.lexnodes)
+	c['omittedtoks'] = len(a.alltokens)-sum(len(n.tokens) for n in a.lexnodes)
 	c['coordnodes'] = len(a.coordnodes)
 	c['anaphlinks'] = len(a.anaphlinks)
 	c['FNs'] = len(a.cbbnodes)
@@ -281,7 +285,7 @@ def main(anns1F, anns2F=None, verbose=False, escapebrackets=False, kirchhoff=Fal
 		if not ann1ln.strip(): continue
 		loc1, sent, ann1JS = ann1ln[:-1].split('\t')
 		ann1J = json.loads(ann1JS)
-		if verbose: print(i, loc1, '<<', sent)
+		if verbose: sys.stderr.flush(); print(i, loc1, '<<', sent); sys.stdout.flush()
 		a1 = FUDGGraph(ann1J)
 		a1single = single_ann_measures(a1, kirchhoff=kirchhoff)
 		a1C += a1single
@@ -295,7 +299,7 @@ def main(anns1F, anns2F=None, verbose=False, escapebrackets=False, kirchhoff=Fal
 			assert len(ann1J['tokens'])==len(ann2J['tokens'])
 			#assert ann1J['tokens']==ann2J['tokens'],(ann1J['tokens'],ann2J['tokens'])
 			a2 = FUDGGraph(ann2J)
-			if verbose: print(i, loc2, '>>', sent2)
+			if verbose: sys.stderr.flush(); print(i, loc2, '>>', sent2); sys.stdout.flush()
 			a2single = single_ann_measures(a2, kirchhoff=kirchhoff)
 			a2C += a2single
 			if verbose: print('   ',a2single)
