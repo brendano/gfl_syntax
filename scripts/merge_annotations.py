@@ -16,28 +16,28 @@ from graph import FUDGGraph, simplify_coord, upward, downward
 from spanningtrees import spanning
 from measures import *
 
-def mw2CBBMW(ann, n):
-	'''Given the JSON object for an annotation and the name of a MW node, convert it to a CBBMW node'''
+def mw2FEMW(ann, n):
+	'''Given the JSON object for an annotation and the name of a MW node, convert it to an FEMW node'''
 	assert n.startswith('MW(')
 	assert n in ann['nodes'],(n,ann['nodes'])
-	assert 'CBB'+n not in ann['nodes']
+	assert 'FE'+n not in ann['nodes']
 	
-	ann['nodes'][ann['nodes'].index(n)] = 'CBB'+n
-	ann['n2w']['CBB'+n] = ann['n2w'][n]
+	ann['nodes'][ann['nodes'].index(n)] = 'FE'+n
+	ann['n2w']['FE'+n] = ann['n2w'][n]
 	del ann['n2w'][n]
 	
 	# create single-word tokens
-	for tkn in ann['n2w']['CBB'+n]:
-		if 'W('+tkn+')' not in ann['nodes']:	# may already be there due to an overlapping CBBMW
+	for tkn in ann['n2w']['FE'+n]:
+		if 'W('+tkn+')' not in ann['nodes']:	# may already be there due to an overlapping FEMW
 			ann['nodes'].append('W('+tkn+')')
 			ann['n2w']['W('+tkn+')'] = [tkn]
 	
-	# ensure edges use CBBMW(...)
+	# ensure edges use FEMW(...)
 	for e in ann['node_edges']:
 		x,y,lbl = e
 		assert x!=y
-		if x==n: e[0] = 'CBB'+n
-		if y==n: e[1] = 'CBB'+n
+		if x==n: e[0] = 'FE'+n
+		if y==n: e[1] = 'FE'+n
 		assert e[0]!=e[1]
 	
 	# derive "deps", "anaph", and "coords" from "node_edges"
@@ -106,7 +106,7 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 					assert annJ['tokens']==mergedJ['tokens'],('Differences in token disambiguation not automatically reconciled--please update manually:',set(enumerate(annJ['tokens']))^set(enumerate(mergedJ['tokens'])))
 				
 				
-				# TODO: smart renaming of conflicting CBBs?
+				# TODO: smart renaming of conflicting FEs?
 				conflictingN2W = {k for k in (set(annJ['n2w'].keys()) & set(mergedJ['n2w'].keys())) if annJ['n2w'][k]!=mergedJ['n2w'][k]}
 				assert not conflictingN2W,('Differences in lexical node-word mappings not automatically reconciled--please update manually:',conflictingN2W)
 				
@@ -141,56 +141,56 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 
 
 				# register any new nodes
-				# if there are any multiwords not in all annotations, include them in the merge with the CBBMW prefix
-				# include in the merge the union of all single-word nodes not represented by a CBBMW
+				# if there are any multiwords not in all annotations, include them in the merge with the FEMW prefix
+				# include in the merge the union of all single-word nodes not represented by an FEMW
 
-				for q in range(2 if updatelex else 1):	# repeat in case a CBBMW is introduced in the first iteration, necessitating new W nodes
+				for q in range(2 if updatelex else 1):	# repeat in case an FEMW is introduced in the first iteration, necessitating new W nodes
 
 					# newly encountered lexical nodes
 					for n in set(annJ['nodes']) - set(mergedJ['nodes']):
 						if n=='**':
 							continue
-						if n.startswith('MW('):	# this annotation has MW, the merge doesn't, so make it a CBBMW
-							if 'CBB'+n not in mergedJ['nodes']:	# merge doesn't have a CBBMW, so make one
+						if n.startswith('MW('):	# this annotation has MW, the merge doesn't, so make it an FEMW
+							if 'FE'+n not in mergedJ['nodes']:	# merge doesn't have an FEMW, so make one
 								if n in mergedJ['nodes']:	# merge has MW
 									assert False,'I think this is outdated code, should never be reached'
-									mw2CBBMW(mergedJ, n)
+									mw2FEMW(mergedJ, n)
 									if updatelex:
 										for ann in annsJ[:-1]:
 											if n in ann['nodes']:
-												mw2CBBMW(ann, n)
-								else:	# merge had/has single-words only (or perhaps, overlapping (CBB)MWs?)	# TODO: overlap case? CBBMW that is the union of overlapping MWs?
+												mw2FEMW(ann, n)
+								else:	# merge had/has single-words only (or perhaps, overlapping (FE)MWs?)	# TODO: overlap case? FEMW that is the union of overlapping MWs?
 										# single-words would have been removed at the beginning of the loop
-										# slightly hacky: add MW, then convert it to CBBMW (this also converts the edges)
+										# slightly hacky: add MW, then convert it to FEMW (this also converts the edges)
 									for ann in [mergedJ]+(annsJ[:-1] if updatelex else []):
 										ann['nodes'].append(n)
 										ann['n2w'][n] = list(annJ['n2w'][n])
-										mw2CBBMW(ann, n)
+										mw2FEMW(ann, n)
 
 							if updatelex:
-									mw2CBBMW(annJ, n)
-						elif n.startswith('CBBMW(') and n[3:] in mergedJ['nodes']:
-							# this annotation has CBBMW, merge has MW
+									mw2FEMW(annJ, n)
+						elif n.startswith('FEMW(') and n[3:] in mergedJ['nodes']:
+							# this annotation has FEMW, merge has MW
 							for ann in [mergedJ]+(annsJ[:-1] if updatelex else []):
-								mw2CBBMW(ann, n[3:])
+								mw2FEMW(ann, n[3:])
 						else:
-							assert n.startswith('CBB') or n.startswith('W(') or n.startswith('$'),n
+							assert n.startswith('FE') or n.startswith('W(') or n.startswith('$'),n
 						
 							considerupdating = [mergedJ] + (annsJ[:-1] if updatelex and n.startswith('W(') else [])
 							for ann in considerupdating:
 								if n in ann['nodes']: continue
-								if n.startswith('W('):	# ensure single word is not already covered by a MW (CBBMW is OK)
+								if n.startswith('W('):	# ensure single word is not already covered by a MW (FEMW is OK)
 									if any(lexnode.startswith('MW(') and n[2:-1] in tkns for lexnode,tkns in ann['n2w'].items()):
 										continue
-								elif n.startswith('CBBMW('):	# do not add a CBBMW if it overlaps with an MW
-									cbbmwtkns = annJ['n2w'][n]
-									if any(lexnode.startswith('MW(') and set(cbbmwtkns)&set(mwtkns) for lexnode,mwtkns in ann['n2w'].items()):
+								elif n.startswith('FEMW('):	# do not add an FEMW if it overlaps with an MW
+									femwtkns = annJ['n2w'][n]
+									if any(lexnode.startswith('MW(') and set(femwtkns)&set(mwtkns) for lexnode,mwtkns in ann['n2w'].items()):
 										continue
 								ann['nodes'].append(n)
 								if n in annJ['n2w']:
 									ann['n2w'][n] = list(annJ['n2w'][n])
 							'''
-							if n.startswith('W('):	# ensure single word is not already covered by a MW (CBBMW is OK)
+							if n.startswith('W('):	# ensure single word is not already covered by a MW (FEMW is OK)
 								tkn = n[2:-1]
 								if any(lexnode.startswith('MW(') and tkn in tkns for lexnode,tkns in mergedJ['node2words'].items()):
 									continue
@@ -206,30 +206,30 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 				
 					# lexical items in the merge of previous annotations, but not this one
 					# note that the merge can acquire single-word nodes not in either annotation 
-					# if a MW from one of the annotations is converted to a CBBMW in the merge!
+					# if a MW from one of the annotations is converted to an FEMW in the merge!
 					for n in set(mergedJ['nodes']) - set(annJ['nodes']):
 						if n=='**':
 							continue
 						elif n.startswith('MW('):
-							# in the merge, relax MW to a CBBMW
-							mw2CBBMW(mergedJ, n)
-							newcbbmmw = True
+							# in the merge, relax MW to an FEMW
+							mw2FEMW(mergedJ, n)
+							newfemmw = True
 							if updatelex:
 								for ann in annsJ[:-1]:
 									if n in ann['nodes']:
-										mw2CBBMW(ann, n)
+										mw2FEMW(ann, n)
 						else:
-							assert n.startswith('CBB') or n.startswith('W(') or n.startswith('$'),n
+							assert n.startswith('FE') or n.startswith('W(') or n.startswith('$'),n
 						
 							considerupdating = [annJ] if updatelex and n.startswith('W(') else []
 							for ann in considerupdating:
 								if n in ann['nodes']: continue
-								if n.startswith('W('):	# ensure single word is not already covered by a MW (CBBMW is OK)
+								if n.startswith('W('):	# ensure single word is not already covered by a MW (FEMW is OK)
 									if any(lexnode.startswith('MW(') and n[2:-1] in mwtkns for lexnode,mwtkns in ann['n2w'].items()):
 										continue
-								elif n.startswith('CBBMW('):	# do not add a CBBMW if it overlaps with an MW
-									cbbmwtkns = mergedJ['n2w'][n]
-									if any(lexnode.startswith('MW(') and set(cbbmwtkns)&set(mwtkns) for lexnode,mwtkns in ann['n2w'].items()):
+								elif n.startswith('FEMW('):	# do not add an FEMW if it overlaps with an MW
+									femwtkns = mergedJ['n2w'][n]
+									if any(lexnode.startswith('MW(') and set(femwtkns)&set(mwtkns) for lexnode,mwtkns in ann['n2w'].items()):
 										continue
 								ann['nodes'].append(n)
 								if n in mergedJ['n2w']:
@@ -238,15 +238,15 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 				
 	
 				if updatelex:
-					yy = {k for k in mergedJ['n2w'] if k not in annJ['n2w'] and not k.startswith('CBBMW(')}
+					yy = {k for k in mergedJ['n2w'] if k not in annJ['n2w'] and not k.startswith('FEMW(')}
 					assert not yy,(yy,mergedJ['nodes'],mergedJ['n2w'],annJ['nodes'],annJ['n2w'])
 					xx = {k for k in annJ['n2w'] if k not in mergedJ['n2w']}
 				else:
-					xx = {k for k in annJ['n2w'] if k not in mergedJ['n2w'] and (not k.startswith('MW(') or 'CBB'+k not in mergedJ['n2w'])}
+					xx = {k for k in annJ['n2w'] if k not in mergedJ['n2w'] and (not k.startswith('MW(') or 'FE'+k not in mergedJ['n2w'])}
 				assert not xx,xx
 
 					
-				# a token may be used by multiple CBBMWs, but for any other type of lexical node it must appear only once
+				# a token may be used by multiple FEMWs, but for any other type of lexical node it must appear only once
 				tokenreps = Counter([t for tkns in mergedJ['n2w'].values() for t in tkns])
 				tokennodetypes = defaultdict(set)
 				for n,tkns in mergedJ['n2w'].items():
@@ -263,10 +263,10 @@ def merge(annsJ, updatelex=False, escapebrackets=False):
 	lexnodes = {n for n in mergedJ['nodes'] if 'W(' in n}	# excluding root
 	assert set(mergedJ['n2w'].keys())==lexnodes,('Mismatch between nodes and n2w in merge',j,lexnodes^set(mergedJ['n2w'].keys()),mergedJ)
 	
-	# ensure single-word elements of CBBMWs also have their own entries
+	# ensure single-word elements of FEMWs also have their own entries
 	for ann in [mergedJ]+(annsJ if updatelex else []):
 		for n,tkns in ann['n2w'].items():
-			if n.startswith('CBBMW('):
+			if n.startswith('FEMW('):
 				for tkn in tkns:
 					assert 'W('+tkn+')' in ann['n2w'],(tkn,ann['n2w'])
 	

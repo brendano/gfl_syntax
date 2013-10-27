@@ -50,19 +50,19 @@ The following types of nodes are allowed:
   * TODO: use `$$` instead?
 - single words: `W(fair)`
 - multiwords: `MW(above_all)`
-- CBB multiwords, a compromise between annotations which do not agree on multiwords 
-  (these are to be interpreted as CBBs in the graph): `CBBMW(above_all)`
-- CBBs: `CBB1`
+- FE multiwords, a compromise between annotations which do not agree on multiwords 
+  (these are to be interpreted as FEs in the graph): `FEMW(above_all)`
+- FEs: `FE1`
 
 `"node2words"`
 --------------
 
-The root node (if present) and every single word, multiword, and CBB multiword should 
+The root node (if present) and every single word, multiword, and FE multiword should 
 be mapped to a list of tokens that are subsumed by that node.
 
   * the root node is mapped to pseudo-token `"$$"` (TODO: get rid of this?)
-  * tokens belonging to a multiword must not also appear in any other lexical node (another multiword or a single-word or CBBMW node)
-  * single-word tokens and their subsumed CBBMWs should both have entries
+  * tokens belonging to a multiword must not also appear in any other lexical node (another multiword or a single-word or FEMW node)
+  * single-word tokens and their subsumed FEMWs should both have entries
 
 `"extra_node2words"`
 --------------------
@@ -76,12 +76,12 @@ Each of these links contains the coordinator node and the label `"Coord"`.
 Includes:
 
 - regular dependency links of type `null`
-- CBB membership links of type `"cbbhead"` or `"unspec"`
+- FE membership links of type `"fe*"` or `"fe"`
 - conjunct links of type `"Conj"`
 - anaphoric links of type `"Anaph"`
 
 Excludes:
 
-- CBBMW membership links
+- FEMW membership links
 - coordinator links
 

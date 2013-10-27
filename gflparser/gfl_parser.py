@@ -30,7 +30,7 @@ class GFLError(Exception):
         Exception.__init__(self, *args, **kwargs)
 
 
-_GFLParse = namedtuple('GFLParse', 'tokens n2w w2n varnodes ww2cbb deps anaph coords')
+_GFLParse = namedtuple('GFLParse', 'tokens n2w w2n varnodes ww2fe deps anaph coords')
 class GFLParse(_GFLParse):
     @property
     def node_edges(self):
@@ -41,7 +41,7 @@ class GFLParse(_GFLParse):
     @property
     def nodes(self):
         '''Includes lexical nodes, coordination nodes, fudge nodes, and the special root node ** if it is used'''
-        allnodes = self.n2w.keys() + list(self.varnodes) + self.ww2cbb.values()
+        allnodes = self.n2w.keys() + list(self.varnodes) + self.ww2fe.values()
         if any(1 for h,d,l in self.deps if h=='**'):
             allnodes.append('**')
         assert len(set(allnodes))==len(allnodes)
@@ -52,8 +52,8 @@ class GFLParse(_GFLParse):
         d = self._asdict()
         d["nodes"] = self.nodes
         d["node_edges"] = self.node_edges
-        if "ww2cbb" in d:
-            del d["ww2cbb"] # key is an object (a set), JSON requires a string. remove, convert to pairs, or use repr()?
+        if "ww2fe" in d:
+            del d["ww2fe"] # key is an object (a set), JSON requires a string. remove, convert to pairs, or use repr()?
         for k,v in d.items():
             if k=='coords':
                 d[k] = [(a,list(b),list(c)) for a,b,c in v]
@@ -121,7 +121,7 @@ def analyze(tokens, tree, ignore_order=False):
     '''Analyze the simplified tree into meaningful GFL annotation graph structures (nodes and edges).'''
     n2w = FixedDict()
     w2n = FixedDict()
-    ww2cbb = FixedDict()
+    ww2fe = FixedDict()
     deps = set()
     anaph = set()
     coords = set()
@@ -159,7 +159,7 @@ def analyze(tokens, tree, ignore_order=False):
                 c = [c]
             coords.add((v,frozenset(j),frozenset(c)))
             coordvars.add(v)
-        elif n=='**':   # ** appearing as first item in a CBB
+        elif n=='**':   # ** appearing as first item in a fudge expression (FE)
             return n
         elif isinstance(n,basestring) and n.startswith('$'):    # variable
             w2n[frozenset([n])] = n
@@ -226,12 +226,12 @@ def analyze(tokens, tree, ignore_order=False):
                 members = []
                 rightward = None
                 leftward = None
-                cbbhead = None
+                fehead = None
                 for i,c in enumerate(rhs):
                         if c=='*':
                             assert rightward is None
-                            assert cbbhead is None
-                            cbbhead = members[-1]
+                            assert fehead is None
+                            fehead = members[-1]
                             continue
                         if c[-1]=='>':
                             assert len(c)%2==0
@@ -254,7 +254,7 @@ def analyze(tokens, tree, ignore_order=False):
                             c = traverse(c)
                             if c=='**':
                                 if i==0:
-                                    cbbhead = c
+                                    fehead = c
                                     members.append(c)
                                 else:
                                     assert leftward is not None
@@ -272,11 +272,11 @@ def analyze(tokens, tree, ignore_order=False):
                         
                 
                     
-                f = ww2cbb.setdefault(frozenset(members), 'CBB'+str(len(ww2cbb)+1))
-                if cbbhead is not None:
-                    deps.add((f,cbbhead,'cbbhead'))
-                for member in set(members)-{cbbhead}:
-                    deps.add((f,member,'unspec'))
+                f = ww2fe.setdefault(frozenset(members), 'FE'+str(len(ww2fe)+1))
+                if fehead is not None:
+                    deps.add((f,fehead,'fe*'))
+                for member in set(members)-{fehead}:
+                    deps.add((f,member,'fe'))
                 return f
             else:
                 assert False,(t,w2n,n)
@@ -341,14 +341,14 @@ def analyze(tokens, tree, ignore_order=False):
         if v in n2w:    # TODO: why for football_wives but not nietzsche?
             del n2w[v]
             del w2n[frozenset([v])]
-    return GFLParse(tokens=tokens, n2w=n2w, w2n=w2n, varnodes=varnodes, ww2cbb=ww2cbb, deps=[e+(None,) if len(e)==2 else e for e in deps], anaph=anaph, coords=coords)
+    return GFLParse(tokens=tokens, n2w=n2w, w2n=w2n, varnodes=varnodes, ww2fe=ww2fe, deps=[e+(None,) if len(e)==2 else e for e in deps], anaph=anaph, coords=coords)
 
 
 def graph_semantics_check(parse):
     """Do checks on the final parse graph -- these are linguistic-level checks,
     not graph definition checks.
     
-    This doesn't attempt to do fancy reasoning about CBBs. 
+    This doesn't attempt to do fancy reasoning about FEs. 
     E.g., a < (b* c d) precludes a < c, but this conflict will not be caught here.
     """
     # Check tree constraint over each fragment
@@ -356,7 +356,7 @@ def graph_semantics_check(parse):
     rootFor = {}
     
     for n in parse.nodes:
-        outbounds = [(h,c,l) for h,c,l in parse.node_edges if c==n and l not in {'Anaph','cbbhead','unspec'}]
+        outbounds = [(h,c,l) for h,c,l in parse.node_edges if c==n and l not in {'Anaph','fe*','fe'}]
         if len(outbounds) > 1:
             raise GFLError("Violates tree constraint: node {} has {} outbound edges: {}".format(
                                                         repr(n), len(outbounds), repr(outbounds)))
@@ -488,5 +488,5 @@ else:    # load the default GFL grammar
         _grammar = Grammar(clean(inF.read()))
 
 
-# TODO: error-checking, e.g. at most one cbbhead per CBB, all tokens are unambiguous in input, etc.
+# TODO: error-checking, e.g. at most one fehead per FE, all tokens are unambiguous in input, etc.
 # TODO: when naming MW nodes, use token order in input

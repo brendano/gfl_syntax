@@ -83,7 +83,7 @@ def com(prom, N):
 
 def promcom(a, c, kirchhoff=False):
 	stg = {(p.name,n.name) for n in a.lexnodes for p in n.parentcandidates}
-	#stg = {(p.name,n.name) for n in a.nodes-{a.root} for ch in (n.topcandidates if n.isCBB else {n.name}) for p in n.parentcandidates}
+	#stg = {(p.name,n.name) for n in a.nodes-{a.root} for ch in (n.topcandidates if n.isFE else {n.name}) for p in n.parentcandidates}
 	assert any(1 for x,y in stg if x=='**'),('The root ** is not in the graph!',stg)
 
 	if kirchhoff:	# approximate promiscuity: count spanning trees with matrix tree theorem (instead of enumerating them). an upper bound.
@@ -103,15 +103,15 @@ def promcom(a, c, kirchhoff=False):
 			#assert False,parmap
 			violation = False
 
-			# determine tops of all CBBs in this analysis, going upward
+			# determine tops of all FEs in this analysis, going upward
 			tops = {}
-			for cbb in sorted(a.cbbnodes, key=lambda node: node.height):
-				assert cbb.members,(cbb,cbb._pointerto)
-				tops[cbb.name] = min((tops.get(n.name,n.name) for n in cbb.members), key=lambda v: depth(v,parmap))
+			for fe in sorted(a.fenodes, key=lambda node: node.height):
+				assert fe.members,(fe,fe._pointerto)
+				tops[fe.name] = min((tops.get(n.name,n.name) for n in fe.members), key=lambda v: depth(v,parmap))
 
-			for cbb in nodeswithext:
-				top = tops[cbb.name]
-				for x in cbb.externalchildren:
+			for fe in nodeswithext:
+				top = tops[fe.name]
+				for x in fe.externalchildren:
 					if (parmap.get(x.name) or parmap[tops[x.name]])!=top:
 						violation = True
 						#if 'tix' in a.alltokens:
@@ -125,7 +125,7 @@ def promcom(a, c, kirchhoff=False):
 		strees = spanning(stg, '**', threshold=10000)
 		assert len(strees)>0
 		c['spanning trees'] = ValueStats(len(strees))
-		nodeswithext = {cbb for cbb in a.cbbnodes if cbb.externalchildren}
+		nodeswithext = {fe for fe in a.fenodes if fe.externalchildren}
 		prom = sum(1 for t in compatible_analyses(strees, nodeswithext))
 		assert prom>0,'No compatible trees for sentence: '+' '.join(a.alltokens)
 		c['promiscuity'] = ValueStats(prom)
@@ -164,7 +164,7 @@ def iapromcom(a1, a2, c, escapebrackets=False, kirchhoff=False):
 	for n in a1U.lexnodes | a2U.lexnodes:
 		assert n.json_name in a1U.nodesbyname,(n.json_name,m,'-------------------',a1J)
 		assert n.json_name in a2U.nodesbyname,(n.json_name,m,'-------------------',a2J)
-		#assert n.json_name in m['node2words'] or (n.json_name.startswith('MW(') and 'CBB'+n.json_name in m['node2words']),(n.json_name,m)
+		#assert n.json_name in m['node2words'] or (n.json_name.startswith('MW(') and 'FE'+n.json_name in m['node2words']),(n.json_name,m)
 
 	jointSuppParents = {n.name: {p.json_name for p in a1U.nodesbyname[n.json_name].parentcandidates} & {p.json_name for p in a2U.nodesbyname[n.json_name].parentcandidates} for n in (a1U.lexnodes|a2U.lexnodes)}
 	
@@ -220,7 +220,7 @@ def iapromcom(a1, a2, c, escapebrackets=False, kirchhoff=False):
 				if 'No spanning trees' in ex.message:
 					c['no_spanning_trees'] = 1
 				elif 'No compatible trees' in ex.message:
-					c['no_compatible_trees'] = 1	# due to external-attachment-to-CBB constraint
+					c['no_compatible_trees'] = 1	# due to external-attachment-to-FE constraint
 				else:
 					print('unknown error in promcom()', file=sys.stderr)
 					raise
@@ -255,7 +255,7 @@ def single_ann_measures(a, kirchhoff=False):
 	c['omittedtoks'] = len(a.alltokens)-sum(len(n.tokens) for n in a.lexnodes)
 	c['coordnodes'] = len(a.coordnodes)
 	c['anaphlinks'] = len(a.anaphlinks)
-	c['FNs'] = len(a.cbbnodes)
+	c['FNs'] = len(a.fenodes)
 	c['explicitly rooted utterances'] = len(a.root.children)
 	#print({n: n.depth for n in a.nodes})
 	simplify_coord(a)

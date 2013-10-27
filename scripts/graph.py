@@ -1,17 +1,17 @@
 #!/usr/bin/env python2.7
 """
-FUDG graph data structures and algorithms for reasoning about possible CBB heads 
+FUDG graph data structures and algorithms for reasoning about possible FE heads 
 (internal a.k.a. 'topcandidates' and external a.k.a. 'parentcandidates').
 
 Some things done here but not in the parser:
-- ensure only one cbbhead child per CBB
+- ensure only one fehead child per FE
 - ensure no token appears in more than one lexical node
 - ensure the root is never attached to anything else
-- ensure CBBs with identical childsets are merged, without losing cbbhead information
+- ensure FEs with identical childsets are merged, without losing fehead information
 
 TODO:
-- ensure nodes attaching to root can't also attach to something else unless it is a CBB
-  (or is this enforced already via the forest-except-CBB-edges constraint?)
+- ensure nodes attaching to root can't also attach to something else unless it is an FE
+  (or is this enforced already via the forest-except-FE-edges constraint?)
 
 - prohibit:
 [a b]
@@ -72,7 +72,7 @@ class FUDGNode(TreeNode):
     
     def add_child(self, node, label=None):
         assert self.name!=node.name,(self.name,node.name)
-        assert not node.isRoot or (self.isCBB and label is not None)
+        assert not node.isRoot or (self.isFE and label is not None)
         TreeNode.add_child(self, node)
         self.childedges.add((node, label))
         # check for cycles
@@ -127,10 +127,10 @@ class FUDGNode(TreeNode):
     @property
     def isLexical(self): return isinstance(self, LexicalNode)
     @property
-    def isCBB(self): return isinstance(self, CBBNode)
+    def isFE(self): return isinstance(self, FENode)
     @property
     def isFirm(self):
-        '''i.e. anything but a CBB (fudge) node'''
+        '''i.e. anything but a FE (fudge) node'''
         return self.isRoot or self.isLexical or self.isCoord
 
 class LexicalNode(FUDGNode):
@@ -166,7 +166,7 @@ class CoordinationNode(FUDGNode):
         self.coords = coords
         self.conjuncts = conjuncts or set()
 
-class CBBNode(FUDGNode):
+class FENode(FUDGNode):
     def __init__(self, name, members=None, externalchildren=None, top=None):
         self.top = top
         self.members = members or set()
@@ -180,18 +180,18 @@ class CBBNode(FUDGNode):
     def add_member(self, node, specified_top):
         self.members.add(node)
         if specified_top:
-            assert self.top is None,'CBB can only have one specified top: '+repr(self.top)+', '+repr(node)
+            assert self.top is None,'FE can only have one specified top: '+repr(self.top)+', '+repr(node)
             self.top = node
-        FUDGNode.add_child(self, node, label=('top' if specified_top else 'unspec'))
+        FUDGNode.add_child(self, node, label=('top' if specified_top else 'fe'))
         
     def add_child(self, node, **kwargs):
         self.externalchildren.add(node)
         FUDGNode.add_child(self, node, **kwargs)
         
     def become_pointer(self, node):
-        '''Merge the two CBBs and assume a reference to the other instance'''
-        print('MERGE CBB ',self,'into',node, file=sys.stderr)
-        assert node.isCBB
+        '''Merge the two FEs and assume a reference to the other instance'''
+        print('MERGE FE ',self,'into',node, file=sys.stderr)
+        assert node.isFE
         assert node.members==self.members
         assert (node.top is None) or (self.top is None) or node.top==self.top
         if node.top is None: node.top = self.top
@@ -263,7 +263,7 @@ class FUDGGraph(Graph):
         self.alltokens = graphJ['tokens']
         self.token2lexnode = {}
         self.lexnodes = set()
-        self.cbbnodes = set()
+        self.fenodes = set()
         self.anaphlinks = set()
         self.root = RootNode()
         self.coordnodes = set()
@@ -272,7 +272,7 @@ class FUDGGraph(Graph):
         
         # lexical nodes
         coordNodes = set()
-        cbbmws = set()
+        femws = set()
         
         '''
         for punct in set('.,!-()$:') | {'....'}:    # TODO: deal with dependency converted input
@@ -305,12 +305,12 @@ class FUDGGraph(Graph):
             elif lex[0]=='$':
                 coordNodes.add(lex)
             else:
-                assert lex.startswith('CBB'),lex
+                assert lex.startswith('FE'),lex
                 members = set()
-                if lex.startswith('CBBMW'): # multiword relaxed to a CBB
-                    cbbmws.add(lex)
-                n = CBBNode(lex)
-                self.cbbnodes.add(n)
+                if lex.startswith('FEMW'): # multiword relaxed to an FE
+                    femws.add(lex)
+                n = FENode(lex)
+                self.fenodes.add(n)
                 self.nodesbyname[lex] = n
                 
         # coordination nodes (which depend on lexical nodes)
@@ -324,16 +324,16 @@ class FUDGGraph(Graph):
             self.coordnodes.add(n)
             self.nodesbyname[varname] = n
         
-        # CBBMWs (attach lexical node members)
-        for cbbmw in cbbmws:
-            cbb = self.nodesbyname[cbbmw]
-            for lex in graphJ['n2w'][cbbmw]:
+        # FEMWs (attach lexical node members)
+        for femw in femws:
+            fe = self.nodesbyname[femw]
+            for lex in graphJ['n2w'][femw]:
                 if 'W('+lex+')' not in self.nodesbyname:
                     add_lex('W('+lex+')', lex)
-                cbb.add_member(self.nodesbyname['W('+lex+')'], False)
-            assert cbb.members
+                fe.add_member(self.nodesbyname['W('+lex+')'], False)
+            assert fe.members
         
-        self.nodes = {self.root} | self.lexnodes | self.coordnodes | self.cbbnodes
+        self.nodes = {self.root} | self.lexnodes | self.coordnodes | self.fenodes
         
         # edges
         for p,c,lbl in graphJ['node_edges']:
@@ -344,9 +344,9 @@ class FUDGGraph(Graph):
                 pnode.conjuncts.add(cnode)
             elif lbl=='Coord':
                 pnode.coords.add(cnode)
-            elif lbl=='unspec':
+            elif lbl=='fe':
                 pnode.add_member(cnode, specified_top=False)
-            elif lbl=='cbbhead':
+            elif lbl=='fe*':
                 pnode.add_member(cnode, specified_top=True)
             elif lbl=='Anaph':
                 self.anaphlinks.add((p,c))  # simply store these for the present purposes
@@ -357,16 +357,16 @@ class FUDGGraph(Graph):
         
 
         
-        # merge CBBs with identical member sets
-        cbbs = list(sorted(self.cbbnodes, key=lambda n: n.name))
-        assert None not in cbbs
-        for i in range(len(cbbs)):
+        # merge FEs with identical member sets
+        fes = list(sorted(self.fenodes, key=lambda n: n.name))
+        assert None not in fes
+        for i in range(len(fes)):
             for h in range(i):
-                if cbbs[h] and cbbs[h].members==cbbs[i].members:
-                    cbbs[i].become_pointer(cbbs[h])
-                    self.cbbnodes.remove(cbbs[i])
-                    self.nodes.remove(cbbs[i])
-                    cbbs[i] = None
+                if fes[h] and fes[h].members==fes[i].members:
+                    fes[i].become_pointer(fes[h])
+                    self.fenodes.remove(fes[i])
+                    self.nodes.remove(fes[i])
+                    fes[i] = None
                     break
                     
         #assert self.lexnodes
@@ -389,8 +389,8 @@ class FUDGGraph(Graph):
         outJ = {"tokens": list(self.alltokens), "varnodes": [], "coords": [], 
                 "nodes": [n.json_name for n in self.nodes], 
                 "n2w": {n.json_name: list(n.tokens) for n in self.lexnodes},
-                # exclude CBBMW member links (these are handled separately)
-                "node_edges": [[p.json_name, n.json_name, lbl and lbl.replace('top','cbbhead')] for n in self.nodes for p,lbl in n.parentedges if not p.name.startswith('CBBMW')]}
+                # exclude FEMW member links (these are handled separately)
+                "node_edges": [[p.json_name, n.json_name, lbl and lbl.replace('top','fe*')] for n in self.nodes for p,lbl in n.parentedges if not p.name.startswith('FEMW')]}
         '''
         if any(self.root.json_name in (x,y) for x,y,l in outJ["node_edges"]):
             outJ["n2w"][self.root.json_name] = ['**']
@@ -398,9 +398,9 @@ class FUDGGraph(Graph):
             outJ["nodes"].remove(self.root.json_name)
         '''
         
-        for cbb in self.cbbnodes:
-            if cbb.name.startswith('CBBMW'):    # hacky
-                outJ["n2w"][cbb.name] = [tkn for n in cbb.members for tkn in n.tokens]
+        for fe in self.fenodes:
+            if fe.name.startswith('FEMW'):    # hacky
+                outJ["n2w"][fe.name] = [tkn for n in fe.members for tkn in n.tokens]
         for e in self.anaphlinks:   # TODO
             outJ["node_edges"]
         assert '**' not in outJ["n2w"]
@@ -478,7 +478,7 @@ def simplify_coord(G):
             try:
                 assert newhead.depth==n.depth,(n,n.depth,newhead,newhead.depth)
             except AssertionError as ex:
-                print(ex, 'There is a legitimate edge case in which this fails: the coordinator is also a member of a CBB and so will continue to have greater depth than the coordination node even when it replaces it', file=sys.stderr)
+                print(ex, 'There is a legitimate edge case in which this fails: the coordinator is also a member of an FE and so will continue to have greater depth than the coordination node even when it replaces it', file=sys.stderr)
 
             assert newhead in G.nodes
             
@@ -489,42 +489,42 @@ def simplify_coord(G):
 
 def upward(F):
     '''
-    For each CBB in the graph or fragment, traverse bottom-up to identify the possible 
+    For each FE in the graph or fragment, traverse bottom-up to identify the possible 
     top nodes (internal heads) that might obtain in a full analysis. 
-    Result: .topcandidates, not containing any CBB nodes
+    Result: .topcandidates, not containing any FE nodes
     '''
     for n in sorted(F.nodes, key=lambda node: node.height):
         assert not n.isCoord    # graph should have been simplified to remove coordination nodes
-        if n.isCBB:
+        if n.isFE:
             n.topcandidates = set()
             
-            # ensure only one cbbhead child per CBB
+            # ensure only one fehead child per FE
             assert [e for (c,e) in n.childedges].count('top')<=1,n.childedges
             
             for (c,e) in n.childedges:
                 if e=='top':
-                    n.topcandidates = set(c.topcandidates) if c.isCBB else {c}
+                    n.topcandidates = set(c.topcandidates) if c.isFE else {c}
                     #n.topcandidates = {c}
-                    #if c.isCBB:
-                    #   n.topcandidates |= {x for x in c.topcandidates if not c.isCBB}
-                    break   # there is only one cbbhead
-                elif e=='unspec':
-                    n.topcandidates |= c.topcandidates if c.isCBB else {c}
+                    #if c.isFE:
+                    #   n.topcandidates |= {x for x in c.topcandidates if not c.isFE}
+                    break   # there is only one fehead
+                elif e=='fe':
+                    n.topcandidates |= c.topcandidates if c.isFE else {c}
                     #n.topcandidates.add(c)
-                    #if c.isCBB:
-                    #   n.topcandidates |= {x for x in c.topcandidates if not c.isCBB}
+                    #if c.isFE:
+                    #   n.topcandidates |= {x for x in c.topcandidates if not c.isFE}
                 else:
                     assert e is None
             assert n not in n.topcandidates
-            assert not any(1 for x in n.topcandidates if x.isCBB)
+            assert not any(1 for x in n.topcandidates if x.isFE)
             #print(n, 'TOPCANDIDATES', n.topcandidates)
 
 def downward(G):
     '''
-    For each lexical node, identify the possible attachments (heads, not CBBs) it might take in some full analysis.
-    For each CBB node, identify the possible attachments to non-CBB heads its *top node* (internal head) might take in some full analysis. 
-    If the node in question is unattached, that will be all non-CBB nodes that are not its descendants.
-    Result: .parentcandidates, not containing any CBB nodes
+    For each lexical node, identify the possible attachments (heads, not FEs) it might take in some full analysis.
+    For each FE node, identify the possible attachments to non-FE heads its *top node* (internal head) might take in some full analysis. 
+    If the node in question is unattached, that will be all non-FE nodes that are not its descendants.
+    Result: .parentcandidates, not containing any FE nodes
     '''
     for n in sorted(G.nodes, key=lambda node: node.depth):
         assert not n.isCoord    # graph should have been simplified to remove coordination nodes
@@ -534,45 +534,45 @@ def downward(G):
             #print(n, n.parentcandidates)
             #print(n, n.parentedges, n.parents, n.parentcandidates)
             for (p,e) in n.parentedges:
-                if p.isCBB:
-                    #print('   CBB topcandidates:',p,p.topcandidates)
+                if p.isFE:
+                    #print('   FE topcandidates:',p,p.topcandidates)
                     if n in p.members:
-                        tcands = n.topcandidates if n.isCBB else {n}
+                        tcands = n.topcandidates if n.isFE else {n}
                         cands = set()
-                        if p.topcandidates & tcands:    # (top of) n might be the top of the CBB
+                        if p.topcandidates & tcands:    # (top of) n might be the top of the FE
                             assert p.parentcandidates is not None,(n,p,p._pointerto,n.depth,p.depth,n.frag,p.frag)
                             cands |= p.parentcandidates
-                        if p.topcandidates!=tcands: # (top of) n might not be the top of the CBB
+                        if p.topcandidates!=tcands: # (top of) n might not be the top of the FE
                             siblings = p.members - {n}
                             for sib in siblings:
-                                cands |= sib.topcandidates if sib.isCBB else {sib}
+                                cands |= sib.topcandidates if sib.isFE else {sib}
                         n.parentcandidates &= cands
                     else:
-                        assert n in p.externalchildren  # edge modifies a CBB
-                        n.parentcandidates &= p.topcandidates   # can be any firm node that might be the top of the CBB
+                        assert n in p.externalchildren  # edge modifies an FE
+                        n.parentcandidates &= p.topcandidates   # can be any firm node that might be the top of the FE
                 else:
                     assert p.isFirm
-                    n.parentcandidates &= {p}   # edge attaches to something other than a CBB, so we know it's for real
+                    n.parentcandidates &= {p}   # edge attaches to something other than an FE, so we know it's for real
                 #print('  ',n,'   after',(p,e),n.parentcandidates)
             #print()
-            #assert n.parentcandidates,(n,(n.topcandidates if n.isCBB else []), n.parents,n.parentedges,[p.topcandidates for p in n.parents if p.isCBB],n.parentcandidates)
+            #assert n.parentcandidates,(n,(n.topcandidates if n.isFE else []), n.parents,n.parentedges,[p.topcandidates for p in n.parents if p.isFE],n.parentcandidates)
             assert n.parentcandidates,'Could not find any possible heads for '+repr(n)+'. Is the annotation valid?' 
 def test():
     '''Some rudimentary test cases.'''
     from spanningtrees import spanning
     g1 = {'tokens': ['I', 'think', "I'm", 'a', 'wait', 'an', 'hour', 'or', '2', '&', 'THEN', 'tweet', '@sinittaofficial', '...'], 'node_edges': [['$a', 'W(tweet)', 'Conj'], ['$a', 'W(wait)', 'Conj'], ['$a', 'MW(&_THEN)', 'Coord'], ['$o', 'W(2)', 'Conj'], ['$o', 'W(or)', 'Coord'], ['$o', 'W(hour)', 'Conj'], ["W(I'm)", '$a', None], ['W(hour)', 'W(an)', None], ['W(think)', "W(I'm)", None], ['W(think)', 'W(I)', None], ['W(tweet)', 'W(@sinittaofficial)', None], ['W(wait)', '$o', None]], 'nodes': ['$a', '$o', 'MW(&_THEN)', 'W(2)', 'W(@sinittaofficial)', "W(I'm)", 'W(I)', 'W(an)', 'W(hour)', 'W(think)', 'W(tweet)', 'W(wait)', 'W(or)'], 'varnodes': ['$o', '$a'], 'coords': [['$o', ['W(2)', 'W(hour)'], ['W(or)']], ['$a', ['W(tweet)', 'W(wait)'], ['MW(&_THEN)']]], 'n2w': {'W(@sinittaofficial)': ['@sinittaofficial'], "W(I'm)": ["I'm"], 'W(2)': ['2'], 'W(think)': ['think'], 'W(tweet)': ['tweet'], 'W(I)': ['I'], 'W(an)': ['an'], 'W(wait)': ['wait'], 'W(hour)': ['hour'], 'MW(&_THEN)': ['THEN', '&'], 'W(or)': ['or']}}
-    g2 = {"tokens": ["@mandaffodil", "lol", ",", "we", "are", "one", ".", "and", "that", "was", "me", "this", "weekend", "especially", ".", "maybe", "put", "it", "off", "until", "you", "feel", "like", "~", "talking", "again", "?"], "node_edges": [["CBB1", "W(again)", "unspec"], ["CBB1", "W(feel)", "cbbhead"], ["CBB1", "W(you)", None], ["MW(put_off)", "W(it)", None], ["MW(put_off)", "W(until)", None], ["**", "W(are)", None], ["**", "W(lol)", None], ["**", "W(maybe)", None], ["**", "W(was)", None], ["W(are)", "W(one)", None], ["W(are)", "W(we)", None], ["W(feel)", "W(like)", None], ["W(like)", "W(talking)", None], ["W(maybe)", "MW(put_off)", None], ["W(until)", "CBB1", None], ["W(was)", "W(me)", None], ["W(was)", "W(that)", None], ["W(was)", "W(weekend)", None], ["W(weekend)", "W(especially)", None], ["W(weekend)", "W(this)", None]], "nodes": ["CBB1", "MW(put_off)", "**", "W(again)", "W(are)", "W(especially)", "W(feel)", "W(it)", "W(like)", "W(lol)", "W(maybe)", "W(me)", "W(one)", "W(talking)", "W(that)", "W(this)", "W(until)", "W(was)", "W(we)", "W(weekend)", "W(you)"], "varnodes": [], "coords": [], "n2w": {"W(are)": ["are"], "W(especially)": ["especially"], "W(like)": ["like"], "W(again)": ["again"], "W(that)": ["that"], "W(me)": ["me"], "**": ["**"], "W(maybe)": ["maybe"], "MW(put_off)": ["put", "off"], "W(was)": ["was"], "W(until)": ["until"], "W(you)": ["you"], "W(we)": ["we"], "W(feel)": ["feel"], "W(it)": ["it"], "W(talking)": ["talking"], "W(this)": ["this"], "W(one)": ["one"], "W(lol)": ["lol"], "W(weekend)": ["weekend"]}}
-    g3 = {"tokens": ["A", "Top", "Quality", "Sandwich", "made", "to", "artistic", "standards", "."], "node_edges": [["CBB1", "W(A)", "unspec"], ["CBB1", "W(Quality)", "unspec"], ["CBB1", "W(Sandwich)", "cbbhead"], ["CBB1", "W(Top)", "unspec"], ["CBB2", "W(artistic)", "unspec"], ["CBB2", "W(standards)", "cbbhead"], ["**", "CBB1", None], ["W(Sandwich)", "W(made)", None], ["W(made)", "W(to)", None], ["W(to)", "CBB2", None]], "nodes": ["CBB1", "CBB2", "**", "W(A)", "W(Quality)", "W(Sandwich)", "W(Top)", "W(artistic)", "W(made)", "W(standards)", "W(to)"], "varnodes": [], "coords": [], "n2w": {"W(made)": ["made"], "W(standards)": ["standards"], "**": ["**"], "W(to)": ["to"], "W(Top)": ["Top"], "W(artistic)": ["artistic"], "W(A)": ["A"], "W(Sandwich)": ["Sandwich"], "W(Quality)": ["Quality"]}}
-    g4 = {"tokens": ["I~1", "wish", "I~2", "had", "you~1", "as", "my~1", "dentist~1", "early", "on", "in", "my~2", "life", "-", "maybe", "my~3", "teeth", "would", "have", "been", "a", "lot", "better", "then", "they", "are~1", "now~1", ",", "However", "I~3", "am", "glad", "you~2", "are~2", "my~4", "dentist~2", "now~2", "."], "node_edges": [["CBB1", "CBB2", "unspec"], ["CBB1", "W(as)", "unspec"], ["CBB1", "W(had)", "unspec"], ["CBB2", "W(early)", "cbbhead"], ["CBB2", "W(in)", "unspec"], ["CBB2", "W(life)", "unspec"], ["CBB2", "W(my~2)", "unspec"], ["CBB2", "W(on)", "unspec"], ["**", "W(However)", None], ["**", "W(am)", None], ["**", "W(wish)", None], ["**", "W(would)", None], ["W(am)", "W(glad)", None], ["W(are~1)", "W(been)", "Anaph"], ["W(are~1)", "W(now~1)", None], ["W(are~1)", "W(they)", None], ["W(as)", "W(my~1)", None], ["W(been)", "W(better)", None], ["W(better)", "MW(a_lot)", None], ["W(better)", "W(then)", None], ["W(glad)", "W(are~2)", None], ["W(had)", "W(I~2)", None], ["W(had)", "W(you~1)", None], ["W(have)", "W(been)", None], ["W(my~1)", "W(dentist~1)", None], ["W(teeth)", "W(my~3)", None], ["W(then)", "W(are~1)", None], ["W(wish)", "CBB1", None], ["W(would)", "W(have)", None], ["W(would)", "W(maybe)", None], ["W(would)", "W(teeth)", None]], "nodes": ["CBB1", "CBB2", "MW(a_lot)", "**", "W(However)", "W(I~2)", "W(am)", "W(are~1)", "W(are~2)", "W(as)", "W(been)", "W(better)", "W(dentist~1)", "W(early)", "W(glad)", "W(had)", "W(have)", "W(in)", "W(life)", "W(maybe)", "W(my~1)", "W(my~2)", "W(my~3)", "W(now~1)", "W(on)", "W(teeth)", "W(then)", "W(they)", "W(wish)", "W(would)", "W(you~1)"], "varnodes": [], "coords": [], "n2w": {"W(I~2)": ["I~2"], "W(However)": ["However"], "W(would)": ["would"], "W(then)": ["then"], "W(maybe)": ["maybe"], "W(my~2)": ["my~2"], "W(life)": ["life"], "W(are~1)": ["are~1"], "W(on)": ["on"], "W(as)": ["as"], "W(have)": ["have"], "W(my~3)": ["my~3"], "W(my~1)": ["my~1"], "W(they)": ["they"], "W(in)": ["in"], "**": ["**"], "W(wish)": ["wish"], "W(had)": ["had"], "W(you~1)": ["you~1"], "W(teeth)": ["teeth"], "W(are~2)": ["are~2"], "W(now~1)": ["now~1"], "W(better)": ["better"], "W(dentist~1)": ["dentist~1"], "MW(a_lot)": ["a", "lot"], "W(glad)": ["glad"], "W(am)": ["am"], "W(been)": ["been"], "W(early)": ["early"]}}
-    g5 = {"tokens": ["I~1", "have~1", "purchased", "over", "15", "vehicles", "(", "cars", ",", "rvs", ",", "and~1", "boats", ")", "in", "my", "lifetime", "and~2", "I~2", "have~2", "to", "say", "the~1", "experience", "with", "Michael", "and~3", "Barrett", "Motor", "Cars", "of~1", "San", "Antonio", "was", "one", "of~2", "the~2", "best", "."], "node_edges": [["CBB1", "W(15)", "unspec"], ["CBB1", "W(I~1)", "unspec"], ["CBB1", "W(and~1)", "unspec"], ["CBB1", "W(boats)", "unspec"], ["CBB1", "W(cars)", "unspec"], ["CBB1", "W(have~1)", "cbbhead"], ["CBB1", "W(in)", "unspec"], ["CBB1", "W(lifetime)", "unspec"], ["CBB1", "W(my)", "unspec"], ["CBB1", "W(over)", "unspec"], ["CBB1", "W(purchased)", "unspec"], ["CBB1", "W(rvs)", "unspec"], ["CBB1", "W(vehicles)", "unspec"], ["CBB2", "W(Antonio)", "unspec"], ["CBB2", "W(Barrett)", "unspec"], ["CBB2", "W(Cars)", "unspec"], ["CBB2", "W(Michael)", "unspec"], ["CBB2", "W(Motor)", "unspec"], ["CBB2", "W(San)", "unspec"], ["CBB2", "W(and~3)", "unspec"], ["CBB2", "W(experience)", "unspec"], ["CBB2", "W(of~1)", "unspec"], ["CBB2", "W(the~1)", "unspec"], ["CBB2", "W(with)", "unspec"], ["CBB3", "W(best)", "unspec"], ["CBB3", "W(of~2)", "unspec"], ["CBB3", "W(one)", "unspec"], ["CBB3", "W(the~2)", "unspec"], ["MW(have~2_to)", "W(I~2)", None], ["MW(have~2_to)", "W(say)", None], ["**", "CBB1", None], ["**", "MW(have~2_to)", None], ["**", "W(and~2)", None], ["W(say)", "W(was)", None], ["W(was)", "CBB2", None], ["W(was)", "CBB3", None]], "nodes": ["CBB1", "CBB2", "CBB3", "MW(have~2_to)", "**", "W(15)", "W(Antonio)", "W(Barrett)", "W(Cars)", "W(I~1)", "W(I~2)", "W(Michael)", "W(Motor)", "W(San)", "W(and~1)", "W(and~2)", "W(and~3)", "W(best)", "W(boats)", "W(cars)", "W(experience)", "W(have~1)", "W(in)", "W(lifetime)", "W(my)", "W(of~1)", "W(of~2)", "W(one)", "W(over)", "W(purchased)", "W(rvs)", "W(say)", "W(the~1)", "W(the~2)", "W(vehicles)", "W(was)", "W(with)"], "varnodes": [], "coords": [], "n2w": {"W(San)": ["San"], "W(I~2)": ["I~2"], "W(and~2)": ["and~2"], "W(the~2)": ["the~2"], "W(lifetime)": ["lifetime"], "W(say)": ["say"], "W(Barrett)": ["Barrett"], "W(purchased)": ["purchased"], "W(vehicles)": ["vehicles"], "W(15)": ["15"], "W(Cars)": ["Cars"], "W(experience)": ["experience"], "W(with)": ["with"], "W(over)": ["over"], "W(rvs)": ["rvs"], "W(my)": ["my"], "W(cars)": ["cars"], "W(in)": ["in"], "W(boats)": ["boats"], "W(I~1)": ["I~1"], "W(and~3)": ["and~3"], "**": ["**"], "W(the~1)": ["the~1"], "W(was)": ["was"], "W(and~1)": ["and~1"], "W(Motor)": ["Motor"], "W(of~1)": ["of~1"], "W(one)": ["one"], "W(have~1)": ["have~1"], "W(Antonio)": ["Antonio"], "MW(have~2_to)": ["to", "have~2"], "W(of~2)": ["of~2"], "W(best)": ["best"], "W(Michael)": ["Michael"]}}
+    g2 = {"tokens": ["@mandaffodil", "lol", ",", "we", "are", "one", ".", "and", "that", "was", "me", "this", "weekend", "especially", ".", "maybe", "put", "it", "off", "until", "you", "feel", "like", "~", "talking", "again", "?"], "node_edges": [["FE1", "W(again)", "fe"], ["FE1", "W(feel)", "fe*"], ["FE1", "W(you)", None], ["MW(put_off)", "W(it)", None], ["MW(put_off)", "W(until)", None], ["**", "W(are)", None], ["**", "W(lol)", None], ["**", "W(maybe)", None], ["**", "W(was)", None], ["W(are)", "W(one)", None], ["W(are)", "W(we)", None], ["W(feel)", "W(like)", None], ["W(like)", "W(talking)", None], ["W(maybe)", "MW(put_off)", None], ["W(until)", "FE1", None], ["W(was)", "W(me)", None], ["W(was)", "W(that)", None], ["W(was)", "W(weekend)", None], ["W(weekend)", "W(especially)", None], ["W(weekend)", "W(this)", None]], "nodes": ["FE1", "MW(put_off)", "**", "W(again)", "W(are)", "W(especially)", "W(feel)", "W(it)", "W(like)", "W(lol)", "W(maybe)", "W(me)", "W(one)", "W(talking)", "W(that)", "W(this)", "W(until)", "W(was)", "W(we)", "W(weekend)", "W(you)"], "varnodes": [], "coords": [], "n2w": {"W(are)": ["are"], "W(especially)": ["especially"], "W(like)": ["like"], "W(again)": ["again"], "W(that)": ["that"], "W(me)": ["me"], "**": ["**"], "W(maybe)": ["maybe"], "MW(put_off)": ["put", "off"], "W(was)": ["was"], "W(until)": ["until"], "W(you)": ["you"], "W(we)": ["we"], "W(feel)": ["feel"], "W(it)": ["it"], "W(talking)": ["talking"], "W(this)": ["this"], "W(one)": ["one"], "W(lol)": ["lol"], "W(weekend)": ["weekend"]}}
+    g3 = {"tokens": ["A", "Top", "Quality", "Sandwich", "made", "to", "artistic", "standards", "."], "node_edges": [["FE1", "W(A)", "fe"], ["FE1", "W(Quality)", "fe"], ["FE1", "W(Sandwich)", "fe*"], ["FE1", "W(Top)", "fe"], ["FE2", "W(artistic)", "fe"], ["FE2", "W(standards)", "fe*"], ["**", "FE1", None], ["W(Sandwich)", "W(made)", None], ["W(made)", "W(to)", None], ["W(to)", "FE2", None]], "nodes": ["FE1", "FE2", "**", "W(A)", "W(Quality)", "W(Sandwich)", "W(Top)", "W(artistic)", "W(made)", "W(standards)", "W(to)"], "varnodes": [], "coords": [], "n2w": {"W(made)": ["made"], "W(standards)": ["standards"], "**": ["**"], "W(to)": ["to"], "W(Top)": ["Top"], "W(artistic)": ["artistic"], "W(A)": ["A"], "W(Sandwich)": ["Sandwich"], "W(Quality)": ["Quality"]}}
+    g4 = {"tokens": ["I~1", "wish", "I~2", "had", "you~1", "as", "my~1", "dentist~1", "early", "on", "in", "my~2", "life", "-", "maybe", "my~3", "teeth", "would", "have", "been", "a", "lot", "better", "then", "they", "are~1", "now~1", ",", "However", "I~3", "am", "glad", "you~2", "are~2", "my~4", "dentist~2", "now~2", "."], "node_edges": [["FE1", "FE2", "fe"], ["FE1", "W(as)", "fe"], ["FE1", "W(had)", "fe"], ["FE2", "W(early)", "fe*"], ["FE2", "W(in)", "fe"], ["FE2", "W(life)", "fe"], ["FE2", "W(my~2)", "fe"], ["FE2", "W(on)", "fe"], ["**", "W(However)", None], ["**", "W(am)", None], ["**", "W(wish)", None], ["**", "W(would)", None], ["W(am)", "W(glad)", None], ["W(are~1)", "W(been)", "Anaph"], ["W(are~1)", "W(now~1)", None], ["W(are~1)", "W(they)", None], ["W(as)", "W(my~1)", None], ["W(been)", "W(better)", None], ["W(better)", "MW(a_lot)", None], ["W(better)", "W(then)", None], ["W(glad)", "W(are~2)", None], ["W(had)", "W(I~2)", None], ["W(had)", "W(you~1)", None], ["W(have)", "W(been)", None], ["W(my~1)", "W(dentist~1)", None], ["W(teeth)", "W(my~3)", None], ["W(then)", "W(are~1)", None], ["W(wish)", "FE1", None], ["W(would)", "W(have)", None], ["W(would)", "W(maybe)", None], ["W(would)", "W(teeth)", None]], "nodes": ["FE1", "FE2", "MW(a_lot)", "**", "W(However)", "W(I~2)", "W(am)", "W(are~1)", "W(are~2)", "W(as)", "W(been)", "W(better)", "W(dentist~1)", "W(early)", "W(glad)", "W(had)", "W(have)", "W(in)", "W(life)", "W(maybe)", "W(my~1)", "W(my~2)", "W(my~3)", "W(now~1)", "W(on)", "W(teeth)", "W(then)", "W(they)", "W(wish)", "W(would)", "W(you~1)"], "varnodes": [], "coords": [], "n2w": {"W(I~2)": ["I~2"], "W(However)": ["However"], "W(would)": ["would"], "W(then)": ["then"], "W(maybe)": ["maybe"], "W(my~2)": ["my~2"], "W(life)": ["life"], "W(are~1)": ["are~1"], "W(on)": ["on"], "W(as)": ["as"], "W(have)": ["have"], "W(my~3)": ["my~3"], "W(my~1)": ["my~1"], "W(they)": ["they"], "W(in)": ["in"], "**": ["**"], "W(wish)": ["wish"], "W(had)": ["had"], "W(you~1)": ["you~1"], "W(teeth)": ["teeth"], "W(are~2)": ["are~2"], "W(now~1)": ["now~1"], "W(better)": ["better"], "W(dentist~1)": ["dentist~1"], "MW(a_lot)": ["a", "lot"], "W(glad)": ["glad"], "W(am)": ["am"], "W(been)": ["been"], "W(early)": ["early"]}}
+    g5 = {"tokens": ["I~1", "have~1", "purchased", "over", "15", "vehicles", "(", "cars", ",", "rvs", ",", "and~1", "boats", ")", "in", "my", "lifetime", "and~2", "I~2", "have~2", "to", "say", "the~1", "experience", "with", "Michael", "and~3", "Barrett", "Motor", "Cars", "of~1", "San", "Antonio", "was", "one", "of~2", "the~2", "best", "."], "node_edges": [["FE1", "W(15)", "fe"], ["FE1", "W(I~1)", "fe"], ["FE1", "W(and~1)", "fe"], ["FE1", "W(boats)", "fe"], ["FE1", "W(cars)", "fe"], ["FE1", "W(have~1)", "fe*"], ["FE1", "W(in)", "fe"], ["FE1", "W(lifetime)", "fe"], ["FE1", "W(my)", "fe"], ["FE1", "W(over)", "fe"], ["FE1", "W(purchased)", "fe"], ["FE1", "W(rvs)", "fe"], ["FE1", "W(vehicles)", "fe"], ["FE2", "W(Antonio)", "fe"], ["FE2", "W(Barrett)", "fe"], ["FE2", "W(Cars)", "fe"], ["FE2", "W(Michael)", "fe"], ["FE2", "W(Motor)", "fe"], ["FE2", "W(San)", "fe"], ["FE2", "W(and~3)", "fe"], ["FE2", "W(experience)", "fe"], ["FE2", "W(of~1)", "fe"], ["FE2", "W(the~1)", "fe"], ["FE2", "W(with)", "fe"], ["FE3", "W(best)", "fe"], ["FE3", "W(of~2)", "fe"], ["FE3", "W(one)", "fe"], ["FE3", "W(the~2)", "fe"], ["MW(have~2_to)", "W(I~2)", None], ["MW(have~2_to)", "W(say)", None], ["**", "FE1", None], ["**", "MW(have~2_to)", None], ["**", "W(and~2)", None], ["W(say)", "W(was)", None], ["W(was)", "FE2", None], ["W(was)", "FE3", None]], "nodes": ["FE1", "FE2", "FE3", "MW(have~2_to)", "**", "W(15)", "W(Antonio)", "W(Barrett)", "W(Cars)", "W(I~1)", "W(I~2)", "W(Michael)", "W(Motor)", "W(San)", "W(and~1)", "W(and~2)", "W(and~3)", "W(best)", "W(boats)", "W(cars)", "W(experience)", "W(have~1)", "W(in)", "W(lifetime)", "W(my)", "W(of~1)", "W(of~2)", "W(one)", "W(over)", "W(purchased)", "W(rvs)", "W(say)", "W(the~1)", "W(the~2)", "W(vehicles)", "W(was)", "W(with)"], "varnodes": [], "coords": [], "n2w": {"W(San)": ["San"], "W(I~2)": ["I~2"], "W(and~2)": ["and~2"], "W(the~2)": ["the~2"], "W(lifetime)": ["lifetime"], "W(say)": ["say"], "W(Barrett)": ["Barrett"], "W(purchased)": ["purchased"], "W(vehicles)": ["vehicles"], "W(15)": ["15"], "W(Cars)": ["Cars"], "W(experience)": ["experience"], "W(with)": ["with"], "W(over)": ["over"], "W(rvs)": ["rvs"], "W(my)": ["my"], "W(cars)": ["cars"], "W(in)": ["in"], "W(boats)": ["boats"], "W(I~1)": ["I~1"], "W(and~3)": ["and~3"], "**": ["**"], "W(the~1)": ["the~1"], "W(was)": ["was"], "W(and~1)": ["and~1"], "W(Motor)": ["Motor"], "W(of~1)": ["of~1"], "W(one)": ["one"], "W(have~1)": ["have~1"], "W(Antonio)": ["Antonio"], "MW(have~2_to)": ["to", "have~2"], "W(of~2)": ["of~2"], "W(best)": ["best"], "W(Michael)": ["Michael"]}}
     graphs = [g1,g2,g3,g4,g5]   # last one allows too many analyses?
     for g in graphs:
         f = FUDGGraph(g)
         simplify_coord(f)
         upward(f)
         downward(f)
-        for cbb in f.cbbnodes:
-            print(cbb.name, cbb.topcandidates, cbb.parentcandidates)
+        for fe in f.fenodes:
+            print(fe.name, fe.topcandidates, fe.parentcandidates)
         assert len({n.name for n in f.lexnodes})==len(f.lexnodes)
         for c in f.lexnodes:
             assert not c.isRoot
