@@ -18,10 +18,8 @@ tab-separated columns:
 
 An example line (wrapped for readability):
 
-```json
-ewtb55.anno.nschneid:52	Friendly , knowledgeable , and above all fair .	
-	{...JSON...}
-```
+
+    ewtb55.anno.nschneid:52	Friendly , knowledgeable , and above all fair .	{...JSON...}
 
 The contents of the JSON object are described below.
 
@@ -111,7 +109,8 @@ Example annotations and their JSON representation
 			"W(Lolx)": ["Lolx"], 
 			"W(you)": ["you"]}, 
 	"varnodes": [], 
-	"deps": [["FE1", "W(you)", "fe"], ["**", "W(Lolx)", null], ["W(are)", "MW(still_at_it)", null], ["**", "W(Jesus)", null], ["FE1", "W(two)", "fe"], ["**", "W(are)", null], ["W(are)", "FE1", null]], "anaph": [], 
+	"deps": [["FE1", "W(you)", "fe"], ["**", "W(Lolx)", null], ["W(are)", "MW(still_at_it)", null], ["**", "W(Jesus)", null], ["FE1", "W(two)", "fe"], ["**", "W(are)", null], ["W(are)", "FE1", null]], 
+	"anaph": [], 
 	"coords": [], 
 	"nodes": ["W(are)", "W(two)", "W(Jesus)", "MW(still_at_it)", "W(Lolx)", "W(you)", "FE1", "**"], 
 	"node_edges": [["W(are)", "FE1", null], ["W(are)", "MW(still_at_it)", null], ["**", "W(Jesus)", null], ["FE1", "W(two)", "fe"], ["**", "W(Lolx)", null], ["FE1", "W(you)", "fe"], ["**", "W(are)", null]]}
