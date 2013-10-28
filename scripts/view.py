@@ -74,7 +74,7 @@ def psf2dot(parse):
         # TODO: if ROOT is an fehead, the above doesn't verify that the FE is the root of the annotation graph
         child=dot_clean(child)
         head=dot_clean(head)
-        col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple', 'unspec':gray}.get(label, 'blue')
+        col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple', 'fe':gray}.get(label, 'blue')
         dir = {'Anaph':'none'}.get(label, 'back')
         constraint = 'constraint="false"' if label=='Anaph' else ''
         lab = '' if not label else label
