@@ -171,7 +171,7 @@ def analyze(tokens, tree, ignore_order=False):
             if t=='L':  # lexical node
                 # there may be lexical nodes starting with a $ sign, like $250
                 for w in x:
-                    if tokens.count(w)!=1:
+                    if not ignore_order and tokens.count(w)!=1:
                         raise GFLError('Token in lexical node must occur exactly once in the input: {}'.format(w))
                 nname = 'W('+'_'.join(sorted(x, key=(None if ignore_order else tokens.index)))+')'
                 if len(x)>1: nname = 'M'+nname
@@ -239,7 +239,8 @@ def analyze(tokens, tree, ignore_order=False):
                                 assert c[k+1]=='>'
                                 d = traverse(c[k])
                                 if rightward is not None:
-                                    deps.add((d,rightward))
+                                    for rw in (rightward if isinstance(rightward,set) else [rightward]):
+                                        deps.add((d,rw))
                                 rightward = d
                         elif c[0]=='<':
                             assert len(c)%2==0
@@ -247,7 +248,8 @@ def analyze(tokens, tree, ignore_order=False):
                             for k in range(1,len(c),2): # possibly a chain: < d1 < d2 ...
                                 assert c[k-1]=='<'
                                 d = traverse(c[k])
-                                deps.add((leftward,d))
+                                for dnode in (d if isinstance(d,set) else [d]):
+                                    deps.add((leftward,dnode))
                                 leftward = d
                             leftward = None
                         else:
@@ -401,7 +403,7 @@ def test(inFP):
     with open(inFP) as inF:
         grammar = Grammar(clean(inF.read()))
 
-    good_inputs = ['{the quick brown} > fox > jumps < over < ({the lazy} > dog)', 
+    good_inputs = ['{the~1 quick brown} > fox > jumps < over < ({the~2 lazy} > dog)', 
                    'They > conspired < to < defenestrate < themselves\n(conspired* to defenestrate on < Tuesday)',
                    'a (** b c) d**', 'a (** b c**)', '::~1 :-)~1 ~(-: (0_0) ~(0_0)~2 *_*~3 )~1 ~( <*_*>',
                    '''
@@ -435,8 +437,14 @@ def test(inFP):
                       who = knights''',
                    '''
                       (ll > l > (m mm) < r < rr   LL > L > (M < MM) < R < RR)
+                   ''',
+                   '''
+                       ({the~1 whole} > world > returns smile)
+                   ''',
+                   '''
+                       (smile return < world < {the~1 whole})
                    ''']
-    bad_inputs = ['{the quick brown} > fox > jumps < over < {the lazy} > dog', 'the > {lazy dog}', 'the < lazy > dog', 
+    bad_inputs = ['{the~1 quick brown} > fox > jumps < over < {the~2 lazy} > dog', 'the~2 > {lazy dog}', 'the~2 < lazy > dog', 
                   'They > conspired* < to < defenestrate < themselves\n(conspired* to defenestrate on < Tuesday)',
                   'big > **', '{** happy} > days', '(my big** fat Greek wedding*)', 'big** > day', 
                   'hi :: there', ':-)', '(-:', '(0_0)~1', '*_*', ') (',
