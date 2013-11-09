@@ -165,11 +165,11 @@ Multiwords allow an annotator to punt on expressions that are best understood as
 
 We generally reserve multiwords for the following cases that are semantically coherent but not easy to analyze syntactically:
 
-  a. multiword proper names: `[Brendan O’Connor]`
-  b. verb-particle constructions: `[wake up]`
-  c. multiple input tokens conventionally written as one word: `[over priced]`
-  d. highly noncompositional compounds and foreign expressions: `[class act]`, `the > [lost and found]`, `[post hoc]`
-  e. syntactically difficult idioms: `[let alone]`, `[had better]` (see [quasi-modals](#verb-complexes))
+  1. multiword proper names: `[Brendan O’Connor]`
+  2. verb-particle constructions: `[wake up]`
+  3. multiple input tokens conventionally written as one word: `[over priced]`
+  4. highly noncompositional compounds and foreign expressions: `[class act]`, `the > [lost and found]`, `[post hoc]`
+  5. syntactically difficult idioms: `[let alone]`, `[had better]` (see [quasi-modals](#verb-complexes))
 
 But we try to decompose idioms that have a plausible (if atypical) syntactic analysis:
 
