@@ -1,4 +1,4 @@
-# FUDG-GFL Annotation Guidelines 1.0
+# FUDG-GFL Annotation Guidelines 1.3
 
 Chris Dyer  
 Brendan O’Connor  
@@ -7,6 +7,7 @@ David Bamman
 Noah A. Smith
 
 *Document history:*  
+2013-11-09: version 1.3: updated Multiwords; note about nonrestrictive relative clauses; Verb complexes: Quasi-modals  
 2013-10-26: version 1.2: Contractions  
 2013-09-30: version 1.1: Nesting and the Substitution Principle  
 2013-09-22: version 1.0
@@ -160,12 +161,21 @@ The formalism makes no commitment to the surface ordering within a square bracke
 
    ![Brendan O’Connor helped write this guide up.](writeup.0.png)
 
-Multiwords allow an annotator to punt on expressions that are best understood as idiosyncratic phrases or that have forbiddingly complicated compositional analyses, while still describing their relationship with the rest of the sentence (e.g. [putnam_catenae_examples](https://github.com/brendano/gfl_syntax/blob/master/anno/putnam_catenae_examples.anno) from Osborne et al 2011). Another example:
+Multiwords allow an annotator to punt on expressions that are best understood as idiosyncratic phrases or that have forbiddingly complicated compositional analyses, while still describing their relationship with the rest of the sentence (e.g. [putnam_catenae_examples](https://github.com/brendano/gfl_syntax/blob/master/anno/putnam_catenae_examples.anno) from Osborne et al 2011).
 
-> sometimes I'm up there waiting for BART
+We generally reserve multiwords for the following cases that are semantically coherent but not easy to analyze syntactically:
 
-    sometimes > i'm < [up there]
-    i'm < [waiting for] < BART
+  a. multiword proper names: `[Brendan O’Connor]`
+  b. verb-particle constructions: `[wake up]`
+  c. multiple input tokens conventionally written as one word: `[over priced]`
+  d. highly noncompositional compounds and foreign expressions: `[class act]`, `the > [lost and found]`, `[post hoc]`
+  e. syntactically difficult idioms: `[let alone]`, `[had better]` (see [quasi-modals](#verb-complexes))
+
+But we try to decompose idioms that have a plausible (if atypical) syntactic analysis:
+
+    kick < (the > bucket)
+    I > (kid < you) < not
+    be < on < (the > verge < of < victory)
 
 ## Fudge Expressions (FEs)
 
@@ -378,6 +388,17 @@ For long and tricky-to-analyze verb chains, consider FEs:
 
     I > will < try < to < (love < you) < more
 
+**Quasi-modals** are usually decomposed:
+
+    have < to < announce
+    ought < to < announce
+    would < like < to < announce
+    (would < rather) < announce
+
+An exception is *had better*, which is treated as a multiword because *had* does not function morphosyntactically as a perfect auxiliary or main verb:
+
+    you > [had better] < believe < it
+
 ## Existentials
 
 Existential *there* counts as a subject:
@@ -398,6 +419,8 @@ GFL supports special **undirected node-node relations** for explicit anaphora. C
 ![The police arrested the man who robbed our bank.](police.0.png)
 
 Semantically, the *man* is both the object of *arrest* **and** the subject of *robbed*. But, syntactically, the complementizer *who* occupies the subject position of the RC. We therefore make the semantics of the semantic link clear by writing: `who = man`. The head of the embedded clause (the verb *robbed*) also serves as the dependent of the nominal head (*man*).
+
+Nonrestrictive relative clauses (*The police arrested the man, who robbed our bank*) are analyzed like their restrictive counterparts.
 
 Sometimes the relative pronoun is the object of a preposition, which may be stranded or fronted:
 
