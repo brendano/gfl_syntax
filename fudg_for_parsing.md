@@ -20,7 +20,7 @@ All of these are specified in a GFL annotation. We propose to treat (1) and (2) 
 GFL:
 
     I > want < $awa
-    $awa :: {$aa tea} :: {[as well as]}
+    $awa :: {$aa tea} :: {[as~1 well as~2]}
     $aa :: {bread butter jam} :: {and~1 and~2}
     fresh > $aa
     
