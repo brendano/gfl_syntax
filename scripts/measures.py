@@ -77,6 +77,8 @@ def depth(v, parmap):
 
 def com(prom, N):
 	com = 1-math.log(prom)/((N-2)*math.log(N)) if N>2 else prom
+	if abs(com) < 1e-10:
+		com = 0
 	if N==2: assert prom in (0,1)
 	assert 0.0<=com<=1.0,(com,prom,N)
 	return com
