@@ -64,14 +64,18 @@ def psf2dot(parse):
     conjbg  = '"#90c090"'
     darkblue = '"#202090"'
     gray = '"#606060"'
+    noheadborder = '"#ff0000"'
     
     def idx(items, elt, default=None):
         if elt not in items: return default
         return items.index(elt)
     
+    no_head = set(parse.nodes)  # no directed head
     for head,child,label in sorted(parse.node_edges, key=lambda (h,c,l): (idx(parse.tokens, next(iter(parse.n2w.get(h,{None})))), idx(parse.tokens, next(iter(parse.n2w.get(c,{None})))))):
         if child=='W('+ROOT+')' and label not in ('fe*','Anaph'): raise Exception("The root node "+ROOT+" cannot be a dependent except as fehead or Anaph.")
         # TODO: if ROOT is an fehead, the above doesn't verify that the FE is the root of the annotation graph
+        if label!='Anaph':
+            no_head.remove(child)
         child=dot_clean(child)
         head=dot_clean(head)
         col = {None:darkblue, 'Conj':conjcol, 'Anaph':'purple', 'fe':gray}.get(label, 'blue')
@@ -86,8 +90,9 @@ def psf2dot(parse):
         #label = re.sub(r'\(.*','', node)
         label = node
         bg = conjbg if node.startswith('$') or node.startswith('FE') else '"#d0d0f0"'
-        G.append('{name} [color={bg} style=filled fillcolor={bg} height=0.4 fontcolor=black label={label} fontsize={fontsize}]'.format(
-            name=dot_clean(node), label=dot_clean(label, node_label=True), fontsize=fontsize, bg=bg))
+        border = noheadborder if node in no_head and len(no_head)>1 else bg
+        G.append('{name} [color={border} style=filled fillcolor={bg} height=0.4 fontcolor=black label={label} fontsize={fontsize}]'.format(
+            name=dot_clean(node), label=dot_clean(label, node_label=True), fontsize=fontsize, border=border, bg=bg))
 
     seen_words = set()
 
