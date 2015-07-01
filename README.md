@@ -12,7 +12,7 @@ This repository contains supporting software developed by Nathan Schneider, Bren
   - gflparser/ -- a parser for the GFL annotations format. It is implemented with a PEG (Parsing Expression Grammar).
     * parser/ contains code for a deprecated version of the annotation parser.
   - scripts/ -- a tool for checking GFL annotations (using the annotation parser), visualizing them in GraphViz, and converting them to other formats (including JSON).
-  - [guidelines/guidelines.md]() -- annotation guidelines.
+  - [guidelines/guidelines.md](guidelines/guidelines.md) -- annotation guidelines.
   - other directories contain some annotated sentences.
   - fudg_for_parsing.md -- describes conventions for converting GFL/FUDG graphs into conventional labeled dependency trees. 
   
