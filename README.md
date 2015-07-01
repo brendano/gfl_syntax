@@ -12,10 +12,11 @@ This repository contains supporting software developed by Nathan Schneider, Bren
   - gflparser/ -- a parser for the GFL annotations format. It is implemented with a PEG (Parsing Expression Grammar).
     * parser/ contains code for a deprecated version of the annotation parser.
   - scripts/ -- a tool for checking GFL annotations (using the annotation parser), visualizing them in GraphViz, and converting them to other formats (including JSON).
+  - [guidelines/guidelines.md]() -- annotation guidelines.
   - other directories contain some annotated sentences.
   - fudg_for_parsing.md -- describes conventions for converting GFL/FUDG graphs into conventional labeled dependency trees. 
   
-For more information on GFL/FUDG, including annotation guidelines and a web annotation tool, see: http://www.ark.cs.cmu.edu/FUDG/
+For more information on GFL/FUDG, including a web annotation tool, see: http://www.ark.cs.cmu.edu/FUDG/
 
 A FUDG dependency parser for tweets, and the data on which it was trained (Tweeboparser and Tweebank; Kong et al., EMNLP 2014) are available at: http://www.ark.cs.cmu.edu/TweetNLP/
 
