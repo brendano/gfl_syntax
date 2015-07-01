@@ -3,7 +3,7 @@ Graph Fragment Language for Easy Syntactic Annotation
 
 Software to support a lightweight dependency-style annotation language. The notation is called __GFL (Graph Fragment Language)__, and the formalism it expresses is called __FUDG (Fragmentary Unlabeled Dependency Grammar)__. These are introduced in
 
-> [A Framework for (Under)specifying Dependency Syntax without Overloading Annotators](http://www.cs.cmu.edu/~nasmith/papers/schneider+oconnor+saphra+bamman+faruqui+smith+dyer+baldridge.law13.pdf)
+> [A Framework for (Under)specifying Dependency Syntax without Overloading Annotators](http://www.cs.cmu.edu/~nasmith/papers/schneider+oconnor+saphra+bamman+faruqui+smith+dyer+baldridge.law13.pdf)  
 > Nathan Schneider, Brendan O’Connor, Naomi Saphra, David Bamman, Manaal Faruqui, Noah A. Smith, Chris Dyer, and Jason Baldridge.
 > In _Proceedings of the 7th Linguistic Annotation Workshop & Interoperability with Discourse_, Sofia, Bulgaria, August 2013.
 
