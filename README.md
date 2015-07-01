@@ -17,7 +17,7 @@ This repository contains supporting software developed by Nathan Schneider, Bren
   
 For more information on GFL/FUDG, including annotation guidelines and a web annotation tool, see: http://www.ark.cs.cmu.edu/FUDG/
 
-A FUDG dependency parser for tweets (Kong et al., EMNLP 2014) is available at: http://www.ark.cs.cmu.edu/TweetNLP/
+A FUDG dependency parser for tweets, and the data on which it was trained (Tweeboparser and Tweebank; Kong et al., EMNLP 2014) are available at: http://www.ark.cs.cmu.edu/TweetNLP/
 
 Getting started
 ===============
