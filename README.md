@@ -9,12 +9,12 @@ Software to support a lightweight dependency-style annotation language. The nota
 
 This repository contains supporting software developed by Nathan Schneider, Brendan O'Connor, Naomi Saphra, and Chris Dyer.
 
-  - gflparser/ -- a parser for the GFL annotations format. It is implemented with a PEG (Parsing Expression Grammar).
+  - [gflparser/](gflparser/) -- a parser for the GFL annotations format. It is implemented with a PEG (Parsing Expression Grammar).
     * parser/ contains code for a deprecated version of the annotation parser.
-  - scripts/ -- a tool for checking GFL annotations (using the annotation parser), visualizing them in GraphViz, and converting them to other formats (including JSON).
+  - [scripts/](scripts/) -- a tool for checking GFL annotations (using the annotation parser), visualizing them in GraphViz, and converting them to other formats (including JSON).
   - [guidelines/guidelines.md](guidelines/guidelines.md) -- annotation guidelines.
   - other directories contain some annotated sentences.
-  - fudg_for_parsing.md -- describes conventions for converting GFL/FUDG graphs into conventional labeled dependency trees. 
+  - [fudg_for_parsing.md](fudg_for_parsing.md) -- describes conventions for converting GFL/FUDG graphs into conventional labeled dependency trees. 
   
 For more information on GFL/FUDG, including a web annotation tool, see: http://www.ark.cs.cmu.edu/FUDG/
 
