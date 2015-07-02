@@ -23,7 +23,7 @@ A FUDG dependency parser for tweets, and the data on which it was trained (Tweeb
 Getting started
 ===============
 
-The viewer needs Python 2.7 (including the [`parsimonious` library](https://pypi.python.org/pypi/parsimonious/)) and [GraphViz](http://www.graphviz.org/) (`dot` command) to be installed.  Run:
+The viewer needs Python 2.7 (including version 0.3 of the [`parsimonious` library](https://pypi.python.org/pypi/parsimonious/)—more recent versions are known to cause problems) and [GraphViz](http://www.graphviz.org/) (`dot` command) to be installed.  Run:
 
     scripts/view.py anno/tweets/dev.0000.anno
     scripts/view.py -w anno/tweets/dev.0000.anno
